@@ -1,0 +1,47 @@
+name: Backup do banco
+# Semanal (domingo 03:17 em Brasília) e sob demanda. O dump (schema public: estrutura + dados) é
+# criptografado com AES-256 antes de sair do job e guardado como artefato por 90 dias.
+# Como o repositório é público, a senha PRECISA ser aleatória e longa (ver docs/backup.md).
+on:
+  schedule: [{ cron: '17 6 * * 0' }]
+  workflow_dispatch: {}
+permissions: { contents: read }
+concurrency: { group: backup, cancel-in-progress: false }
+jobs:
+  dump:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Cliente PostgreSQL 17 (o servidor do Supabase é 17)
+        run: |
+          sudo install -d /usr/share/postgresql-common/pgdg
+          curl -fsSL https://www.postgresql.org/media/keys/ACCC4CF8.asc | sudo tee /usr/share/postgresql-common/pgdg/apt.postgresql.org.asc >/dev/null
+          echo "deb [signed-by=/usr/share/postgresql-common/pgdg/apt.postgresql.org.asc] https://apt.postgresql.org/pub/repos/apt $(lsb_release -cs)-pgdg main" | sudo tee /etc/apt/sources.list.d/pgdg.list >/dev/null
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq postgresql-client-17
+      - name: Dump + criptografia
+        env:
+          BACKUP_DB_URL: ${{ secrets.BACKUP_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          set -euo pipefail
+          test -n "$BACKUP_DB_URL" && test -n "$BACKUP_PASSPHRASE" || { echo "Cadastre os segredos BACKUP_DB_URL e BACKUP_PASSPHRASE."; exit 1; }
+          stamp=$(date -u +%Y%m%d-%H%M)
+          # stderr vai para arquivo: o log deste repositório é público.
+          if ! /usr/lib/postgresql/17/bin/pg_dump "$BACKUP_DB_URL" --schema=public --no-owner --no-privileges --quiet -f dump.sql 2>dump.err; then
+            echo "pg_dump falhou (detalhes omitidos de propósito)."; exit 1
+          fi
+          rm -f dump.err
+          copias=$(grep -c '^COPY public\.' dump.sql || true)
+          test "$copias" -ge 10 || { echo "Dump suspeito: só $copias tabelas com dados."; exit 1; }
+          echo "Tabelas no dump: $copias; tamanho: $(du -h dump.sql | cut -f1)"
+          gpg --batch --yes --pinentry-mode loopback --passphrase "$BACKUP_PASSPHRASE" \
+            --symmetric --cipher-algo AES256 -o "financas-$stamp.sql.gpg" dump.sql
+          shred -u dump.sql
+          echo "ARQUIVO=financas-$stamp.sql.gpg" >> "$GITHUB_ENV"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: backup-banco
+          path: ${{ env.ARQUIVO }}
+          retention-days: 90
+          if-no-files-found: error

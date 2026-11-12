@@ -87,7 +87,7 @@ export function MfaCard() {
           {fatores === null
             ? 'Carregando…'
             : ativo
-              ? 'Ativada (aplicativo autenticador).'
+              ? 'Ativada. Cadastre um segundo aplicativo como reserva, para o caso de perder o celular.'
               : 'Desativada. Recomendado ativar.'}
         </p>
       </div>
@@ -122,9 +122,14 @@ export function MfaCard() {
       {!passo &&
         fatores !== null &&
         (ativo ? (
-          <Button type="button" variant="secondary" onClick={remover} block>
-            Desativar
-          </Button>
+          <div className="space-y-2">
+            <Button type="button" variant="secondary" onClick={iniciar} block>
+              Adicionar outro aplicativo (reserva)
+            </Button>
+            <Button type="button" variant="secondary" onClick={remover} block>
+              Desativar
+            </Button>
+          </div>
         ) : (
           <Button type="button" onClick={iniciar} block>
             Ativar 2FA
