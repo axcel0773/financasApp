@@ -2,6 +2,9 @@ import Link from 'next/link';
 import { getContainer } from '@/composition/container';
 import { proximoCredito, resumirBeneficio } from '@/core/benefits/domain';
 import { calcularSobraDoMes, statusOrcamento } from '@/core/budgets/domain';
+import { gerarAvisos } from '@/core/alerts/domain';
+import { compararMeses } from '@/core/reports/domain';
+import { Bars } from '@/ui/charts/bars';
 import { totalRecebido } from '@/core/income/domain';
 import { ocorrenciasPendentes } from '@/core/recurring/domain';
 import {
@@ -282,6 +285,97 @@ export async function BlocoRecentes() {
           })}
         </Card>
       )}
+    </>
+  );
+}
+
+const TOM_AVISO = { perigo: 'danger', alerta: 'alert', info: 'info' } as const;
+
+export async function BlocoAvisos() {
+  const c = await getContainer();
+  const hoje = c.clock.hoje();
+  const mes = competenciaDe(hoje);
+  const [cats, gasto, carteiras, regras, tabelas] = await Promise.all([
+    c.categories.list(),
+    c.categories.spendByCategory(mes),
+    c.wallets.list(),
+    c.recurring.regras(),
+    c.income.tabelas(),
+  ]);
+  const g = new Map(gasto.map((x) => [x.categoryId, x.spentCents]));
+  const orcamentos = cats
+    .filter((x) => x.monthlyBudgetCents)
+    .map((x) => {
+      const s = statusOrcamento(x.monthlyBudgetCents, g.get(x.id) ?? 0);
+      return { nome: x.name, usadoPct: s.usadoPct, estado: s.estado };
+    });
+  const beneficios = await Promise.all(
+    carteiras
+      .filter((w) => ehBeneficio(w.kind))
+      .map(async (w) => {
+        const ultimo = (await c.benefits.credits(w.id))[0];
+        return { nome: w.name, proximoCredito: ultimo ? proximoCredito(ultimo.creditedOn, hoje) : null };
+      }),
+  );
+  const ate = addDias(hoje, 3);
+  const comps = [...new Set([mes, competenciaDe(ate)])];
+  const contas = [];
+  for (const comp of comps)
+    contas.push(
+      ...ocorrenciasPendentes(regras, comp, await c.recurring.chavesGeradas(comp))
+        .filter((o) => o.date >= hoje && o.date <= ate)
+        .map((o) => ({ nome: o.name, date: o.date, amountCents: o.amountCents })),
+    );
+  const avisos = gerarAvisos({
+    hoje,
+    beneficios,
+    orcamentos,
+    contas,
+    validadeTabela: tabelas ? tabelas.validaDesde.inss : null,
+    saldoAbaixoDoMinimo: null,
+  });
+  if (avisos.length === 0) return null;
+  return (
+    <>
+      <SectionTitle>Avisos</SectionTitle>
+      <Card className="py-1">
+        {avisos.slice(0, 5).map((a) => (
+          <Link key={a.id} href={a.href} className="flex min-h-14 items-center justify-between gap-3 border-b border-border py-2 last:border-0">
+            <span className="min-w-0">
+              <span className="block font-semibold">{a.titulo}</span>
+              <span className="block text-xs text-muted">{a.detalhe}</span>
+            </span>
+            <Chip tom={TOM_AVISO[a.tom]}>{a.tom === 'perigo' ? 'Urgente' : a.tom === 'alerta' ? 'Atenção' : 'Aviso'}</Chip>
+          </Link>
+        ))}
+      </Card>
+    </>
+  );
+}
+
+export async function BlocoTendencia() {
+  const c = await getContainer();
+  const meses = await c.queries.somaMensal(6);
+  if (meses.length === 0) return null;
+  const atual = meses[meses.length - 1]!;
+  const anterior = meses[meses.length - 2];
+  const cmp = anterior ? compararMeses(atual.spentCents, anterior.spentCents) : null;
+  return (
+    <>
+      <SectionTitle action={linkVer('/relatorios', 'Relatórios')}>Gastos nos últimos meses</SectionTitle>
+      <Card>
+        <Bars
+          titulo="Gastos por mês"
+          barras={meses.map((m, i) => ({ label: rotuloCompetencia(m.competencia).slice(0, 3), value: m.spentCents, destaque: i === meses.length - 1 }))}
+        />
+        {cmp && cmp.deltaPct !== null && (
+          <p className="mt-2 text-sm text-muted">
+            {cmp.deltaCents > 0 ? 'Você gastou ' : 'Você gastou '}
+            <span className="font-semibold">{Math.abs(Math.round(cmp.deltaPct))}% {cmp.deltaCents > 0 ? 'a mais' : 'a menos'}</span> que no mês anterior
+            {' '}(<span className="amount">{centavosParaCampo(Math.abs(cmp.deltaCents))}</span>).
+          </p>
+        )}
+      </Card>
     </>
   );
 }

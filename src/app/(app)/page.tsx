@@ -1,12 +1,14 @@
 import { Suspense } from 'react';
 import { getContainer } from '@/composition/container';
 import {
+  BlocoAvisos,
   BlocoBeneficios,
   BlocoContas,
   BlocoHero,
   BlocoOrcamento,
   BlocoRecebimentos,
   BlocoRecentes,
+  BlocoTendencia,
 } from '@/features/inicio/blocos';
 import { HideToggle } from '@/features/shell/hide-toggle';
 import { dataLonga } from '@/ui/format';
@@ -27,6 +29,9 @@ export default async function InicioPage() {
           <Suspense fallback={fallback('h-44')}>
             <BlocoHero />
           </Suspense>
+          <Suspense fallback={null}>
+            <BlocoAvisos />
+          </Suspense>
           <Suspense fallback={fallback('mt-6 h-32')}>
             <BlocoOrcamento />
           </Suspense>
@@ -40,6 +45,9 @@ export default async function InicioPage() {
           </Suspense>
           <Suspense fallback={fallback('mt-6 h-32')}>
             <BlocoContas />
+          </Suspense>
+          <Suspense fallback={fallback('mt-6 h-48')}>
+            <BlocoTendencia />
           </Suspense>
           <Suspense fallback={fallback('mt-6 h-48')}>
             <BlocoRecentes />

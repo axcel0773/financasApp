@@ -12,6 +12,8 @@ import { carregarBase } from '@/features/base';
 import { centavosParaCampo, dataLonga } from '@/ui/format';
 import { ActionForm } from '@/ui/patterns/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
+import { excluirMetaAction } from '@/app/_actions/gestao';
+import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Field, Input, MoneyInput, RadioChips } from '@/ui/primitives/fields';
 import { EmptyState, ProgressBar } from '@/ui/primitives/progress';
@@ -156,6 +158,7 @@ export default async function MetasPage() {
                   </summary>
                   <FormMeta m={m} hoje={hoje} />
                 </details>
+                <ExcluirConfirmado action={excluirMetaAction} id={m.id} aviso="A meta e o progresso dela são apagados." />
               </Card>
             );
           })}

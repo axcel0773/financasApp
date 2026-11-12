@@ -39,10 +39,12 @@ export function calcularIrrf(p: {
   grossCents: Cents;
   inssCents: Cents;
   dependentes: number;
+  pensaoCents?: Cents;
   faixas: Faixa[];
   params: ParamsIrrf;
 }): Cents {
-  const legal = p.grossCents - p.inssCents - p.dependentes * p.params.dependentCents;
+  const legal =
+    p.grossCents - p.inssCents - p.dependentes * p.params.dependentCents - (p.pensaoCents ?? 0);
   const base = Math.max(0, Math.min(legal, p.grossCents - p.params.simplifiedCents));
   const faixa = p.faixas.find((f) => f.upToCents === null || base <= f.upToCents);
   let imposto = faixa ? Math.max(0, Math.round(base * faixa.rate) - faixa.deductionCents) : 0;
@@ -58,6 +60,8 @@ export function calcularIrrf(p: {
 export function estimarHolerite(p: {
   grossCents: Cents;
   dependentes?: number;
+  /** Pensão alimentícia paga: abate a base do IRRF. */
+  pensaoCents?: Cents;
   inss: Faixa[];
   irrf: Faixa[];
   paramsIrrf: ParamsIrrf;
@@ -67,6 +71,7 @@ export function estimarHolerite(p: {
     grossCents: p.grossCents,
     inssCents,
     dependentes: p.dependentes ?? 0,
+    pensaoCents: p.pensaoCents,
     faixas: p.irrf,
     params: p.paramsIrrf,
   });
@@ -85,4 +90,37 @@ export function dividirSalario(
 ): { adiantamentoCents: Cents; finalCents: Cents } {
   const adiantamentoCents = Math.round((h.grossCents * adiantamentoPercent) / 100);
   return { adiantamentoCents, finalCents: h.netCents - adiantamentoCents };
+}
+
+type EntradaFiscal = {
+  dependentes?: number;
+  pensaoCents?: Cents;
+  inss: Faixa[];
+  irrf: Faixa[];
+  paramsIrrf: ParamsIrrf;
+};
+
+/**
+ * 13º salário: a 1ª parcela é metade do bruto, sem descontos; a 2ª parcela leva INSS e IRRF calculados sobre o 13º inteiro
+ * (tributação separada do salário mensal). Estimativa: o redutor mensal da Lei 15.270 não é aplicado.
+ */
+export function estimar13o(p: EntradaFiscal & { grossCents: Cents }): {
+  primeiraCents: Cents;
+  segundaCents: Cents;
+  holerite: Holerite;
+} {
+  const holerite = estimarHolerite({ ...p, paramsIrrf: { ...p.paramsIrrf, reducer: undefined } });
+  const primeiraCents = Math.round(p.grossCents / 2);
+  return { primeiraCents, segundaCents: holerite.netCents - primeiraCents, holerite };
+}
+
+/**
+ * Férias: salário proporcional aos dias + 1/3 constitucional, com INSS e IRRF sobre o total.
+ * Estimativa: sem abono pecuniário e sem o redutor mensal da Lei 15.270.
+ */
+export function estimarFerias(p: EntradaFiscal & { grossMensalCents: Cents; dias: number }): Holerite {
+  const dias = Math.min(30, Math.max(1, Math.round(p.dias)));
+  const remuneracao = Math.round((p.grossMensalCents * dias) / 30);
+  const bruto = remuneracao + Math.round(remuneracao / 3);
+  return estimarHolerite({ ...p, grossCents: bruto, paramsIrrf: { ...p.paramsIrrf, reducer: undefined } });
 }

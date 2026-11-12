@@ -33,4 +33,11 @@ export interface IncomeRepository {
     walletId: string | null;
   }): Promise<void>;
   tabelas(): Promise<TabelasImposto | null>;
+  salvarTabela(t: {
+    kind: 'inss' | 'irrf';
+    validFrom: IsoDate;
+    faixas: Faixa[];
+    params?: ParamsIrrf;
+  }): Promise<void>;
+  setFonteAtiva(id: string, active: boolean): Promise<void>;
 }

@@ -27,3 +27,18 @@ export const ROTULO_CARTEIRA: Record<WalletKind, string> = {
   credit_card: 'Cartão',
   cash: 'Dinheiro',
 };
+
+export function validarCarteira(i: {
+  name: string;
+  kind: WalletKind;
+  closingDay: number | null;
+  dueDay: number | null;
+}): string | null {
+  const nome = i.name.trim();
+  if (nome.length < 1 || nome.length > 60) return 'O nome deve ter de 1 a 60 caracteres.';
+  if (i.kind === 'credit_card') {
+    const dia = (d: number | null) => d !== null && Number.isInteger(d) && d >= 1 && d <= 31;
+    if (!dia(i.closingDay) || !dia(i.dueDay)) return 'Informe o dia de fechamento e o de vencimento (1 a 31).';
+  }
+  return null;
+}

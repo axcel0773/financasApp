@@ -47,6 +47,7 @@ export function NovoLancamentoForm({
     setErro(null);
     if (cents <= 0) return setErro('Informe um valor maior que zero.');
     const item = {
+      op: 'criar' as const,
       clientId,
       walletId,
       categoryId,

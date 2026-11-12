@@ -11,6 +11,7 @@ import {
   competencia,
   data,
   dinheiro,
+  dinheiroOpcional,
   dinheiroPositivo,
   inteiroOpcional,
   lerForm,
@@ -29,6 +30,8 @@ const fonte = z.object({
   advanceDay: inteiroOpcional(1, 31),
   finalDay: inteiroOpcional(1, 31),
   walletId: uuidOpcional,
+  dependents: inteiroOpcional(0, 20),
+  alimony: dinheiroOpcional,
 });
 export async function salvarFonteAction(_: ActionState, fd: FormData): Promise<ActionState> {
   return executar(async () => {
@@ -46,6 +49,8 @@ export async function salvarFonteAction(_: ActionState, fd: FormData): Promise<A
       finalDay: p.value.finalDay,
       walletId: p.value.walletId,
       active: true,
+      dependents: p.value.dependents ?? 0,
+      alimonyCents: Math.max(0, p.value.alimony ?? 0),
     });
     return ok(undefined);
   }, 'Salário salvo.');
@@ -65,6 +70,8 @@ export async function gerarPrevistosAction(_: ActionState, fd: FormData): Promis
         p.value.competencia,
         estimarHolerite({
           grossCents: f.grossCents,
+          dependentes: f.dependents,
+          pensaoCents: f.alimonyCents,
           inss: tabelas.inss,
           irrf: tabelas.irrf,
           paramsIrrf: tabelas.paramsIrrf,

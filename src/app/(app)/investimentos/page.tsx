@@ -9,7 +9,9 @@ import {
   calcularRendimento,
   type TipoInvestimento,
 } from '@/core/investments/domain';
+import { arquivarInvestimentoAction, editarInvestimentoAction } from '@/app/_actions/gestao';
 import { carregarBase } from '@/features/base';
+import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { Donut } from '@/ui/charts/donut';
 import { centavosParaCampo, dataLonga } from '@/ui/format';
 import { ActionForm } from '@/ui/patterns/action-form';
@@ -184,6 +186,24 @@ export default async function InvestimentosPage() {
                   </Field>
                 </ActionForm>
               </details>
+              <details>
+                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">
+                  Editar dados
+                </summary>
+                <ActionForm action={editarInvestimentoAction} submitLabel="Salvar" className="space-y-3 pb-1">
+                  <input type="hidden" name="id" value={i.id} />
+                  <Field label="Nome"><Input name="name" defaultValue={i.name} required maxLength={80} /></Field>
+                  <Field label="Tipo">
+                    <Select name="kind" defaultValue={i.kind}>
+                      {Object.entries(ROTULO_TIPO).map(([v, l]) => (<option key={v} value={v}>{l}</option>))}
+                    </Select>
+                  </Field>
+                  <Field label="Instituição"><Input name="institution" defaultValue={i.institution ?? ''} maxLength={80} /></Field>
+                  <Field label="Taxa % a.a."><Input name="rate" inputMode="decimal" defaultValue={i.annualRatePercent === null ? '' : String(i.annualRatePercent).replace('.', ',')} /></Field>
+                  <Field label="Vencimento"><Input type="date" name="maturityOn" defaultValue={i.maturityOn ?? ''} /></Field>
+                </ActionForm>
+              </details>
+              <ExcluirConfirmado action={arquivarInvestimentoAction} id={i.id} rotulo="Arquivar" aviso="O investimento some da lista e da alocação; o histórico de aportes fica guardado." />
             </Card>
           ))}
         </div>

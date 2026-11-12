@@ -9,6 +9,7 @@ import { SupabaseInvestmentRepository } from '@/infra/supabase/repositories/inve
 import { SupabaseRecurringRepository } from '@/infra/supabase/repositories/recurring';
 import { SupabaseSettingsRepository } from '@/infra/supabase/repositories/settings';
 import { SupabaseTransactionRepository } from '@/infra/supabase/repositories/transactions';
+import { SupabaseTransferRepository } from '@/infra/supabase/repositories/transfers';
 import { SupabaseWalletRepository } from '@/infra/supabase/repositories/wallets';
 
 /** Único lugar que instancia repositórios concretos. Um container por requisição. */
@@ -22,6 +23,7 @@ export const getContainer = cache(async () => {
     transactions,
     queries: transactions,
     wallets: new SupabaseWalletRepository(db),
+    transfers: new SupabaseTransferRepository(db),
     categories: new SupabaseCategoryRepository(db),
     income: new SupabaseIncomeRepository(db),
     benefits: new SupabaseBenefitRepository(db),

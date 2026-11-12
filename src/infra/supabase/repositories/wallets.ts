@@ -6,11 +6,11 @@ import { check, num, numOrNull } from './shared';
 export class SupabaseWalletRepository implements WalletRepository {
   constructor(private readonly db: SupabaseClient) {}
 
-  async list(): Promise<Wallet[]> {
+  private async carregar(arquivadas: boolean): Promise<Wallet[]> {
     const { data, error } = await this.db
       .from('wallets')
       .select('id,kind,name,closing_day,due_day,limit_cents,opening_cents,archived')
-      .eq('archived', false)
+      .eq('archived', arquivadas)
       .order('created_at');
     check(error, 'listar carteiras');
     return (data ?? []).map((w) => ({
@@ -23,6 +23,12 @@ export class SupabaseWalletRepository implements WalletRepository {
       openingCents: num(w.opening_cents),
       archived: w.archived,
     }));
+  }
+  list(): Promise<Wallet[]> {
+    return this.carregar(false);
+  }
+  arquivadas(): Promise<Wallet[]> {
+    return this.carregar(true);
   }
   async balances(): Promise<WalletBalance[]> {
     const { data, error } = await this.db
@@ -45,5 +51,20 @@ export class SupabaseWalletRepository implements WalletRepository {
     if (p.openingCents !== undefined) patch.opening_cents = p.openingCents;
     const { error } = await this.db.from('wallets').update(patch).eq('id', id);
     check(error, 'atualizar carteira');
+  }
+  async create(w: Parameters<WalletRepository['create']>[0]): Promise<void> {
+    const { error } = await this.db.from('wallets').insert({
+      kind: w.kind,
+      name: w.name,
+      closing_day: w.closingDay,
+      due_day: w.dueDay,
+      limit_cents: w.limitCents,
+      opening_cents: w.openingCents,
+    });
+    check(error, 'criar carteira');
+  }
+  async setArchived(id: string, archived: boolean): Promise<void> {
+    const { error } = await this.db.from('wallets').update({ archived }).eq('id', id);
+    check(error, 'arquivar carteira');
   }
 }

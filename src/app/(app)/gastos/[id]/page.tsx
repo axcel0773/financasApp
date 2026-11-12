@@ -30,7 +30,11 @@ export default async function EditarPage({ params }: { params: Promise<{ id: str
           </ButtonLink>
         }
       />
-      <ActionForm action={editarLancamentoAction} submitLabel="Salvar alterações">
+      <ActionForm
+        action={editarLancamentoAction}
+        submitLabel="Salvar alterações"
+        offlineEditar={{ alvoId: t.id }}
+      >
         <input type="hidden" name="id" value={t.id} />
         <Field label="Valor">
           <MoneyInput name="amount" defaultValue={centavosParaCampo(t.amountCents)} required />

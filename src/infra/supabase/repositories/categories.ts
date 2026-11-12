@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Category } from '@/core/budgets/domain';
-import type { CategoryRepository } from '@/core/budgets/ports';
+import type { CategoryRepository, RegraCategoria } from '@/core/budgets/ports';
 import { check, num, numOrNull } from './shared';
 
 export class SupabaseCategoryRepository implements CategoryRepository {
@@ -38,5 +38,38 @@ export class SupabaseCategoryRepository implements CategoryRepository {
       categoryId: r.category_id as string | null,
       spentCents: num(r.spent_cents),
     }));
+  }
+  async create(c: { name: string; color: string | null }): Promise<void> {
+    const { error } = await this.db.from('categories').insert({ name: c.name.trim(), color: c.color });
+    check(error, 'criar categoria');
+  }
+  async update(id: string, c: { name: string; color: string | null }): Promise<void> {
+    const { error } = await this.db
+      .from('categories')
+      .update({ name: c.name.trim(), color: c.color })
+      .eq('id', id);
+    check(error, 'atualizar categoria');
+  }
+  async remove(id: string): Promise<void> {
+    const { error } = await this.db.from('categories').delete().eq('id', id);
+    check(error, 'excluir categoria');
+  }
+  async regras(): Promise<RegraCategoria[]> {
+    const { data, error } = await this.db
+      .from('category_rules')
+      .select('id,keyword,category_id')
+      .order('keyword');
+    check(error, 'listar regras de categoria');
+    return (data ?? []).map((r) => ({ id: r.id, keyword: r.keyword, categoryId: r.category_id }));
+  }
+  async adicionarRegra(keyword: string, categoryId: string): Promise<void> {
+    const { error } = await this.db
+      .from('category_rules')
+      .upsert({ keyword: keyword.trim().toLowerCase(), category_id: categoryId }, { onConflict: 'user_id,keyword' });
+    check(error, 'salvar regra de categoria');
+  }
+  async removerRegra(id: string): Promise<void> {
+    const { error } = await this.db.from('category_rules').delete().eq('id', id);
+    check(error, 'excluir regra de categoria');
   }
 }

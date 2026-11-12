@@ -15,6 +15,8 @@ function fake(regras: RegraFixa[]) {
       return o.length;
     },
     planos: async () => [],
+    excluirRegra: async () => {},
+    excluirPlano: async () => {},
     criarPlano: async (_p, parcelas) => {
       planos.push(parcelas.length);
     },

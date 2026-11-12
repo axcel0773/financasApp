@@ -50,7 +50,7 @@ export class SupabaseIncomeRepository implements IncomeRepository {
     const { data, error } = await this.db
       .from('income_sources')
       .select(
-        'id,kind,name,employer,gross_cents,advance_percent,advance_day,final_day,wallet_id,active',
+        'id,kind,name,employer,gross_cents,advance_percent,advance_day,final_day,wallet_id,active,dependents,alimony_cents',
       )
       .order('created_at');
     check(error, 'listar fontes de renda');
@@ -65,6 +65,8 @@ export class SupabaseIncomeRepository implements IncomeRepository {
       finalDay: numOrNull(s.final_day),
       walletId: s.wallet_id,
       active: s.active,
+      dependents: num(s.dependents),
+      alimonyCents: num(s.alimony_cents),
     }));
   }
   async salvarFonte(f: Parameters<IncomeRepository['salvarFonte']>[0]): Promise<void> {
@@ -78,6 +80,8 @@ export class SupabaseIncomeRepository implements IncomeRepository {
       final_day: f.finalDay,
       wallet_id: f.walletId,
       active: f.active,
+      dependents: f.dependents,
+      alimony_cents: f.alimonyCents,
     };
     const { error } = f.id
       ? await this.db.from('income_sources').update(row).eq('id', f.id)
@@ -175,5 +179,40 @@ export class SupabaseIncomeRepository implements IncomeRepository {
       paramsIrrf,
       validaDesde: { inss: inss.valid_from, irrf: irrf.valid_from },
     };
+  }
+
+  async salvarTabela(t: Parameters<IncomeRepository['salvarTabela']>[0]): Promise<void> {
+    const brackets = t.faixas.map((f) => ({
+      up_to_cents: f.upToCents,
+      rate: f.rate,
+      deduction_cents: f.deductionCents,
+    }));
+    const params = t.params
+      ? {
+          dependent_cents: t.params.dependentCents,
+          simplified_cents: t.params.simplifiedCents,
+          ...(t.params.reducer
+            ? {
+                reducer: {
+                  exempt_until_cents: t.params.reducer.exemptUntilCents,
+                  phase_until_cents: t.params.reducer.phaseUntilCents,
+                  a_cents: t.params.reducer.aCents,
+                  b: t.params.reducer.b,
+                },
+              }
+            : {}),
+        }
+      : {};
+    const { error } = await this.db
+      .from('tax_tables')
+      .upsert(
+        { kind: t.kind, valid_from: t.validFrom, brackets, params },
+        { onConflict: 'user_id,kind,valid_from' },
+      );
+    check(error, 'salvar tabela de imposto');
+  }
+  async setFonteAtiva(id: string, active: boolean): Promise<void> {
+    const { error } = await this.db.from('income_sources').update({ active }).eq('id', id);
+    check(error, 'atualizar fonte de renda');
   }
 }

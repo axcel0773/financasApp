@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { addMeses, primeiroDia, ultimoDia } from '@/core/shared/competencia';
+import { addMeses, isIsoDate, primeiroDia, ultimoDia } from '@/core/shared/competencia';
 import { ROTULO_CARTEIRA } from '@/core/wallets/domain';
 import { carregarBase } from '@/features/base';
 import { PendingQueue } from '@/features/gastos/pending-queue';
@@ -9,6 +9,7 @@ import { TransactionHeader, TransactionRow } from '@/ui/patterns/transaction-row
 import { ButtonLink } from '@/ui/primitives/button';
 import { Card, PageHeader } from '@/ui/primitives/card';
 import { FilterChip } from '@/ui/primitives/chip';
+import { Input } from '@/ui/primitives/fields';
 import { Icon } from '@/ui/primitives/icon';
 import { EmptyState } from '@/ui/primitives/progress';
 
@@ -22,6 +23,12 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
   const mes = competenciaDoParam(sp.mes, mesAtual);
   const carteira = typeof sp.carteira === 'string' ? sp.carteira : undefined;
   const categoria = typeof sp.categoria === 'string' ? sp.categoria : undefined;
+  const q = typeof sp.q === 'string' ? sp.q.trim().slice(0, 80) : '';
+  const deP = typeof sp.de === 'string' && isIsoDate(sp.de) ? sp.de : undefined;
+  const ateP = typeof sp.ate === 'string' && isIsoDate(sp.ate) ? sp.ate : undefined;
+  const periodoLivre = !!deP && !!ateP && deP <= ateP;
+  const inicio = periodoLivre ? deP! : primeiroDia(mes);
+  const fim = periodoLivre ? ateP! : ultimoDia(mes);
   const cursor =
     typeof sp.cursor === 'string' && /^\d{4}-\d{2}-\d{2}_[0-9a-f-]{36}$/i.test(sp.cursor)
       ? { occurredOn: sp.cursor.slice(0, 10), id: sp.cursor.slice(11) }
@@ -29,14 +36,15 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
 
   const [lista, mensal] = await Promise.all([
     c.transactions.list({
-      de: primeiroDia(mes),
-      ate: ultimoDia(mes),
+      de: inicio,
+      ate: fim,
+      texto: q || undefined,
       walletId: carteira,
       categoryId: categoria,
       limite: PAGINA + 1,
       cursor,
     }),
-    c.queries.detalhado(primeiroDia(mes), ultimoDia(mes)),
+    c.queries.detalhado(inicio, fim),
   ]);
   const temMais = lista.length > PAGINA;
   const itens = lista.slice(0, PAGINA);
@@ -47,10 +55,10 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
   );
 
   const url = (extra: Record<string, string | undefined>) => {
-    const q = new URLSearchParams();
-    const base = { mes, carteira, categoria, ...extra };
-    for (const [k, v] of Object.entries(base)) if (v) q.set(k, v);
-    return `/gastos?${q.toString()}`;
+    const params = new URLSearchParams();
+    const base = { mes, carteira, categoria, q: q || undefined, de: periodoLivre ? deP : undefined, ate: periodoLivre ? ateP : undefined, ...extra };
+    for (const [k, v] of Object.entries(base)) if (v) params.set(k, v);
+    return `/gastos?${params.toString()}`;
   };
   const ultimo = itens[itens.length - 1];
 
@@ -58,7 +66,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
     <>
       <PageHeader
         title="Gastos"
-        subtitle={rotuloCompetencia(mes)}
+        subtitle={periodoLivre ? `${dataCurta(inicio)} a ${dataCurta(fim)}` : rotuloCompetencia(mes)}
         action={
           <ButtonLink href="/gastos/novo" className="hidden md:inline-flex">
             <Icon name="plus" size={18} />
@@ -66,6 +74,25 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
           </ButtonLink>
         }
       />
+      <form action="/gastos" method="get" className="mb-3 space-y-2">
+        <input type="hidden" name="mes" value={mes} />
+        {carteira && <input type="hidden" name="carteira" value={carteira} />}
+        {categoria && <input type="hidden" name="categoria" value={categoria} />}
+        <Input type="search" name="q" defaultValue={q} placeholder="Buscar na descrição" aria-label="Buscar lançamentos" maxLength={80} />
+        <details open={periodoLivre}>
+          <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">Período livre</summary>
+          <div className="grid grid-cols-2 gap-2">
+            <Input type="date" name="de" defaultValue={deP ?? ''} aria-label="De" />
+            <Input type="date" name="ate" defaultValue={ateP ?? ''} aria-label="Até" />
+          </div>
+        </details>
+        <div className="flex flex-wrap gap-2">
+          <button type="submit" className="min-h-11 rounded-md bg-primary px-4 text-sm font-semibold text-primary-fg">Filtrar</button>
+          {(q || periodoLivre) && <Link href={`/gastos?mes=${mes}`} className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-primary">Limpar busca</Link>}
+          <Link href="/gastos/transferir" className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-primary">Transferir</Link>
+          <Link href="/gastos/importar" className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-primary">Importar extrato</Link>
+        </div>
+      </form>
       <div className="mb-3 flex items-center justify-between">
         <Link
           href={url({ mes: addMeses(mes, -1), cursor: undefined })}

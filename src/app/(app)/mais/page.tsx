@@ -54,6 +54,12 @@ export default async function MaisPage() {
           <SectionTitle>Dados</SectionTitle>
           <Links
             itens={[
+              { href: '/mais/carteiras', label: 'Carteiras', icon: 'wallet' },
+              { href: '/mais/categorias', label: 'Categorias e regras', icon: 'list' },
+              { href: '/mais/impostos', label: 'Tabelas de INSS e IRRF', icon: 'list' },
+              { href: '/gastos/transferir', label: 'Transferir entre carteiras', icon: 'list' },
+              { href: '/gastos/importar', label: 'Importar extrato (CSV)', icon: 'list' },
+              { href: '/renda/simulador', label: 'Simular holerite, 13º e férias', icon: 'list' },
               { href: '/gastos/lixeira', label: 'Lixeira (30 dias)', icon: 'trash' },
               { href: '/renda/historico', label: 'Histórico de renda', icon: 'list' },
             ]}

@@ -62,6 +62,7 @@ export class SupabaseTransactionRepository implements TransactionRepository, Tra
     if (f.ate) q = q.lte('occurred_on', f.ate);
     if (f.walletId) q = q.eq('wallet_id', f.walletId);
     if (f.categoryId) q = q.eq('category_id', f.categoryId);
+    if (f.texto) q = q.ilike('note', `%${f.texto.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
     if (f.cursor)
       q = q.or(
         `occurred_on.lt.${f.cursor.occurredOn},and(occurred_on.eq.${f.cursor.occurredOn},id.lt.${f.cursor.id})`,
@@ -69,6 +70,30 @@ export class SupabaseTransactionRepository implements TransactionRepository, Tra
     const { data, error } = await q;
     check(error, 'listar lançamentos');
     return (data as Row[]).map(toDomain);
+  }
+
+  async inserirEmLote(inputs: NewTransactionInput[]): Promise<number> {
+    let criados = 0;
+    for (let i = 0; i < inputs.length; i += 500) {
+      const { data, error } = await this.db
+        .from('transactions')
+        .upsert(
+          inputs.slice(i, i + 500).map((t) => ({
+            client_id: t.clientId,
+            wallet_id: t.walletId,
+            category_id: t.categoryId,
+            kind: t.kind,
+            amount_cents: t.amountCents,
+            occurred_on: t.occurredOn,
+            note: t.note ?? null,
+          })),
+          { onConflict: 'user_id,client_id', ignoreDuplicates: true },
+        )
+        .select('id');
+      check(error, 'importar lançamentos');
+      criados += data?.length ?? 0;
+    }
+    return criados;
   }
 
   async get(id: string): Promise<Transaction | null> {

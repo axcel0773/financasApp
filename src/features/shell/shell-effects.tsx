@@ -2,7 +2,11 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
-import { criarLancamentoAction } from '@/app/_actions/gastos';
+import {
+  criarLancamentoAction,
+  editarLancamentoRemotoAction,
+  excluirLancamentoAction,
+} from '@/app/_actions/gastos';
 import { sincronizarFila } from '@/infra/offline/queue';
 import { useToast } from '@/ui/primitives/toast';
 
@@ -66,8 +70,18 @@ export function ShellEffects({
       if (rodando || !navigator.onLine) return;
       rodando = true;
       try {
-        const r = await sincronizarFila(async (i) =>
-          criarLancamentoAction({
+        const r = await sincronizarFila(async (i) => {
+          if (i.op === 'excluir') return excluirLancamentoAction(i.alvoId);
+          if (i.op === 'editar')
+            return editarLancamentoRemotoAction({
+              id: i.alvoId,
+              walletId: i.walletId,
+              categoryId: i.categoryId,
+              amountCents: i.amountCents,
+              occurredOn: i.occurredOn,
+              note: i.note,
+            });
+          return criarLancamentoAction({
             clientId: i.clientId,
             walletId: i.walletId,
             categoryId: i.categoryId,
@@ -75,10 +89,10 @@ export function ShellEffects({
             amountCents: i.amountCents,
             occurredOn: i.occurredOn,
             note: i.note,
-          }),
-        );
+          });
+        });
         if (r.enviados > 0) {
-          show(`${r.enviados} lançamento(s) enviado(s).`);
+          show(`${r.enviados} alteração(ões) enviada(s).`);
           router.refresh();
         }
       } catch {

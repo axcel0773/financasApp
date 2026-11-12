@@ -2,7 +2,13 @@ import { describe, expect, it } from 'vitest';
 import { relogioFixo } from '../../shared/clock';
 import type { Transaction, NewTransactionInput } from '../domain';
 import type { TransactionRepository } from './ports';
-import { criarTransacao, desfazerExclusao, editarTransacao, excluirTransacao } from './use-cases';
+import {
+  criarTransacao,
+  desfazerExclusao,
+  editarTransacao,
+  excluirTransacao,
+  importarLancamentos,
+} from './use-cases';
 
 function fakeRepo(): TransactionRepository & { rows: Map<string, Transaction> } {
   const rows = new Map<string, Transaction>();
@@ -41,6 +47,16 @@ function fakeRepo(): TransactionRepository & { rows: Map<string, Transaction> } 
       rows.set(id, { ...rows.get(id)!, deletedAt: at });
     },
     history: async () => [],
+    inserirEmLote: async (inputs) => {
+      let criados = 0;
+      for (const i of inputs) {
+        if ([...rows.values()].some((r) => r.clientId === i.clientId)) continue;
+        const t = mk(i);
+        rows.set(t.id, t);
+        criados++;
+      }
+      return criados;
+    },
   };
 }
 const base: NewTransactionInput = {
@@ -98,5 +114,15 @@ describe('transações', () => {
       occurredOn: '2026-11-12',
     });
     expect(r.ok).toBe(false);
+  });
+  it('importa em lote, ignora repetidos e conta inválidos', async () => {
+    const repo = fakeRepo();
+    const lote = [
+      { ...base, clientId: 'a' },
+      { ...base, clientId: 'b' },
+      { ...base, clientId: 'c', amountCents: 0 },
+    ];
+    expect(await importarLancamentos(repo, lote)).toEqual({ criados: 2, repetidos: 0, invalidos: 1 });
+    expect(await importarLancamentos(repo, lote)).toEqual({ criados: 0, repetidos: 2, invalidos: 1 });
   });
 });

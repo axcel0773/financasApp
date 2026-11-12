@@ -6,6 +6,8 @@ export interface TransactionFilter {
   ate?: IsoDate;
   walletId?: string;
   categoryId?: string;
+  /** Busca na descrição (sem diferenciar maiúsculas). */
+  texto?: string;
   apenasLixeira?: boolean;
   limite?: number;
   /** Paginação por cursor: itens antes desta data/id. */
@@ -15,6 +17,8 @@ export interface TransactionFilter {
 export interface TransactionRepository {
   list(filter: TransactionFilter): Promise<Transaction[]>;
   get(id: string): Promise<Transaction | null>;
+  /** Insere em lote ignorando os que já existem (mesmo clientId). Devolve quantos foram criados. */
+  inserirEmLote(inputs: NewTransactionInput[]): Promise<number>;
   /** Idempotente por (user, clientId): reenvio devolve o existente. */
   insert(input: NewTransactionInput): Promise<Transaction>;
   update(

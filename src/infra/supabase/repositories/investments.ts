@@ -87,4 +87,21 @@ export class SupabaseInvestmentRepository implements InvestmentRepository {
       );
     check(error, 'atualizar saldo');
   }
+  async update(id: string, i: Parameters<InvestmentRepository['update']>[1]): Promise<void> {
+    const { error } = await this.db
+      .from('investments')
+      .update({
+        kind: i.kind,
+        name: i.name,
+        institution: i.institution,
+        annual_rate_percent: i.annualRatePercent,
+        maturity_on: i.maturityOn,
+      })
+      .eq('id', id);
+    check(error, 'atualizar investimento');
+  }
+  async setArchived(id: string, archived: boolean): Promise<void> {
+    const { error } = await this.db.from('investments').update({ archived }).eq('id', id);
+    check(error, 'arquivar investimento');
+  }
 }

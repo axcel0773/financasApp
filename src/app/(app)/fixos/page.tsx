@@ -3,7 +3,9 @@ import {
   gerarFixosAction,
   salvarRegraAction,
 } from '@/app/_actions/planejamento';
+import { excluirParcelamentoAction, excluirRegraFixaAction } from '@/app/_actions/gestao';
 import { carregarBase } from '@/features/base';
+import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { centavosParaCampo, dataCurta, rotuloCompetencia } from '@/ui/format';
 import { ActionForm } from '@/ui/patterns/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
@@ -119,8 +121,9 @@ export default async function FixosPage() {
                     <Field label="Começa em">
                       <Input type="date" name="startOn" defaultValue={r.startOn} required />
                     </Field>
-                    <Switch name="active" defaultChecked={r.active} label="Ativo" />
+                    <Switch name="active" defaultChecked={r.active} label="Ativo (desmarque para pausar)" />
                   </ActionForm>
+                  <ExcluirConfirmado action={excluirRegraFixaAction} id={r.id} aviso="Encerra este fixo. Lançamentos já gerados continuam no histórico." />
                 </details>
               ))}
             </Card>
@@ -183,6 +186,7 @@ export default async function FixosPage() {
                       pct={(n / p.installments) * 100}
                       label={`${p.description}: parcelas pagas`}
                     />
+                    <ExcluirConfirmado action={excluirParcelamentoAction} id={p.id} aviso="Remove o parcelamento e as parcelas futuras ainda não vencidas. As já pagas ficam no histórico." />
                   </Card>
                 );
               })}

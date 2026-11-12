@@ -12,6 +12,8 @@ const fonte = (o: Partial<FonteRenda> = {}): FonteRenda => ({
   finalDay: 5,
   walletId: null,
   active: true,
+  dependents: 0,
+  alimonyCents: 0,
   ...o,
 });
 const holerite = {

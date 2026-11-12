@@ -15,6 +15,8 @@ export interface FonteRenda {
   finalDay: number | null;
   walletId: string | null;
   active: boolean;
+  dependents: number;
+  alimonyCents: Cents;
 }
 export interface Recebimento {
   id: string;

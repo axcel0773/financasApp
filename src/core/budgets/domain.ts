@@ -36,3 +36,10 @@ export function statusOrcamento(limiteCents: Cents | null, gastoCents: Cents): S
     ratio > 1 ? 'estourado' : ratio >= LIMITE_ALERTA_ORCAMENTO ? 'alerta' : 'ok';
   return { usadoPct: Math.round(ratio * 100), restanteCents: limiteCents - gastoCents, estado };
 }
+
+export function validarCategoria(i: { name: string; color: string | null }): string | null {
+  const nome = i.name.trim();
+  if (nome.length < 1 || nome.length > 40) return 'O nome deve ter de 1 a 40 caracteres.';
+  if (i.color !== null && !/^#[0-9a-fA-F]{6}$/.test(i.color)) return 'Cor inválida.';
+  return null;
+}

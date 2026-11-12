@@ -23,4 +23,7 @@ export interface RecurringRepository {
   gerar(ocorrencias: OcorrenciaFixa[]): Promise<number>;
   planos(): Promise<PlanoParcelado[]>;
   criarPlano(plano: NovoPlano, parcelas: Parcela[]): Promise<void>;
+  excluirRegra(id: string): Promise<void>;
+  /** Manda para a lixeira as parcelas ainda não vencidas e apaga o plano; parcelas passadas ficam como lançamentos avulsos. */
+  excluirPlano(id: string, hoje: string, quando: string): Promise<void>;
 }

@@ -68,6 +68,30 @@ export async function editarLancamentoAction(_: ActionState, fd: FormData): Prom
   return r;
 }
 
+const editarRemoto = z.object({
+  id: uuid,
+  walletId: uuid,
+  categoryId: z.string().uuid().nullable(),
+  amountCents: z.number().int().positive('O valor deve ser maior que zero.'),
+  occurredOn: data,
+  note: z.string().max(200).nullable().optional(),
+});
+/** Mesma edição, chamada pela fila offline (sem redirecionar). */
+export async function editarLancamentoRemotoAction(input: unknown): Promise<ActionState> {
+  return executar(async () => {
+    const p = lerForm(editarRemoto, input as Record<string, unknown>);
+    if (!p.ok) return p;
+    const c = await getContainer();
+    return editarTransacao(c.transactions, p.value.id, {
+      walletId: p.value.walletId,
+      categoryId: p.value.categoryId,
+      amountCents: p.value.amountCents,
+      occurredOn: p.value.occurredOn,
+      note: p.value.note ?? null,
+    });
+  }, 'Alterações salvas.');
+}
+
 export async function excluirLancamentoAction(id: string): Promise<ActionState> {
   return executar(async () => {
     const p = lerForm(z.object({ id: uuid }), { id });

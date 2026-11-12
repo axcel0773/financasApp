@@ -7,7 +7,9 @@ import {
 import { totalPrevistoPendente, totalRecebido } from '@/core/income/domain';
 import { dividirSalario, estimarHolerite } from '@/core/income/holerite';
 import { addMeses } from '@/core/shared/competencia';
+import { desativarFonteAction } from '@/app/_actions/gestao';
 import { carregarBase } from '@/features/base';
+import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { ReceiptRow } from '@/features/renda/receipt-row';
 import { centavosParaCampo, competenciaDoParam, dataLonga, rotuloCompetencia } from '@/ui/format';
 import { ActionForm } from '@/ui/patterns/action-form';
@@ -40,6 +42,8 @@ export default async function RendaPage({
     fonte && tabelas
       ? estimarHolerite({
           grossCents: fonte.grossCents,
+          dependentes: fonte.dependents,
+          pensaoCents: fonte.alimonyCents,
           inss: tabelas.inss,
           irrf: tabelas.irrf,
           paramsIrrf: tabelas.paramsIrrf,
@@ -51,7 +55,18 @@ export default async function RendaPage({
 
   return (
     <>
-      <PageHeader title="Renda" subtitle={rotuloCompetencia(mes)} />
+      <PageHeader
+        title="Renda"
+        subtitle={rotuloCompetencia(mes)}
+        action={
+          <Link
+            href="/renda/simulador"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-primary"
+          >
+            Simular holerite
+          </Link>
+        }
+      />
       <div className="mb-3 flex items-center justify-between text-sm">
         <Link
           href={`/renda?mes=${addMeses(mes, -1)}`}
@@ -222,8 +237,25 @@ export default async function RendaPage({
                   />
                 </Field>
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Dependentes">
+                  <Input
+                    name="dependents"
+                    inputMode="numeric"
+                    defaultValue={fonte?.dependents ?? 0}
+                  />
+                </Field>
+                <Field label="Pensão alimentícia">
+                  <MoneyInput
+                    name="alimony"
+                    defaultValue={
+                      fonte?.alimonyCents ? centavosParaCampo(fonte.alimonyCents) : ''
+                    }
+                  />
+                </Field>
+              </div>
               <p className="text-xs text-muted">
-                Datas e percentual são opcionais. O pagamento final cai no mês seguinte ao de
+                Dependentes e pensão reduzem o IRRF estimado. Datas e percentual são opcionais. O pagamento final cai no mês seguinte ao de
                 referência. Sem datas, o app não gera previstos e você registra manualmente.
               </p>
               <Field label="Cai na carteira">
@@ -236,6 +268,7 @@ export default async function RendaPage({
                 </Select>
               </Field>
             </ActionForm>
+            {fonte && <ExcluirConfirmado action={desativarFonteAction} id={fonte.id} rotulo="Desativar fonte" aviso="Para de gerar novos recebimentos previstos. O histórico continua." />}
           </details>
 
           {fonte && (

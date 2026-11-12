@@ -121,4 +121,19 @@ export class SupabaseRecurringRepository implements RecurringRepository {
       check(e2, 'criar parcelas');
     }
   }
+  async excluirRegra(id: string): Promise<void> {
+    const { error } = await this.db.from('recurring_rules').delete().eq('id', id);
+    check(error, 'excluir fixo');
+  }
+  async excluirPlano(id: string, hoje: string, quando: string): Promise<void> {
+    const { error: e1 } = await this.db
+      .from('transactions')
+      .update({ deleted_at: quando })
+      .eq('installment_plan_id', id)
+      .gt('occurred_on', hoje)
+      .is('deleted_at', null);
+    check(e1, 'cancelar parcelas futuras');
+    const { error } = await this.db.from('installment_plans').delete().eq('id', id);
+    check(error, 'excluir parcelamento');
+  }
 }

@@ -50,3 +50,19 @@ export async function excluirTransacao(
 export async function desfazerExclusao(repo: TransactionRepository, id: string): Promise<void> {
   await repo.setDeletedAt(id, null);
 }
+
+/** Importação em lote: valida cada linha, descarta as inválidas e deixa o banco ignorar as repetidas (clientId). */
+export async function importarLancamentos(
+  repo: TransactionRepository,
+  inputs: NewTransactionInput[],
+): Promise<{ criados: number; repetidos: number; invalidos: number }> {
+  const validos: NewTransactionInput[] = [];
+  let invalidos = 0;
+  for (const i of inputs) {
+    const v = validarTransacao(i);
+    if (v.ok) validos.push(v.value);
+    else invalidos++;
+  }
+  const criados = validos.length ? await repo.inserirEmLote(validos) : 0;
+  return { criados, repetidos: validos.length - criados, invalidos };
+}

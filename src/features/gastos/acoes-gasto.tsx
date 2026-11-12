@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { useTransition } from 'react';
 import { desfazerExclusaoAction, excluirLancamentoAction } from '@/app/_actions/gastos';
+import { enfileirar } from '@/infra/offline/queue';
 import { Button } from '@/ui/primitives/button';
 import { Icon } from '@/ui/primitives/icon';
 import { useToast } from '@/ui/primitives/toast';
@@ -18,7 +19,18 @@ export function ExcluirButton({ id }: { id: string }) {
       disabled={pending}
       onClick={() =>
         start(async () => {
-          const r = await excluirLancamentoAction(id);
+          const guardar = async () => {
+            await enfileirar({ clientId: `excluir:${id}`, op: 'excluir', alvoId: id });
+            show('Sem conexão: a exclusão será enviada quando voltar.');
+            router.push('/gastos');
+          };
+          if (!navigator.onLine) return guardar();
+          let r;
+          try {
+            r = await excluirLancamentoAction(id);
+          } catch {
+            return guardar(); // queda de rede no meio do envio
+          }
           if (!r.ok) return show(r.message ?? 'Não foi possível excluir.');
           show('Lançamento excluído.', {
             label: 'Desfazer',

@@ -39,4 +39,8 @@ export class SupabaseGoalRepository implements GoalRepository {
     const { error } = await this.db.from('goals').update({ current_cents: cents }).eq('id', id);
     check(error, 'atualizar meta');
   }
+  async remove(id: string): Promise<void> {
+    const { error } = await this.db.from('goals').delete().eq('id', id);
+    check(error, 'excluir meta');
+  }
 }
