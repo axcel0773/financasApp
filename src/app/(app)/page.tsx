@@ -1,0 +1,51 @@
+import { Suspense } from 'react';
+import { getContainer } from '@/composition/container';
+import {
+  BlocoBeneficios,
+  BlocoContas,
+  BlocoHero,
+  BlocoOrcamento,
+  BlocoRecebimentos,
+  BlocoRecentes,
+} from '@/features/inicio/blocos';
+import { HideToggle } from '@/features/shell/hide-toggle';
+import { dataLonga } from '@/ui/format';
+import { PageHeader } from '@/ui/primitives/card';
+import { Skeleton } from '@/ui/primitives/progress';
+
+export const metadata = { title: 'Início' };
+const fallback = (h: string) => <Skeleton className={h} />;
+
+/** RSC com streaming: cada bloco carrega sozinho, com skeleton enquanto espera. */
+export default async function InicioPage() {
+  const hoje = (await getContainer()).clock.hoje();
+  return (
+    <>
+      <PageHeader title="Início" subtitle={dataLonga(hoje)} action={<HideToggle />} />
+      <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+        <div>
+          <Suspense fallback={fallback('h-44')}>
+            <BlocoHero />
+          </Suspense>
+          <Suspense fallback={fallback('mt-6 h-32')}>
+            <BlocoOrcamento />
+          </Suspense>
+          <Suspense fallback={fallback('mt-6 h-24')}>
+            <BlocoBeneficios />
+          </Suspense>
+        </div>
+        <div>
+          <Suspense fallback={fallback('mt-6 h-32 lg:mt-0')}>
+            <BlocoRecebimentos />
+          </Suspense>
+          <Suspense fallback={fallback('mt-6 h-32')}>
+            <BlocoContas />
+          </Suspense>
+          <Suspense fallback={fallback('mt-6 h-48')}>
+            <BlocoRecentes />
+          </Suspense>
+        </div>
+      </div>
+    </>
+  );
+}

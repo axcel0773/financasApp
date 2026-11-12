@@ -1,0 +1,173 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: #f4f6f5;
+  --surface: #ffffff;
+  --border: #e6eae8;
+  --ink: #0e1b16;
+  --muted: #5f6b66;
+  --primary: #0b5d45;
+  --primary-dark: #0b3b2e;
+  --expense: #b54708;
+  --expense-text: #93370d;
+  --voucher: #1e40af;
+  --danger-bg: #fef3f2;
+  --ok-bg: #ecfdf3;
+  color-scheme: light;
+}
+/* Modo escuro: automático pelo sistema, com opção manual em Mais (data-theme). Pares texto/fundo ≥ 4,5:1. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --bg: #0b1310;
+    --surface: #121c18;
+    --border: #24332d;
+    --ink: #eaf1ee;
+    --muted: #9fb0a8;
+    --primary: #187a5b;
+    --expense: #f5a66b;
+    --expense-text: #f7b98a;
+    --voucher: #8fb0ff;
+    --danger-bg: #2a1512;
+    --ok-bg: #10261c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --bg: #0b1310;
+  --surface: #121c18;
+  --border: #24332d;
+  --ink: #eaf1ee;
+  --muted: #9fb0a8;
+  --primary: #187a5b;
+  --expense: #f5a66b;
+  --expense-text: #f7b98a;
+  --voucher: #8fb0ff;
+  --danger-bg: #2a1512;
+  --ok-bg: #10261c;
+  color-scheme: dark;
+}
+
+html {
+  background: var(--bg);
+  color: var(--ink);
+  -webkit-text-size-adjust: 100%;
+}
+body {
+  min-height: 100dvh;
+  font-family: var(--font-body), system-ui, sans-serif;
+}
+input,
+select,
+textarea {
+  font-size: 16px;
+} /* evita zoom no iOS */
+:focus-visible {
+  outline: 2px solid var(--primary);
+  outline-offset: 2px;
+}
+.amount {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-display), system-ui, sans-serif;
+}
+html[data-hide-values='true'] .amount {
+  filter: blur(8px);
+  user-select: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+@keyframes pulse-soft {
+  50% {
+    opacity: 0.5;
+  }
+}
+.skeleton {
+  background: var(--border);
+  border-radius: 12px;
+  animation: pulse-soft 1.6s ease-in-out infinite;
+}
+.no-scrollbar {
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Transições entre páginas e feedback de toque (desligadas com prefers-reduced-motion, regra acima) */
+@keyframes page-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes page-up {
+  from {
+    opacity: 0;
+    transform: translateY(28px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.page-in {
+  animation: page-in 240ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.page-up {
+  animation: page-up 320ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+nav a {
+  transition:
+    transform 140ms ease,
+    color 140ms ease;
+}
+nav a:active {
+  transform: scale(0.94);
+}
+@keyframes fab-ring {
+  from {
+    opacity: 0.45;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(1.7);
+  }
+}
+.fab {
+  position: relative;
+  transition:
+    transform 180ms cubic-bezier(0.34, 1.56, 0.64, 1),
+    box-shadow 180ms ease;
+}
+.fab svg {
+  transition: transform 260ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.fab:active {
+  transform: scale(0.88);
+}
+.fab:active svg {
+  transform: rotate(135deg);
+}
+.fab::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--primary);
+  opacity: 0;
+  pointer-events: none;
+}
+.fab:active::after {
+  animation: fab-ring 500ms ease-out;
+}

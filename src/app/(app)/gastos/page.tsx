@@ -1,0 +1,174 @@
+import Link from 'next/link';
+import { addMeses, primeiroDia, ultimoDia } from '@/core/shared/competencia';
+import { ROTULO_CARTEIRA } from '@/core/wallets/domain';
+import { carregarBase } from '@/features/base';
+import { PendingQueue } from '@/features/gastos/pending-queue';
+import { competenciaDoParam, dataCurta, rotuloCompetencia } from '@/ui/format';
+import { AmountDisplay } from '@/ui/patterns/amount-display';
+import { TransactionHeader, TransactionRow } from '@/ui/patterns/transaction-row';
+import { ButtonLink } from '@/ui/primitives/button';
+import { Card, PageHeader } from '@/ui/primitives/card';
+import { FilterChip } from '@/ui/primitives/chip';
+import { Icon } from '@/ui/primitives/icon';
+import { EmptyState } from '@/ui/primitives/progress';
+
+export const metadata = { title: 'Gastos' };
+const PAGINA = 30;
+type SP = Promise<Record<string, string | string[] | undefined>>;
+
+export default async function GastosPage({ searchParams }: { searchParams: SP }) {
+  const sp = await searchParams;
+  const { c, wallets, categories, mesAtual } = await carregarBase();
+  const mes = competenciaDoParam(sp.mes, mesAtual);
+  const carteira = typeof sp.carteira === 'string' ? sp.carteira : undefined;
+  const categoria = typeof sp.categoria === 'string' ? sp.categoria : undefined;
+  const cursor =
+    typeof sp.cursor === 'string' && /^\d{4}-\d{2}-\d{2}_[0-9a-f-]{36}$/i.test(sp.cursor)
+      ? { occurredOn: sp.cursor.slice(0, 10), id: sp.cursor.slice(11) }
+      : undefined;
+
+  const [lista, mensal] = await Promise.all([
+    c.transactions.list({
+      de: primeiroDia(mes),
+      ate: ultimoDia(mes),
+      walletId: carteira,
+      categoryId: categoria,
+      limite: PAGINA + 1,
+      cursor,
+    }),
+    c.queries.detalhado(primeiroDia(mes), ultimoDia(mes)),
+  ]);
+  const temMais = lista.length > PAGINA;
+  const itens = lista.slice(0, PAGINA);
+  const totalGasto = mensal.filter((g) => g.kind === 'expense').reduce((s, g) => s + g.cents, 0);
+  const carteiras = Object.fromEntries(wallets.map((w) => [w.id, w.name]));
+  const cats = Object.fromEntries(
+    categories.map((x) => [x.id, { nome: x.name, cor: x.color ?? '#667085' }]),
+  );
+
+  const url = (extra: Record<string, string | undefined>) => {
+    const q = new URLSearchParams();
+    const base = { mes, carteira, categoria, ...extra };
+    for (const [k, v] of Object.entries(base)) if (v) q.set(k, v);
+    return `/gastos?${q.toString()}`;
+  };
+  const ultimo = itens[itens.length - 1];
+
+  return (
+    <>
+      <PageHeader
+        title="Gastos"
+        subtitle={rotuloCompetencia(mes)}
+        action={
+          <ButtonLink href="/gastos/novo" className="hidden md:inline-flex">
+            <Icon name="plus" size={18} />
+            Novo
+          </ButtonLink>
+        }
+      />
+      <div className="mb-3 flex items-center justify-between">
+        <Link
+          href={url({ mes: addMeses(mes, -1), cursor: undefined })}
+          aria-label="Mês anterior"
+          className="flex h-11 w-11 items-center justify-center rounded-md border border-border"
+        >
+          <Icon name="back" />
+        </Link>
+        <Card className="mx-3 flex-1 py-2 text-center">
+          <p className="text-xs text-muted">Gastos no mês</p>
+          <AmountDisplay cents={totalGasto} size="lg" tom="expense" />
+        </Card>
+        <Link
+          href={url({ mes: addMeses(mes, 1), cursor: undefined })}
+          aria-label="Próximo mês"
+          className="flex h-11 w-11 items-center justify-center rounded-md border border-border"
+        >
+          <Icon name="chevron" />
+        </Link>
+      </div>
+      <div
+        className="-mx-5 mb-3 flex gap-2 overflow-x-auto px-5 pb-1 no-scrollbar"
+        aria-label="Filtrar por carteira"
+      >
+        <FilterChip href={url({ carteira: undefined, cursor: undefined })} ativo={!carteira}>
+          Todas
+        </FilterChip>
+        {wallets.map((w) => (
+          <FilterChip
+            key={w.id}
+            href={url({ carteira: w.id, cursor: undefined })}
+            ativo={carteira === w.id}
+          >
+            {ROTULO_CARTEIRA[w.kind]}
+            {w.kind === 'checking' || w.kind === 'cash' ? '' : ''}
+          </FilterChip>
+        ))}
+      </div>
+      <div
+        className="-mx-5 mb-4 flex gap-2 overflow-x-auto px-5 pb-1 no-scrollbar"
+        aria-label="Filtrar por categoria"
+      >
+        {categories.map((x) => (
+          <FilterChip
+            key={x.id}
+            href={url({ categoria: categoria === x.id ? undefined : x.id, cursor: undefined })}
+            ativo={categoria === x.id}
+          >
+            {x.name}
+          </FilterChip>
+        ))}
+      </div>
+      <PendingQueue carteiras={carteiras} categorias={cats} />
+      {itens.length === 0 ? (
+        <EmptyState title="Nenhum lançamento neste período">
+          Toque em “+” para registrar o primeiro gasto.
+        </EmptyState>
+      ) : (
+        <Card className="px-4 py-2">
+          <TransactionHeader />
+          {itens.map((t) => (
+            <TransactionRow
+              key={t.id}
+              t={{
+                id: t.id,
+                href: `/gastos/${t.id}`,
+                descricao: t.note ?? cats[t.categoryId ?? '']?.nome ?? 'Lançamento',
+                categoria: t.categoryId ? (cats[t.categoryId] ?? null) : null,
+                carteira: carteiras[t.walletId] ?? '',
+                data: dataCurta(t.occurredOn),
+                cents: t.amountCents,
+                kind: t.kind,
+                origem:
+                  t.origin === 'recurring'
+                    ? 'Fixo'
+                    : t.origin === 'installment'
+                      ? `Parcela ${t.installmentNumber}`
+                      : undefined,
+              }}
+            />
+          ))}
+        </Card>
+      )}
+      {temMais && ultimo && (
+        <div className="mt-4">
+          <ButtonLink
+            href={url({ cursor: `${ultimo.occurredOn}_${ultimo.id}` })}
+            variant="secondary"
+            block
+          >
+            Carregar mais
+          </ButtonLink>
+        </div>
+      )}
+      <p className="mt-6 text-center text-sm">
+        <Link
+          href="/gastos/lixeira"
+          className="inline-flex min-h-11 items-center gap-1 text-muted underline"
+        >
+          <Icon name="trash" size={16} />
+          Lixeira
+        </Link>
+      </p>
+    </>
+  );
+}
