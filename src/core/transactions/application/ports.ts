@@ -28,7 +28,7 @@ export interface TransactionRepository {
   update(
     id: string,
     patch: Partial<
-      Pick<Transaction, 'walletId' | 'categoryId' | 'amountCents' | 'occurredOn' | 'note'>
+      Pick<Transaction, 'walletId' | 'categoryId' | 'amountCents' | 'occurredOn' | 'note' | 'tripId'>
     >,
   ): Promise<Transaction>;
   setDeletedAt(id: string, at: string | null): Promise<void>;

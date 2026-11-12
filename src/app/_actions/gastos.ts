@@ -50,6 +50,7 @@ const editar = z.object({
   amount: dinheiroPositivo,
   occurredOn: data,
   note: textoOpcional(200),
+  tripId: z.union([z.string().uuid('Seleção inválida.'), z.literal('')]).optional(),
 });
 export async function editarLancamentoAction(_: ActionState, fd: FormData): Promise<ActionState> {
   const r = await executar(async () => {
@@ -62,6 +63,7 @@ export async function editarLancamentoAction(_: ActionState, fd: FormData): Prom
       amountCents: p.value.amount,
       occurredOn: p.value.occurredOn,
       note: p.value.note,
+      tripId: p.value.tripId === undefined ? undefined : p.value.tripId || null,
     });
   }, 'Alterações salvas.');
   if (r.ok) redirect('/gastos');

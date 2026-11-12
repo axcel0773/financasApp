@@ -23,6 +23,8 @@ export async function editarTransacao(
     amountCents: number;
     occurredOn: string;
     note?: string | null;
+    /** Indefinido mantém a viagem atual; nulo tira o gasto da viagem. */
+    tripId?: string | null;
   },
 ): Promise<Result<Transaction, DomainError>> {
   const atual = await repo.get(id);
@@ -36,6 +38,7 @@ export async function editarTransacao(
       amountCents: v.value.amountCents,
       occurredOn: v.value.occurredOn,
       note: v.value.note ?? null,
+      ...(patch.tripId !== undefined && atual.kind === 'expense' ? { tripId: patch.tripId } : {}),
     }),
   );
 }

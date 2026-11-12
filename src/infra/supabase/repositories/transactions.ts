@@ -150,6 +150,7 @@ export class SupabaseTransactionRepository implements TransactionRepository, Tra
     if (p.amountCents !== undefined) patch.amount_cents = p.amountCents;
     if (p.occurredOn !== undefined) patch.occurred_on = p.occurredOn;
     if (p.note !== undefined) patch.note = p.note;
+    if (p.tripId !== undefined) patch.trip_id = p.tripId;
     const { data, error } = await this.db
       .from('transactions')
       .update(patch)

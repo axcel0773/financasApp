@@ -4,7 +4,9 @@ import { carregarBase } from '@/features/base';
 import { ExcluirButton } from '@/features/gastos/acoes-gasto';
 import { formatBRL } from '@/core/shared/money';
 import { ActionForm } from '@/ui/patterns/action-form';
+import Link from 'next/link';
 import { ButtonLink } from '@/ui/primitives/button';
+import { Chip } from '@/ui/primitives/chip';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Field, Input, MoneyInput, RadioChips, Select } from '@/ui/primitives/fields';
 import { Icon } from '@/ui/primitives/icon';
@@ -18,7 +20,8 @@ export default async function EditarPage({ params }: { params: Promise<{ id: str
   const { c, wallets, categories } = await carregarBase();
   const t = await c.transactions.get(id);
   if (!t || t.deletedAt) notFound();
-  const historico = await c.transactions.history(id);
+  const [historico, viagens] = await Promise.all([c.transactions.history(id), c.trips.list()]);
+  const viagemAtual = viagens.find((v) => v.id === t.tripId);
   return (
     <>
       <PageHeader
@@ -30,6 +33,13 @@ export default async function EditarPage({ params }: { params: Promise<{ id: str
           </ButtonLink>
         }
       />
+      {viagemAtual && (
+        <p className="mb-3">
+          <Link href={`/mais/viagens/${viagemAtual.id}`}>
+            <Chip tom="info">Gasto da viagem · {viagemAtual.name}</Chip>
+          </Link>
+        </p>
+      )}
       <ActionForm
         action={editarLancamentoAction}
         submitLabel="Salvar alterações"
@@ -65,6 +75,18 @@ export default async function EditarPage({ params }: { params: Promise<{ id: str
         <Field label="Descrição">
           <Input name="note" defaultValue={t.note ?? ''} maxLength={200} />
         </Field>
+        {t.kind === 'expense' && (
+          <Field label="Viagem" hint="Escolha uma viagem para este gasto sair do dia a dia e entrar no orçamento dela.">
+            <Select name="tripId" defaultValue={t.tripId ?? ''}>
+              <option value="">Nenhuma (dia a dia)</option>
+              {viagens.map((v) => (
+                <option key={v.id} value={v.id}>
+                  {v.name}
+                </option>
+              ))}
+            </Select>
+          </Field>
+        )}
       </ActionForm>
       <div className="mt-3">
         <ExcluirButton id={t.id} />
