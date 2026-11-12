@@ -3,7 +3,6 @@ import { salvarAjustesAction } from '@/app/_actions/ajustes';
 import { getContainer } from '@/composition/container';
 import { createSupabaseServer } from '@/infra/supabase/client.server';
 import { LogoutForm } from '@/features/shell/logout-form';
-import { MfaCard } from '@/features/shell/mfa-card';
 import { NAV_INVESTIR, NAV_PLANEJAMENTO } from '@/ui/shell/nav-items';
 import { centavosParaCampo } from '@/ui/format';
 import { ActionForm } from '@/ui/patterns/action-form';
@@ -118,8 +117,6 @@ export default async function MaisPage() {
               />
             </ActionForm>
           </Card>
-          <SectionTitle>Segurança</SectionTitle>
-          <MfaCard />
           <p className="mt-3 text-xs text-muted">
             As tabelas de INSS e IRRF (2026) são editáveis e devem ser conferidas com a legislação
             vigente.

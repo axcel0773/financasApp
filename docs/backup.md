@@ -29,8 +29,3 @@ psql "$URL_DO_BANCO_NOVO" -v ON_ERROR_STOP=1 -f dump.sql
 
 O dump cobre os dados do app. Usuários de login (`auth.users`) e autenticadores (2FA) não entram:
 em um projeto novo, crie o usuário de novo e, se os dados tiverem `user_id`, ajuste-o (`update ... set user_id = '<novo id>'`).
-
-## Segurança (2FA)
-
-A migração `20261112060000_mfa_aal2.sql` cria a política restritiva `mfa_aal2` em todas as tabelas do schema
-`public` existentes naquele momento. **Toda tabela nova precisa da mesma política** (copie o `create policy` da migração).

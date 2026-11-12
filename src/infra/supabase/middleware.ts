@@ -1,6 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
-import { aalDoToken, exigeCodigo } from '@/core/auth/mfa';
 import { env } from '@/infra/env';
 
 const PUBLIC_PATHS = ['/login'];
@@ -28,25 +27,18 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  const path = request.nextUrl.pathname;
-  const isPublic = PUBLIC_PATHS.some((p) => path.startsWith(p));
-  const isVerificar = path.startsWith('/login/verificar');
-  const ir = (destino: string) => {
+  const isPublic = PUBLIC_PATHS.some((p) => request.nextUrl.pathname.startsWith(p));
+
+  if (!user && !isPublic) {
     const url = request.nextUrl.clone();
-    url.pathname = destino;
+    url.pathname = '/login';
     url.search = '';
     return NextResponse.redirect(url);
-  };
-
-  if (!user) return isPublic ? response : ir('/login');
-
-  // Segunda etapa: com autenticador verificado, a sessão só vale depois do código (aal2).
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
-  if (exigeCodigo(user.factors, aalDoToken(session?.access_token))) {
-    return isVerificar ? response : ir('/login/verificar');
   }
-  if (isPublic) return ir('/');
+  if (user && isPublic) {
+    const url = request.nextUrl.clone();
+    url.pathname = '/';
+    return NextResponse.redirect(url);
+  }
   return response;
 }
