@@ -65,6 +65,8 @@ export class SupabaseTransactionRepository implements TransactionRepository, Tra
     if (f.walletId) q = q.eq('wallet_id', f.walletId);
     if (f.categoryId) q = q.eq('category_id', f.categoryId);
     if (f.tripId) q = q.eq('trip_id', f.tripId);
+    if (f.escopo === 'dia') q = q.is('trip_id', null);
+    if (f.escopo === 'viagens') q = q.not('trip_id', 'is', null);
     if (f.texto) q = q.ilike('note', `%${f.texto.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
     if (f.cursor)
       q = q.or(

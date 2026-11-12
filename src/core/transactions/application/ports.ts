@@ -8,6 +8,8 @@ export interface TransactionFilter {
   categoryId?: string;
   /** Só lançamentos desta viagem. */
   tripId?: string;
+  /** 'dia' = fora de viagens; 'viagens' = só os de viagem. */
+  escopo?: 'dia' | 'viagens';
   /** Busca na descrição (sem diferenciar maiúsculas). */
   texto?: string;
   apenasLixeira?: boolean;

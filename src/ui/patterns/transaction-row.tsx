@@ -14,6 +14,8 @@ export interface LinhaTransacao {
   cents: number;
   kind: 'expense' | 'income';
   origem?: string;
+  /** Nome da viagem, quando o gasto pertence a uma. */
+  viagem?: string;
   pendente?: boolean;
 }
 
@@ -46,6 +48,7 @@ export function TransactionRow({ t }: { t: LinhaTransacao }) {
               Pendente de envio
             </Chip>
           )}
+          {t.viagem && <Chip tom="info">Viagem · {t.viagem}</Chip>}
           {t.origem && <Chip>{t.origem}</Chip>}
         </span>
       </span>

@@ -3,7 +3,7 @@ import { addMeses, isIsoDate, primeiroDia, ultimoDia } from '@/core/shared/compe
 import { ROTULO_CARTEIRA } from '@/core/wallets/domain';
 import { carregarBase } from '@/features/base';
 import { PendingQueue } from '@/features/gastos/pending-queue';
-import { competenciaDoParam, dataCurta, rotuloCompetencia } from '@/ui/format';
+import { centavosParaCampo, competenciaDoParam, dataCurta, rotuloCompetencia } from '@/ui/format';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { TransactionHeader, TransactionRow } from '@/ui/patterns/transaction-row';
 import { ButtonLink } from '@/ui/primitives/button';
@@ -23,6 +23,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
   const mes = competenciaDoParam(sp.mes, mesAtual);
   const carteira = typeof sp.carteira === 'string' ? sp.carteira : undefined;
   const categoria = typeof sp.categoria === 'string' ? sp.categoria : undefined;
+  const tipo = sp.tipo === 'dia' || sp.tipo === 'viagens' ? sp.tipo : undefined;
   const q = typeof sp.q === 'string' ? sp.q.trim().slice(0, 80) : '';
   const deP = typeof sp.de === 'string' && isIsoDate(sp.de) ? sp.de : undefined;
   const ateP = typeof sp.ate === 'string' && isIsoDate(sp.ate) ? sp.ate : undefined;
@@ -34,21 +35,27 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
       ? { occurredOn: sp.cursor.slice(0, 10), id: sp.cursor.slice(11) }
       : undefined;
 
-  const [lista, mensal] = await Promise.all([
+  const [lista, mensal, viagensTodas] = await Promise.all([
     c.transactions.list({
       de: inicio,
       ate: fim,
       texto: q || undefined,
+      escopo: tipo,
       walletId: carteira,
       categoryId: categoria,
       limite: PAGINA + 1,
       cursor,
     }),
     c.queries.detalhado(inicio, fim),
+    c.trips.list(),
   ]);
+  const nomeViagem = new Map(viagensTodas.map((v) => [v.id, v.name]));
   const temMais = lista.length > PAGINA;
   const itens = lista.slice(0, PAGINA);
-  const totalGasto = mensal.filter((g) => g.kind === 'expense').reduce((s, g) => s + g.cents, 0);
+  const despesasPeriodo = mensal.filter((g) => g.kind === 'expense');
+  const gastoViagens = despesasPeriodo.filter((g) => g.tripId).reduce((s, g) => s + g.cents, 0);
+  const gastoDia = despesasPeriodo.filter((g) => !g.tripId).reduce((s, g) => s + g.cents, 0);
+  const totalGasto = tipo === 'dia' ? gastoDia : tipo === 'viagens' ? gastoViagens : gastoDia + gastoViagens;
   const carteiras = Object.fromEntries(wallets.map((w) => [w.id, w.name]));
   const cats = Object.fromEntries(
     categories.map((x) => [x.id, { nome: x.name, cor: x.color ?? '#667085' }]),
@@ -56,7 +63,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
 
   const url = (extra: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
-    const base = { mes, carteira, categoria, q: q || undefined, de: periodoLivre ? deP : undefined, ate: periodoLivre ? ateP : undefined, ...extra };
+    const base = { mes, carteira, categoria, tipo, q: q || undefined, de: periodoLivre ? deP : undefined, ate: periodoLivre ? ateP : undefined, ...extra };
     for (const [k, v] of Object.entries(base)) if (v) params.set(k, v);
     return `/gastos?${params.toString()}`;
   };
@@ -78,6 +85,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
         <input type="hidden" name="mes" value={mes} />
         {carteira && <input type="hidden" name="carteira" value={carteira} />}
         {categoria && <input type="hidden" name="categoria" value={categoria} />}
+        {tipo && <input type="hidden" name="tipo" value={tipo} />}
         <Input type="search" name="q" defaultValue={q} placeholder="Buscar na descrição" aria-label="Buscar lançamentos" maxLength={80} />
         <details open={periodoLivre}>
           <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">Período livre</summary>
@@ -102,8 +110,13 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
           <Icon name="back" />
         </Link>
         <Card className="mx-3 flex-1 py-2 text-center">
-          <p className="text-xs text-muted">Gastos no mês</p>
+          <p className="text-xs text-muted">{tipo === 'dia' ? 'Dia a dia' : tipo === 'viagens' ? 'Viagens' : 'Gastos no mês'}</p>
           <AmountDisplay cents={totalGasto} size="lg" tom="expense" />
+          {!tipo && gastoViagens > 0 && (
+            <p className="mt-0.5 text-xs text-muted">
+              Dia a dia <span className="amount">{centavosParaCampo(gastoDia)}</span> · Viagens <span className="amount">{centavosParaCampo(gastoViagens)}</span>
+            </p>
+          )}
         </Card>
         <Link
           href={url({ mes: addMeses(mes, 1), cursor: undefined })}
@@ -112,6 +125,11 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
         >
           <Icon name="chevron" />
         </Link>
+      </div>
+      <div className="mb-3 flex gap-2" aria-label="Filtrar por tipo de gasto">
+        <FilterChip href={url({ tipo: undefined, cursor: undefined })} ativo={!tipo}>Tudo</FilterChip>
+        <FilterChip href={url({ tipo: 'dia', cursor: undefined })} ativo={tipo === 'dia'}>Dia a dia</FilterChip>
+        <FilterChip href={url({ tipo: 'viagens', cursor: undefined })} ativo={tipo === 'viagens'}>Viagens</FilterChip>
       </div>
       <div
         className="-mx-5 mb-3 flex gap-2 overflow-x-auto px-5 pb-1 no-scrollbar"
@@ -165,6 +183,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
                 data: dataCurta(t.occurredOn),
                 cents: t.amountCents,
                 kind: t.kind,
+                viagem: t.tripId ? (nomeViagem.get(t.tripId) ?? 'Viagem') : undefined,
                 origem:
                   t.origin === 'recurring'
                     ? 'Fixo'
