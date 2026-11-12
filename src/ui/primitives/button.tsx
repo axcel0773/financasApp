@@ -4,12 +4,12 @@ import { cx } from '../cx';
 
 type Variante = 'primary' | 'secondary' | 'ghost' | 'danger';
 const BASE =
-  'inline-flex min-h-11 items-center justify-center gap-2 rounded-md px-4 text-[15px] font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none';
+  'inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-[15px] font-semibold transition-colors disabled:opacity-50 disabled:pointer-events-none';
 const VAR: Record<Variante, string> = {
-  primary: 'bg-primary text-white hover:opacity-90',
-  secondary: 'border border-border bg-surface text-ink hover:bg-bg',
-  ghost: 'text-primary hover:bg-bg',
-  danger: 'border border-border bg-surface text-expense-text hover:bg-bg',
+  primary: 'bg-primary text-primary-fg hover:opacity-90',
+  secondary: 'border border-border bg-surface text-ink hover:bg-soft',
+  ghost: 'text-link hover:bg-soft',
+  danger: 'border border-border bg-surface text-expense-text hover:bg-soft',
 };
 export function Button({
   variant = 'primary',

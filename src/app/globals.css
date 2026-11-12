@@ -3,31 +3,45 @@
 @tailwind utilities;
 
 :root {
-  --bg: #f4f6f5;
+  --bg: #ffffff;
   --surface: #ffffff;
-  --border: #e6eae8;
-  --ink: #0e1b16;
-  --muted: #5f6b66;
-  --primary: #0b5d45;
-  --primary-dark: #0b3b2e;
-  --expense: #b54708;
-  --expense-text: #93370d;
-  --voucher: #1e40af;
+  --soft: #f1f4f9;
+  --border: #e3e8f0;
+  --ink: #0d1b2a;
+  --muted: #566274;
+  --primary: #0d1b2a;
+  --primary-fg: #ffffff;
+  --primary-dark: #0d1b2a;
+  --link: #1b45b8;
+  --income: #0b7a4f;
+  --brass: #a87a2e;
+  --trip: #2b5bd7;
+  --expense: #b42318;
+  --expense-text: #b42318;
+  --voucher: #1b45b8;
   --danger-bg: #fef3f2;
   --ok-bg: #ecfdf3;
+  --font-display: var(--font-body);
   color-scheme: light;
 }
 /* Modo escuro: automático pelo sistema, com opção manual em Mais (data-theme). Pares texto/fundo ≥ 4,5:1. */
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
-    --bg: #0b1310;
-    --surface: #121c18;
-    --border: #24332d;
-    --ink: #eaf1ee;
-    --muted: #9fb0a8;
-    --primary: #187a5b;
-    --expense: #f5a66b;
-    --expense-text: #f7b98a;
+    --bg: #0c1424;
+    --surface: #142038;
+    --soft: #1a2a47;
+    --border: #25365a;
+    --ink: #e8ecf3;
+    --muted: #9aa7bd;
+    --primary: #e8ecf3;
+    --primary-fg: #0d1b2a;
+    --primary-dark: #1a2b47;
+    --link: #8fb0ff;
+    --income: #4fd6a4;
+    --brass: #d9ae5b;
+    --trip: #6c9bff;
+    --expense: #f08a7e;
+    --expense-text: #f5a79d;
     --voucher: #8fb0ff;
     --danger-bg: #2a1512;
     --ok-bg: #10261c;
@@ -35,14 +49,21 @@
   }
 }
 :root[data-theme='dark'] {
-  --bg: #0b1310;
-  --surface: #121c18;
-  --border: #24332d;
-  --ink: #eaf1ee;
-  --muted: #9fb0a8;
-  --primary: #187a5b;
-  --expense: #f5a66b;
-  --expense-text: #f7b98a;
+  --bg: #0c1424;
+  --surface: #142038;
+  --soft: #1a2a47;
+  --border: #25365a;
+  --ink: #e8ecf3;
+  --muted: #9aa7bd;
+  --primary: #e8ecf3;
+  --primary-fg: #0d1b2a;
+  --primary-dark: #1a2b47;
+  --link: #8fb0ff;
+  --income: #4fd6a4;
+  --brass: #d9ae5b;
+  --trip: #6c9bff;
+  --expense: #f08a7e;
+  --expense-text: #f5a79d;
   --voucher: #8fb0ff;
   --danger-bg: #2a1512;
   --ok-bg: #10261c;
@@ -132,7 +153,7 @@ nav a {
     color 140ms ease;
 }
 nav a:active {
-  transform: scale(0.94);
+  transform: scale(0.96);
 }
 @keyframes fab-ring {
   from {

@@ -36,14 +36,14 @@ export default async function OrcamentoPage({
       <div className="mb-3 flex items-center justify-between text-sm">
         <Link
           href={`/orcamento?mes=${addMeses(mes, -1)}`}
-          className="inline-flex min-h-11 items-center gap-1 text-primary"
+          className="inline-flex min-h-11 items-center gap-1 text-link"
         >
           <Icon name="back" size={18} />
           Mês anterior
         </Link>
         <Link
           href={`/orcamento?mes=${addMeses(mes, 1)}`}
-          className="inline-flex min-h-11 items-center gap-1 text-primary"
+          className="inline-flex min-h-11 items-center gap-1 text-link"
         >
           Próximo mês
           <Icon name="chevron" size={18} />
@@ -115,7 +115,7 @@ export default async function OrcamentoPage({
                 </div>
               ) : null}
               <details className="mt-1">
-                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">
+                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">
                   {cat.monthlyBudgetCents ? 'Alterar limite' : 'Definir limite'}
                 </summary>
                 <ActionForm

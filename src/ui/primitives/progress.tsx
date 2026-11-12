@@ -20,7 +20,7 @@ export function ProgressBar({
       className="h-2.5 w-full overflow-hidden rounded-full bg-border"
     >
       <div
-        className={cx('h-full rounded-full', tom === 'alert' ? 'bg-expense' : 'bg-primary')}
+        className={cx('h-full rounded-full', tom === 'alert' ? 'bg-expense' : 'bg-trip')}
         style={{ width: `${v}%` }}
       />
     </div>

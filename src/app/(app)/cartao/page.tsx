@@ -91,7 +91,7 @@ export default async function CartaoPage({
           ) : null}
           <SectionTitle>Configurar cartão</SectionTitle>
           <details className="rounded-lg border border-border bg-surface p-4">
-            <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-primary">
+            <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-link">
               Fechamento, vencimento e limite
             </summary>
             <ActionForm action={salvarCartaoAction} submitLabel="Salvar" className="mt-3 space-y-3">
@@ -148,7 +148,7 @@ export default async function CartaoPage({
           <p className="mt-3 text-center text-sm">
             <Link
               href={`/gastos?carteira=${cartao.id}`}
-              className="inline-flex min-h-11 items-center text-primary underline"
+              className="inline-flex min-h-11 items-center text-link underline"
             >
               Ver todas as compras do cartão
             </Link>

@@ -78,11 +78,11 @@ export function NovoLancamentoForm({
   const chip = (ativo: boolean) =>
     cx(
       'inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-semibold',
-      ativo ? 'border-primary bg-primary text-white' : 'border-border bg-surface',
+      ativo ? 'border-primary bg-primary text-primary-fg' : 'border-border bg-surface',
     );
   return (
     <div className="space-y-4">
-      <div role="tablist" aria-label="Tipo" className="grid grid-cols-2 gap-2 rounded-md bg-bg p-1">
+      <div role="tablist" aria-label="Tipo" className="grid grid-cols-2 gap-2 rounded-full bg-soft p-1">
         {(['expense', 'income'] as const).map((k) => (
           <button
             key={k}

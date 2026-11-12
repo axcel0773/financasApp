@@ -67,7 +67,7 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
             {r.porCategoria.map((f) => (
               <div key={f.categoryId ?? 'sem'}>
                 <div className="flex justify-between text-sm"><span>{f.categoryId ? (cats[f.categoryId]?.nome ?? '—') : 'Sem categoria'}</span><span className="amount font-semibold">{brl(f.cents)} · {f.pct.toFixed(0)}%</span></div>
-                <div className="mt-1 h-2 overflow-hidden rounded-full bg-border" aria-hidden><div className="h-full bg-[#2f5fd0]" style={{ width: `${f.pct}%` }} /></div>
+                <div className="mt-1 h-2 overflow-hidden rounded-full bg-border" aria-hidden><div className="h-full bg-trip" style={{ width: `${f.pct}%` }} /></div>
               </div>
             ))}
           </Card>
@@ -120,7 +120,7 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
             </ActionForm>
           </Card>
           <details className="rounded-lg border border-border bg-surface p-4">
-            <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-primary">Editar viagem</summary>
+            <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-link">Editar viagem</summary>
             <div className="mt-3"><FormViagem viagem={viagem} hoje={hoje} /></div>
           </details>
           <Card>

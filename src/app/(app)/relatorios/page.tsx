@@ -67,14 +67,14 @@ export default async function RelatoriosPage({
       <div className="mb-3 flex items-center justify-between text-sm">
         <Link
           href={`/relatorios?mes=${addMeses(mes, -1)}`}
-          className="inline-flex min-h-11 items-center gap-1 text-primary"
+          className="inline-flex min-h-11 items-center gap-1 text-link"
         >
           <Icon name="back" size={18} />
           Mês anterior
         </Link>
         <Link
           href={`/relatorios?mes=${addMeses(mes, 1)}`}
-          className="inline-flex min-h-11 items-center gap-1 text-primary"
+          className="inline-flex min-h-11 items-center gap-1 text-link"
         >
           Próximo mês
           <Icon name="chevron" size={18} />

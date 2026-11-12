@@ -4,11 +4,11 @@ import { cx } from '../cx';
 
 type Tom = 'neutral' | 'ok' | 'alert' | 'danger' | 'info';
 const TOM: Record<Tom, string> = {
-  neutral: 'bg-bg text-muted border border-border',
-  ok: 'bg-ok-bg text-primary',
+  neutral: 'bg-soft text-muted',
+  ok: 'bg-ok-bg text-income',
   alert: 'bg-danger-bg text-expense-text',
   danger: 'bg-danger-bg text-expense-text',
-  info: 'bg-bg text-voucher border border-border',
+  info: 'bg-soft text-voucher',
 };
 /** Estado nunca depende só de cor: sempre há texto (e ícone, quando passado). */
 export function Chip({
@@ -47,7 +47,7 @@ export function FilterChip({
       aria-current={ativo ? 'true' : undefined}
       className={cx(
         'inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-semibold',
-        ativo ? 'border-primary bg-primary text-white' : 'border-border bg-surface text-ink',
+        ativo ? 'border-primary bg-primary text-primary-fg' : 'border-transparent bg-soft text-ink',
       )}
     >
       {children}

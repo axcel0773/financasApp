@@ -69,7 +69,7 @@ export default async function InvestimentosPage() {
         action={
           <Link
             href="/investimentos/simulador"
-            className="inline-flex min-h-11 items-center text-sm font-semibold text-primary"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-link"
           >
             Simulador
           </Link>
@@ -143,7 +143,7 @@ export default async function InvestimentosPage() {
                 rendeu <span className="amount">{centavosParaCampo(r.rendimentoCents)}</span>
               </p>
               <details className="mt-1">
-                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">
+                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">
                   Aporte ou resgate
                 </summary>
                 <ActionForm
@@ -169,7 +169,7 @@ export default async function InvestimentosPage() {
                 </ActionForm>
               </details>
               <details>
-                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">
+                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">
                   Atualizar saldo
                 </summary>
                 <ActionForm
@@ -187,7 +187,7 @@ export default async function InvestimentosPage() {
                 </ActionForm>
               </details>
               <details>
-                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">
+                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">
                   Editar dados
                 </summary>
                 <ActionForm action={editarInvestimentoAction} submitLabel="Salvar" className="space-y-3 pb-1">

@@ -23,7 +23,7 @@ export function Keypad({ cents, onChange }: { cents: number; onChange: (c: numbe
           type="button"
           onClick={() => toca(k)}
           aria-label={k === 'del' ? 'Apagar' : k}
-          className="flex min-h-14 items-center justify-center rounded-md border border-border bg-surface font-display text-xl font-bold active:bg-bg"
+          className="flex min-h-14 items-center justify-center rounded-md border border-border bg-surface font-display text-xl font-bold active:bg-soft"
         >
           {k === 'del' ? <Icon name="backspace" /> : k}
         </button>

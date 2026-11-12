@@ -42,7 +42,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="min-h-12 w-full rounded-md bg-primary font-semibold text-white disabled:opacity-60"
+        className="min-h-12 w-full rounded-md bg-primary font-semibold text-primary-fg disabled:opacity-60"
       >
         {pending ? 'Entrando…' : 'Entrar'}
       </button>

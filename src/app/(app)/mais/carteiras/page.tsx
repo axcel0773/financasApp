@@ -26,13 +26,13 @@ export default async function CarteirasPage() {
               <AmountDisplay cents={saldo.get(w.id) ?? 0} size="md" />
             </div>
             <details className="mt-1">
-              <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">Editar</summary>
+              <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">Editar</summary>
               <ActionForm action={renomearCarteiraAction} submitLabel="Salvar" className="space-y-3 pb-1">
                 <input type="hidden" name="id" value={w.id} />
                 <Field label="Nome"><Input name="name" defaultValue={w.name} required maxLength={60} /></Field>
                 <Field label="Saldo inicial" hint="Quanto havia na carteira antes de você começar a registrar."><MoneyInput name="opening" defaultValue={centavosParaCampo(w.openingCents)} /></Field>
               </ActionForm>
-              {w.kind === 'credit_card' && <Link href="/cartao" className="inline-flex min-h-11 items-center text-sm font-semibold text-primary">Fechamento, vencimento e limite</Link>}
+              {w.kind === 'credit_card' && <Link href="/cartao" className="inline-flex min-h-11 items-center text-sm font-semibold text-link">Fechamento, vencimento e limite</Link>}
             </details>
             <details>
               <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-expense-text">Arquivar</summary>

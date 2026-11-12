@@ -86,7 +86,7 @@ export function ReceiptRow({
       )}
       {!recebido && comConfirmar && (
         <details className="mt-2">
-          <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-primary">
+          <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-link">
             Confirmar recebimento
           </summary>
           <ActionForm

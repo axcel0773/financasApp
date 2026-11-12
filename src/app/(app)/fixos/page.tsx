@@ -129,7 +129,7 @@ export default async function FixosPage() {
             </Card>
           )}
           <details className="mt-3 rounded-lg border border-border bg-surface p-4">
-            <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-primary">
+            <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-link">
               Novo gasto fixo
             </summary>
             <ActionForm
@@ -193,7 +193,7 @@ export default async function FixosPage() {
             </div>
           )}
           <details className="mt-3 rounded-lg border border-border bg-surface p-4">
-            <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-primary">
+            <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-link">
               Nova compra parcelada
             </summary>
             <ActionForm

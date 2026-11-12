@@ -7,7 +7,7 @@ export function Card({ className, ...p }: HTMLAttributes<HTMLDivElement>) {
   return <div {...p} className={cx('rounded-lg border border-border bg-surface p-4', className)} />;
 }
 export function Hero({ className, ...p }: HTMLAttributes<HTMLDivElement>) {
-  return <div {...p} className={cx('rounded-2xl bg-primary-dark p-5 text-white', className)} />;
+  return <div {...p} className={cx('rounded-2xl bg-primary-dark p-6 text-white', className)} />;
 }
 export function SectionTitle({
   children,
@@ -18,7 +18,7 @@ export function SectionTitle({
 }) {
   return (
     <div className="mb-2 mt-6 flex items-center justify-between">
-      <h2 className="font-display text-lg font-bold">{children}</h2>
+      <h2 className="font-display text-lg font-semibold">{children}</h2>
       {action}
     </div>
   );
@@ -44,13 +44,13 @@ export function PageHeader({
           <Link
             href={voltar.href}
             aria-label={`Voltar${voltar.label ? ` para ${voltar.label}` : ''}`}
-            className="-ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-sm font-semibold text-primary"
+            className="-ml-2 mb-1 inline-flex min-h-11 items-center gap-1 rounded-md px-2 text-sm font-semibold text-link"
           >
             <Icon name="back" size={20} />
             {voltar.label ?? 'Voltar'}
           </Link>
         )}
-        <h1 className="font-display text-2xl font-bold">{title}</h1>
+        <h1 className="font-display text-[26px] font-semibold tracking-tight">{title}</h1>
         {subtitle && <p className="text-sm text-muted">{subtitle}</p>}
       </div>
       {action}

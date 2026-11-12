@@ -67,7 +67,7 @@ export function TransactionRow({ t }: { t: LinhaTransacao }) {
     </div>
   );
   return t.href ? (
-    <Link href={t.href} className="block border-b border-border last:border-0 hover:bg-bg">
+    <Link href={t.href} className="block border-b border-border last:border-0 hover:bg-soft">
       {conteudo}
     </Link>
   ) : (

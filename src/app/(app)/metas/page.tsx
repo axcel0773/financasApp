@@ -153,7 +153,7 @@ export default async function MetasPage() {
                   </p>
                 )}
                 <details>
-                  <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">
+                  <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">
                     Editar
                   </summary>
                   <FormMeta m={m} hoje={hoje} />

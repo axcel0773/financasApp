@@ -2,7 +2,7 @@ import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes 
 import { cx } from '../cx';
 
 export const FIELD =
-  'min-h-12 w-full rounded-md border border-border bg-surface px-4 text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20';
+  'min-h-12 w-full rounded-[14px] border border-border bg-surface px-4 text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20';
 
 export function Field({
   label,
@@ -84,7 +84,7 @@ export function RadioChips({
             defaultChecked={o.value === (defaultValue ?? '')}
             className="peer sr-only"
           />
-          <span className="inline-flex min-h-11 items-center rounded-full border border-border bg-surface px-4 text-sm font-semibold peer-checked:border-primary peer-checked:bg-primary peer-checked:text-white peer-focus-visible:ring-2 peer-focus-visible:ring-primary">
+          <span className="inline-flex min-h-11 items-center rounded-full border border-border bg-surface px-4 text-sm font-semibold peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-fg peer-focus-visible:ring-2 peer-focus-visible:ring-primary">
             {o.label}
           </span>
         </label>

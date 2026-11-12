@@ -88,28 +88,28 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
         {tipo && <input type="hidden" name="tipo" value={tipo} />}
         <Input type="search" name="q" defaultValue={q} placeholder="Buscar na descrição" aria-label="Buscar lançamentos" maxLength={80} />
         <details open={periodoLivre}>
-          <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">Período livre</summary>
+          <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">Período livre</summary>
           <div className="grid grid-cols-2 gap-2">
             <Input type="date" name="de" defaultValue={deP ?? ''} aria-label="De" />
             <Input type="date" name="ate" defaultValue={ateP ?? ''} aria-label="Até" />
           </div>
         </details>
         <div className="flex flex-wrap gap-2">
-          <button type="submit" className="min-h-11 rounded-md bg-primary px-4 text-sm font-semibold text-primary-fg">Filtrar</button>
-          {(q || periodoLivre) && <Link href={`/gastos?mes=${mes}`} className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-primary">Limpar busca</Link>}
-          <Link href="/gastos/transferir" className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-primary">Transferir</Link>
-          <Link href="/gastos/importar" className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-primary">Importar extrato</Link>
+          <button type="submit" className="min-h-11 rounded-full bg-primary px-5 text-sm font-semibold text-primary-fg">Filtrar</button>
+          {(q || periodoLivre) && <Link href={`/gastos?mes=${mes}`} className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-link">Limpar busca</Link>}
+          <Link href="/gastos/transferir" className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-link">Transferir</Link>
+          <Link href="/gastos/importar" className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-link">Importar extrato</Link>
         </div>
       </form>
       <div className="mb-3 flex items-center justify-between">
         <Link
           href={url({ mes: addMeses(mes, -1), cursor: undefined })}
           aria-label="Mês anterior"
-          className="flex h-11 w-11 items-center justify-center rounded-md border border-border"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-soft"
         >
           <Icon name="back" />
         </Link>
-        <Card className="mx-3 flex-1 py-2 text-center">
+        <Card className="mx-3 flex-1 border-0 bg-soft py-3 text-center">
           <p className="text-xs text-muted">{tipo === 'dia' ? 'Dia a dia' : tipo === 'viagens' ? 'Viagens' : 'Gastos no mês'}</p>
           <AmountDisplay cents={totalGasto} size="lg" tom="expense" />
           {!tipo && gastoViagens > 0 && (
@@ -121,7 +121,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
         <Link
           href={url({ mes: addMeses(mes, 1), cursor: undefined })}
           aria-label="Próximo mês"
-          className="flex h-11 w-11 items-center justify-center rounded-md border border-border"
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-soft"
         >
           <Icon name="chevron" />
         </Link>

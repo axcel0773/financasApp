@@ -28,7 +28,7 @@ export default async function CategoriasPage() {
           <Card key={x.id}>
             <p className="flex items-center gap-2 font-semibold"><span aria-hidden className="h-3.5 w-3.5 rounded-full" style={{ background: x.color ?? '#667085' }} />{x.name}</p>
             <details>
-              <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-primary">Editar</summary>
+              <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">Editar</summary>
               <ActionForm action={salvarCategoriaAction} submitLabel="Salvar" className="space-y-3 pb-1">
                 <input type="hidden" name="id" value={x.id} />
                 <Field label="Nome"><Input name="name" defaultValue={x.name} required maxLength={40} /></Field>

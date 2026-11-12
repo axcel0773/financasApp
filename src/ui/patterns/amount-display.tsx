@@ -4,15 +4,15 @@ import { cx } from '../cx';
 type Tom = 'default' | 'income' | 'expense' | 'onDark';
 const TOM: Record<Tom, string> = {
   default: 'text-ink',
-  income: 'text-primary',
+  income: 'text-income',
   expense: 'text-expense-text',
   onDark: 'text-white',
 };
 const TAM = {
   sm: 'text-sm font-semibold',
-  md: 'text-lg font-bold',
-  lg: 'text-2xl font-extrabold',
-  xl: 'text-4xl font-extrabold',
+  md: 'text-lg font-semibold',
+  lg: 'text-2xl font-semibold',
+  xl: 'text-[44px] font-semibold leading-[1.1] tracking-tight',
 } as const;
 
 /** Valores em Manrope, tabulares; `.amount` permite ocultar tudo pelo botão do olho. */

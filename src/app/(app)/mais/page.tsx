@@ -27,7 +27,7 @@ function Links({
           href={i.href}
           className="flex min-h-14 items-center gap-3 border-b border-border last:border-0"
         >
-          <Icon name={i.icon} className="text-primary" />
+          <Icon name={i.icon} className="text-link" />
           <span className="flex-1 font-semibold">{i.label}</span>
           <Icon name="chevron" size={18} className="text-muted" />
         </Link>

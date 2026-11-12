@@ -14,7 +14,7 @@ export function HideToggle() {
       type="button"
       aria-pressed={oculto}
       aria-label={oculto ? 'Mostrar valores' : 'Ocultar valores'}
-      className="flex h-11 w-11 items-center justify-center rounded-md border border-border bg-surface"
+      className="flex h-11 items-center gap-2 rounded-full bg-soft px-4 text-sm font-medium text-ink"
       onClick={() => {
         const n = !oculto;
         setOculto(n);
@@ -26,7 +26,8 @@ export function HideToggle() {
         }
       }}
     >
-      <Icon name={oculto ? 'eyeoff' : 'eye'} />
+      <Icon name={oculto ? 'eyeoff' : 'eye'} size={18} />
+      <span>{oculto ? 'Mostrar' : 'Ocultar'}</span>
     </button>
   );
 }

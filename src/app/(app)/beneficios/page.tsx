@@ -159,7 +159,7 @@ export default async function BeneficiosPage() {
               ))}
             </Card>
             <details className="rounded-lg border border-border bg-surface p-4">
-              <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-primary">
+              <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-link">
                 Registrar crédito
               </summary>
               <ActionForm
@@ -183,7 +183,7 @@ export default async function BeneficiosPage() {
               action={
                 <Link
                   href={`/gastos?carteira=${w.id}`}
-                  className="inline-flex min-h-11 items-center text-sm text-primary"
+                  className="inline-flex min-h-11 items-center text-sm text-link"
                 >
                   Ver todos
                 </Link>

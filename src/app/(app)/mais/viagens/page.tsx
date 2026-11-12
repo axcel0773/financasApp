@@ -51,7 +51,7 @@ export default async function ViagensPage() {
                           {r.usadoPct !== null && <Chip tom={r.estourou ? 'danger' : 'info'}>{r.usadoPct}%</Chip>}
                         </div>
                         {r.usadoPct !== null && (
-                          <div className="h-2 overflow-hidden rounded-full bg-border" aria-hidden><div className={`h-full ${r.estourou ? 'bg-expense-text' : 'bg-[#2f5fd0]'}`} style={{ width: `${Math.min(100, r.usadoPct)}%` }} /></div>
+                          <div className="h-2 overflow-hidden rounded-full bg-border" aria-hidden><div className={`h-full ${r.estourou ? 'bg-expense-text' : 'bg-trip'}`} style={{ width: `${Math.min(100, r.usadoPct)}%` }} /></div>
                         )}
                         <div className="flex justify-between text-sm">
                           <span className="amount font-semibold">R$ {centavosParaCampo(r.totalCents)}</span>

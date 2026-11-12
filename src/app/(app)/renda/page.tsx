@@ -61,7 +61,7 @@ export default async function RendaPage({
         action={
           <Link
             href="/renda/simulador"
-            className="inline-flex min-h-11 items-center text-sm font-semibold text-primary"
+            className="inline-flex min-h-11 items-center text-sm font-semibold text-link"
           >
             Simular holerite
           </Link>
@@ -70,14 +70,14 @@ export default async function RendaPage({
       <div className="mb-3 flex items-center justify-between text-sm">
         <Link
           href={`/renda?mes=${addMeses(mes, -1)}`}
-          className="inline-flex min-h-11 items-center gap-1 text-primary"
+          className="inline-flex min-h-11 items-center gap-1 text-link"
         >
           <Icon name="back" size={18} />
           Mês anterior
         </Link>
         <Link
           href={`/renda?mes=${addMeses(mes, 1)}`}
-          className="inline-flex min-h-11 items-center gap-1 text-primary"
+          className="inline-flex min-h-11 items-center gap-1 text-link"
         >
           Próximo mês
           <Icon name="chevron" size={18} />
@@ -135,7 +135,7 @@ export default async function RendaPage({
           <p className="mt-3 text-center text-sm">
             <Link
               href="/renda/historico"
-              className="inline-flex min-h-11 items-center text-primary underline"
+              className="inline-flex min-h-11 items-center text-link underline"
             >
               Ver histórico do salário
             </Link>
@@ -162,7 +162,7 @@ export default async function RendaPage({
                   <AmountDisplay cents={holerite.netCents} tom="income" />
                 </div>
                 {partes && fonte.advancePercent ? (
-                  <div className="rounded-md bg-bg p-3 text-sm">
+                  <div className="rounded-md bg-soft p-3 text-sm">
                     <div className="flex justify-between">
                       <span>Adiantamento ({fonte.advancePercent}%)</span>
                       <span className="amount">{centavosParaCampo(partes.adiantamentoCents)}</span>

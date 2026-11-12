@@ -7,12 +7,12 @@ import { NAV_INVESTIR, NAV_PLANEJAMENTO, NAV_PRINCIPAL } from './nav-items';
 export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-20 hidden w-20 flex-col overflow-y-auto border-r border-border bg-surface p-2 md:flex lg:w-60 lg:p-4">
-      <p className="mb-4 hidden font-display text-xl font-extrabold text-primary-dark lg:block">
+      <p className="mb-4 hidden font-display text-xl font-semibold text-ink lg:block">
         Finanças
       </p>
       <Link
         href="/gastos/novo"
-        className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-white lg:mx-0 lg:h-11 lg:w-full lg:gap-2 lg:rounded-md"
+        className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-fg lg:mx-0 lg:h-11 lg:w-full lg:gap-2 lg:rounded-full"
         aria-label="Novo lançamento"
       >
         <Icon name="plus" />

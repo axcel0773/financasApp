@@ -28,7 +28,7 @@ import { EmptyState, ProgressBar } from '@/ui/primitives/progress';
 const linkVer = (href: string, texto = 'Ver tudo') => (
   <Link
     href={href}
-    className="inline-flex min-h-11 items-center text-sm font-semibold text-primary"
+    className="inline-flex min-h-11 items-center text-sm font-medium text-ink underline decoration-brass decoration-2 underline-offset-[5px]"
   >
     {texto}
   </Link>
@@ -52,15 +52,15 @@ export async function BlocoHero() {
   const gasto = gastos.filter((g) => !ehBeneficio(g.walletKind)).reduce((s, g) => s + g.cents, 0);
   return (
     <Hero>
-      <p className="text-sm opacity-80">Sobra de {rotuloCompetencia(mes)}</p>
+      <p className="text-sm text-white/75">Sobra de {rotuloCompetencia(mes)}</p>
       <AmountDisplay cents={sobra} size="xl" tom="onDark" />
-      <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-        <div className="rounded-md bg-white/10 p-3">
-          <p className="opacity-80">Recebido</p>
+      <div className="mt-5 grid grid-cols-2 gap-2.5 text-sm">
+        <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+          <p className="text-white/75">Recebido</p>
           <AmountDisplay cents={recebido} size="md" tom="onDark" />
         </div>
-        <div className="rounded-md bg-white/10 p-3">
-          <p className="opacity-80">Gasto (sem VR/VA)</p>
+        <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+          <p className="text-white/75">Gasto (sem VR/VA)</p>
           <AmountDisplay cents={gasto} size="md" tom="onDark" />
         </div>
       </div>
@@ -400,15 +400,15 @@ export async function BlocoGastosMes() {
           <AmountDisplay cents={total} size="md" tom="expense" />
         </div>
         <div className="flex h-2.5 overflow-hidden rounded-full bg-border" aria-hidden>
-          <div className="bg-primary" style={{ width: `${100 - pctViagem}%` }} />
-          <div className="bg-[#2f5fd0]" style={{ width: `${pctViagem}%` }} />
+          <div className="bg-ink" style={{ width: `${100 - pctViagem}%` }} />
+          <div className="bg-trip" style={{ width: `${pctViagem}%` }} />
         </div>
         <div className="flex justify-between text-sm">
-          <span className="flex items-center gap-2"><span aria-hidden className="h-2.5 w-2.5 rounded-sm bg-primary" />Dia a dia</span>
+          <span className="flex items-center gap-2"><span aria-hidden className="h-2.5 w-2.5 rounded-full bg-ink" />Dia a dia</span>
           <span className="amount font-semibold">{centavosParaCampo(diaADia)}</span>
         </div>
         <div className="flex justify-between text-sm">
-          <span className="flex items-center gap-2"><span aria-hidden className="h-2.5 w-2.5 rounded-sm bg-[#2f5fd0]" />Viagens</span>
+          <span className="flex items-center gap-2"><span aria-hidden className="h-2.5 w-2.5 rounded-full bg-trip" />Viagens</span>
           <span className="amount font-semibold">{centavosParaCampo(viagens)}</span>
         </div>
         <p className="text-xs text-muted">Os orçamentos por categoria consideram só o dia a dia.</p>
