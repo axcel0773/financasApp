@@ -3,6 +3,8 @@ import { getContainer } from '@/composition/container';
 import {
   BlocoAvisos,
   BlocoBeneficios,
+  BlocoGastosMes,
+  BlocoViagens,
   BlocoContas,
   BlocoHero,
   BlocoOrcamento,
@@ -31,6 +33,12 @@ export default async function InicioPage() {
           </Suspense>
           <Suspense fallback={null}>
             <BlocoAvisos />
+          </Suspense>
+          <Suspense fallback={null}>
+            <BlocoGastosMes />
+          </Suspense>
+          <Suspense fallback={null}>
+            <BlocoViagens />
           </Suspense>
           <Suspense fallback={fallback('mt-6 h-32')}>
             <BlocoOrcamento />

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { getContainer } from '@/composition/container';
 import { proximoCredito, resumirBeneficio } from '@/core/benefits/domain';
 import { calcularSobraDoMes, statusOrcamento } from '@/core/budgets/domain';
+import { estadoViagem, resumirViagem } from '@/core/trips/domain';
 import { gerarAvisos } from '@/core/alerts/domain';
 import { compararMeses } from '@/core/reports/domain';
 import { Bars } from '@/ui/charts/bars';
@@ -376,6 +377,77 @@ export async function BlocoTendencia() {
           </p>
         )}
       </Card>
+    </>
+  );
+}
+
+export async function BlocoGastosMes() {
+  const c = await getContainer();
+  const mes = competenciaDe(c.clock.hoje());
+  const detalhe = await c.queries.detalhado(primeiroDia(mes), ultimoDia(mes));
+  const gastos = detalhe.filter((d) => d.kind === 'expense' && !ehBeneficio(d.walletKind));
+  const viagens = gastos.filter((d) => d.tripId).reduce((s, d) => s + d.cents, 0);
+  const diaADia = gastos.filter((d) => !d.tripId).reduce((s, d) => s + d.cents, 0);
+  const total = diaADia + viagens;
+  if (viagens === 0) return null;
+  const pctViagem = total > 0 ? Math.round((viagens / total) * 100) : 0;
+  return (
+    <>
+      <SectionTitle>Gastos do mês</SectionTitle>
+      <Card className="space-y-3">
+        <div className="flex items-baseline justify-between">
+          <span className="font-semibold">Total (sem VR/VA)</span>
+          <AmountDisplay cents={total} size="md" tom="expense" />
+        </div>
+        <div className="flex h-2.5 overflow-hidden rounded-full bg-border" aria-hidden>
+          <div className="bg-primary" style={{ width: `${100 - pctViagem}%` }} />
+          <div className="bg-[#2f5fd0]" style={{ width: `${pctViagem}%` }} />
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="flex items-center gap-2"><span aria-hidden className="h-2.5 w-2.5 rounded-sm bg-primary" />Dia a dia</span>
+          <span className="amount font-semibold">{centavosParaCampo(diaADia)}</span>
+        </div>
+        <div className="flex justify-between text-sm">
+          <span className="flex items-center gap-2"><span aria-hidden className="h-2.5 w-2.5 rounded-sm bg-[#2f5fd0]" />Viagens</span>
+          <span className="amount font-semibold">{centavosParaCampo(viagens)}</span>
+        </div>
+        <p className="text-xs text-muted">Os orçamentos por categoria consideram só o dia a dia.</p>
+      </Card>
+    </>
+  );
+}
+
+export async function BlocoViagens() {
+  const c = await getContainer();
+  const hoje = c.clock.hoje();
+  const ativas = (await c.trips.list()).filter((v) => estadoViagem(v, hoje) === 'andamento');
+  if (ativas.length === 0) return null;
+  const itens = await Promise.all(
+    ativas.map(async (v) => {
+      const l = await c.transactions.list({ tripId: v.id, limite: 500 });
+      return { v, r: resumirViagem(v, l.filter((t) => t.kind === 'expense').map((t) => ({ categoryId: t.categoryId, cents: t.amountCents })), hoje) };
+    }),
+  );
+  return (
+    <>
+      <SectionTitle action={linkVer('/mais/viagens')}>Viagens</SectionTitle>
+      <div className="space-y-3">
+        {itens.map(({ v, r }) => (
+          <Link key={v.id} href={`/mais/viagens/${v.id}`} className="block">
+            <Card className="space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div><p className="font-semibold">{v.name}</p><p className="text-xs text-muted">Dia {r.diaAtual} de {r.diasTotal}</p></div>
+                {r.usadoPct !== null && <Chip tom={r.estourou ? 'danger' : 'info'}>{r.usadoPct}% do orçamento</Chip>}
+              </div>
+              {r.usadoPct !== null && <ProgressBar pct={Math.min(100, r.usadoPct)} tom={r.estourou ? 'alert' : 'ok'} label={`${v.name}: orçamento usado`} />}
+              <div className="flex justify-between text-sm">
+                <AmountDisplay cents={r.totalCents} size="sm" />
+                <span className="text-muted">{v.budgetCents > 0 ? `de ${centavosParaCampo(v.budgetCents)}` : 'sem orçamento'}</span>
+              </div>
+            </Card>
+          </Link>
+        ))}
+      </div>
     </>
   );
 }

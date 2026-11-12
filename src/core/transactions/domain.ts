@@ -21,6 +21,8 @@ export interface Transaction {
   installmentPlanId: string | null;
   installmentNumber: number | null;
   deletedAt: string | null;
+  /** Viagem à qual o gasto pertence (nulo = dia a dia). */
+  tripId?: string | null;
 }
 
 export interface NewTransactionInput {
@@ -31,6 +33,7 @@ export interface NewTransactionInput {
   amountCents: number;
   occurredOn: string;
   note?: string | null;
+  tripId?: string | null;
 }
 
 export type TransactionHistoryEntry = {

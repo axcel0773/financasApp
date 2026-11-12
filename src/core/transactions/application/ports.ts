@@ -6,6 +6,8 @@ export interface TransactionFilter {
   ate?: IsoDate;
   walletId?: string;
   categoryId?: string;
+  /** Só lançamentos desta viagem. */
+  tripId?: string;
   /** Busca na descrição (sem diferenciar maiúsculas). */
   texto?: string;
   apenasLixeira?: boolean;
@@ -38,6 +40,8 @@ export interface GastoDetalhado {
   cents: number;
   occurredOn: IsoDate;
   kind: 'expense' | 'income';
+  /** Viagem do lançamento (nulo = dia a dia). */
+  tripId: string | null;
 }
 /** Consulta de leitura usada por Início, Orçamento, Relatórios e Fluxo (despesas/receitas avulsas ativas). */
 export interface TransactionQueries {

@@ -14,7 +14,7 @@ import type { WalletKind } from '@/core/wallets/domain';
 import { check, num, numOrNull, UNIQUE_VIOLATION } from './shared';
 
 const COLS =
-  'id,client_id,wallet_id,category_id,kind,amount_cents,occurred_on,note,origin,recurring_rule_id,installment_plan_id,installment_number,deleted_at';
+  'id,client_id,wallet_id,category_id,kind,amount_cents,occurred_on,note,origin,recurring_rule_id,installment_plan_id,installment_number,deleted_at,trip_id';
 
 type Row = {
   id: string;
@@ -30,6 +30,7 @@ type Row = {
   installment_plan_id: string | null;
   installment_number: number | null;
   deleted_at: string | null;
+  trip_id: string | null;
 };
 const toDomain = (r: Row): Transaction => ({
   id: r.id,
@@ -45,6 +46,7 @@ const toDomain = (r: Row): Transaction => ({
   installmentPlanId: r.installment_plan_id,
   installmentNumber: numOrNull(r.installment_number),
   deletedAt: r.deleted_at,
+  tripId: r.trip_id,
 });
 
 export class SupabaseTransactionRepository implements TransactionRepository, TransactionQueries {
@@ -62,6 +64,7 @@ export class SupabaseTransactionRepository implements TransactionRepository, Tra
     if (f.ate) q = q.lte('occurred_on', f.ate);
     if (f.walletId) q = q.eq('wallet_id', f.walletId);
     if (f.categoryId) q = q.eq('category_id', f.categoryId);
+    if (f.tripId) q = q.eq('trip_id', f.tripId);
     if (f.texto) q = q.ilike('note', `%${f.texto.replace(/[\\%_]/g, (c) => `\\${c}`)}%`);
     if (f.cursor)
       q = q.or(
@@ -117,6 +120,7 @@ export class SupabaseTransactionRepository implements TransactionRepository, Tra
         amount_cents: i.amountCents,
         occurred_on: i.occurredOn,
         note: i.note ?? null,
+        trip_id: i.tripId ?? null,
       })
       .select(COLS)
       .single();
@@ -178,7 +182,7 @@ export class SupabaseTransactionRepository implements TransactionRepository, Tra
   async detalhado(de: string, ate: string): Promise<GastoDetalhado[]> {
     const { data, error } = await this.db
       .from('transactions')
-      .select('wallet_id,category_id,kind,amount_cents,occurred_on,wallets!inner(kind)')
+      .select('wallet_id,category_id,kind,amount_cents,occurred_on,trip_id,wallets!inner(kind)')
       .is('deleted_at', null)
       .gte('occurred_on', de)
       .lte('occurred_on', ate)
@@ -193,6 +197,7 @@ export class SupabaseTransactionRepository implements TransactionRepository, Tra
         cents: num(r.amount_cents),
         occurredOn: r.occurred_on,
         kind: r.kind,
+        tripId: r.trip_id,
       };
     });
   }

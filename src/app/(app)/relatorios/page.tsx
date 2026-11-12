@@ -41,8 +41,8 @@ export default async function RelatoriosPage({
     .reduce((s, d) => s + d.cents, 0);
   const anterior = resumo.find((r) => r.competencia === addMeses(mes, -1))?.spentCents ?? 0;
   const cmp = compararMeses(gastoMes, anterior);
-  const semBeneficio = (d: { kind: string; walletKind: Parameters<typeof ehBeneficio>[0] }) =>
-    d.kind === 'expense' && !ehBeneficio(d.walletKind);
+  const semBeneficio = (d: { kind: string; tripId: string | null; walletKind: Parameters<typeof ehBeneficio>[0] }) =>
+    d.kind === 'expense' && !d.tripId && !ehBeneficio(d.walletKind);
   const insights = gerarInsights({
     hoje,
     mes,
@@ -135,7 +135,7 @@ export default async function RelatoriosPage({
         {insights.mesesDeHistorico === 0 && insights.maiores.length > 0 && (
           <p className="text-xs text-muted">Sem meses anteriores com gastos, ainda não dá para comparar com a sua média.</p>
         )}
-        <p className="text-xs text-muted">Cálculo simples com os seus dados, feito no próprio app. A projeção assume gasto constante ao longo do mês.</p>
+        <p className="text-xs text-muted">Cálculo simples com os seus dados, feito no próprio app. A projeção assume gasto constante ao longo do mês. Gastos de viagem ficam de fora.</p>
       </Card>
       <div className="lg:grid lg:grid-cols-2 lg:gap-6">
         <div>

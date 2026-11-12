@@ -54,6 +54,7 @@ export default async function MaisPage() {
           <SectionTitle>Dados</SectionTitle>
           <Links
             itens={[
+              { href: '/mais/viagens', label: 'Viagens', icon: 'list' },
               { href: '/mais/carteiras', label: 'Carteiras', icon: 'wallet' },
               { href: '/mais/categorias', label: 'Categorias e regras', icon: 'list' },
               { href: '/mais/impostos', label: 'Tabelas de INSS e IRRF', icon: 'list' },
