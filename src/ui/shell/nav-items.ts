@@ -19,6 +19,7 @@ export const NAV_PLANEJAMENTO: ItemNav[] = [
   { href: '/relatorios', label: 'Relatórios', icon: 'pie' },
   { href: '/cartao', label: 'Fatura do cartão', icon: 'card' },
   { href: '/fixos', label: 'Fixos e parcelas', icon: 'repeat' },
+  { href: '/mais/viagens', label: 'Viagens', icon: 'list' },
 ];
 export const NAV_INVESTIR: ItemNav[] = [
   { href: '/investimentos', label: 'Investimentos', icon: 'trend' },
