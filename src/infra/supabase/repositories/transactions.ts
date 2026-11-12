@@ -11,33 +11,36 @@ import type {
   TransactionRepository,
 } from '@/core/transactions/application/ports';
 import type { WalletKind } from '@/core/wallets/domain';
+import type { DbRow } from '../database.types';
 import { check, num, numOrNull, UNIQUE_VIOLATION } from './shared';
 
 const COLS =
   'id,client_id,wallet_id,category_id,kind,amount_cents,occurred_on,note,origin,recurring_rule_id,installment_plan_id,installment_number,deleted_at,trip_id';
 
-type Row = {
-  id: string;
-  client_id: string;
-  wallet_id: string;
-  category_id: string | null;
-  kind: 'expense' | 'income';
-  amount_cents: number;
-  occurred_on: string;
-  note: string | null;
-  origin: Transaction['origin'];
-  recurring_rule_id: string | null;
-  installment_plan_id: string | null;
-  installment_number: number | null;
-  deleted_at: string | null;
-  trip_id: string | null;
-};
+type Row = Pick<
+  DbRow<'transactions'>,
+  | 'id'
+  | 'client_id'
+  | 'wallet_id'
+  | 'category_id'
+  | 'kind'
+  | 'amount_cents'
+  | 'occurred_on'
+  | 'note'
+  | 'origin'
+  | 'recurring_rule_id'
+  | 'installment_plan_id'
+  | 'installment_number'
+  | 'deleted_at'
+  | 'trip_id'
+>;
 const toDomain = (r: Row): Transaction => ({
   id: r.id,
   clientId: r.client_id,
   walletId: r.wallet_id,
   categoryId: r.category_id,
-  kind: r.kind,
+  // 'transfer' existe no enum do banco por legado; transferências vivem na tabela `transfers`.
+  kind: r.kind as Transaction['kind'],
   amountCents: num(r.amount_cents),
   occurredOn: r.occurred_on,
   note: r.note,

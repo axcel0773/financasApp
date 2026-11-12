@@ -2,6 +2,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { FonteRenda, NovoPrevisto, Recebimento } from '@/core/income/domain';
 import type { Faixa, ParamsIrrf } from '@/core/income/holerite';
 import type { IncomeRepository, TabelasImposto } from '@/core/income/ports';
+import type { DbRow } from '../database.types';
 import { check, num, numOrNull, UNIQUE_VIOLATION } from './shared';
 
 type BracketJson = { up_to_cents: number | null; rate: number; deduction_cents: number };
@@ -12,20 +13,21 @@ const faixas = (j: unknown): Faixa[] =>
     deductionCents: b.deduction_cents,
   }));
 
-type ReceiptRow = {
-  id: string;
-  source_id: string;
-  kind: Recebimento['kind'];
-  competencia: string;
-  expected_on: string | null;
-  expected_net_cents: number | null;
-  received_on: string | null;
-  gross_cents: number | null;
-  deductions_cents: number;
-  net_cents: number | null;
-  wallet_id: string | null;
-  note: string | null;
-};
+type ReceiptRow = Pick<
+  DbRow<'income_receipts'>,
+  | 'id'
+  | 'source_id'
+  | 'kind'
+  | 'competencia'
+  | 'expected_on'
+  | 'expected_net_cents'
+  | 'received_on'
+  | 'gross_cents'
+  | 'deductions_cents'
+  | 'net_cents'
+  | 'wallet_id'
+  | 'note'
+>;
 const R_COLS =
   'id,source_id,kind,competencia,expected_on,expected_net_cents,received_on,gross_cents,deductions_cents,net_cents,wallet_id,note';
 const toReceipt = (r: ReceiptRow): Recebimento => ({

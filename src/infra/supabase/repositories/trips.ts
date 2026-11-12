@@ -1,10 +1,11 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { NovaViagem, Viagem } from '@/core/trips/domain';
 import type { TripRepository } from '@/core/trips/ports';
+import type { DbRow } from '../database.types';
 import { check, num } from './shared';
 
 const COLS = 'id,name,start_on,end_on,budget_cents,people';
-type Row = { id: string; name: string; start_on: string; end_on: string; budget_cents: number; people: number };
+type Row = Pick<DbRow<'trips'>, 'id' | 'name' | 'start_on' | 'end_on' | 'budget_cents' | 'people'>;
 const toDomain = (r: Row): Viagem => ({
   id: r.id,
   name: r.name,
