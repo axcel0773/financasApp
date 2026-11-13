@@ -1,5 +1,4 @@
 import 'server-only';
-import { revalidatePath } from 'next/cache';
 import type { DomainError } from '@/core/shared/errors';
 import type { Result } from '@/core/shared/result';
 import { createSupabaseServer } from '@/infra/supabase/client.server';
@@ -27,7 +26,8 @@ export async function executar(
     const r = await corpo();
     if (r && !r.ok)
       return { ok: false, message: typeof r.error === 'string' ? r.error : r.error.message };
-    revalidatePath('/', 'layout');
+    // Sem revalidatePath: a resposta da ação não carrega a árvore da página (isso disparava o travamento de
+    // transição do Next 15/React 19). Quem chama atualiza a tela com router.refresh() ou navega (páginas são dinâmicas).
     return { ok: true, message: sucesso };
   } catch (e) {
     console.error('action_error', e instanceof RepositoryError ? e.code : 'unexpected');
