@@ -104,6 +104,7 @@ export async function BlocoRecentes() {
             return (
               <TransactionRow
                 key={t.id}
+                compacto
                 t={{
                   id: t.id,
                   href: `/gastos/${t.id}`,
