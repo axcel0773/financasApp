@@ -61,6 +61,26 @@ export default async function InvestimentosPage() {
   const rend = total - investido;
   const aloc = alocacaoPorTipo(linhas.map((l) => ({ kind: l.i.kind, valorCents: l.valor })));
 
+  const proximoVenc = lista
+    .filter((i) => i.maturityOn && i.maturityOn >= hoje)
+    .sort((a, b) => (a.maturityOn! < b.maturityOn! ? -1 : 1))[0];
+  const fatias = aloc.map((a) => ({ label: ROTULO_TIPO[a.kind], value: a.valorCents, color: COR[a.kind] }));
+  const alocacao = aloc.length > 0 && total > 0 && (
+    <Card>
+      <Donut titulo="Alocação por tipo" fatias={fatias} />
+      <ul className="mt-3 divide-y divide-border text-sm">
+        {fatias.map((f) => (
+          <li key={f.label} className="flex items-center gap-2 py-2">
+            <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: f.color }} />
+            <span className="flex-1">{f.label}</span>
+            <span className="amount text-muted">{Math.round((f.value / total) * 100)}%</span>
+            <span className="amount w-28 text-right font-semibold">{centavosParaCampo(f.value)}</span>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+
   return (
     <>
       <PageHeader
@@ -76,6 +96,7 @@ export default async function InvestimentosPage() {
           </Link>
         }
       />
+      <div className="lg:hidden">
       <Hero>
         <p className="text-sm opacity-80">Patrimônio investido</p>
         <AmountDisplay cents={total} size="xl" tom="onDark" />
@@ -90,24 +111,38 @@ export default async function InvestimentosPage() {
           </div>
         </div>
       </Hero>
+      </div>
+      <div className="hidden gap-4 lg:grid lg:grid-cols-3">
+        <Card>
+          <p className="text-sm text-muted">Total investido</p>
+          <AmountDisplay cents={total} size="xl" />
+          <p className="mt-1 text-sm text-muted">
+            Aportado <span className="amount">{centavosParaCampo(investido)}</span> · {lista.length}{' '}
+            {lista.length === 1 ? 'investimento' : 'investimentos'}
+          </p>
+        </Card>
+        <Card>
+          <p className="text-sm text-muted">Rendimento</p>
+          <AmountDisplay cents={rend} size="xl" tom={rend >= 0 ? 'income' : 'expense'} sinal />
+          <p className="mt-1 text-sm text-muted">Saldo menos o que foi aportado</p>
+        </Card>
+        <Card>
+          <p className="text-sm text-muted">Vencimento mais próximo</p>
+          <p className="font-display text-2xl font-semibold">
+            {proximoVenc ? dataLonga(proximoVenc.maturityOn!) : 'Nenhum'}
+          </p>
+          <p className="mt-1 text-sm text-muted">{proximoVenc ? proximoVenc.name : 'Informe o vencimento ao cadastrar'}</p>
+        </Card>
+      </div>
       <p className="mt-2 text-xs text-muted">
         Os saldos são informados por você; o app não consulta corretoras.
       </p>
 
-      {aloc.length > 0 && total > 0 && (
-        <>
+      {alocacao && (
+        <div className="lg:hidden">
           <SectionTitle>Alocação</SectionTitle>
-          <Card>
-            <Donut
-              titulo="Alocação por tipo"
-              fatias={aloc.map((a) => ({
-                label: ROTULO_TIPO[a.kind],
-                value: a.valorCents,
-                color: COR[a.kind],
-              }))}
-            />
-          </Card>
-        </>
+          {alocacao}
+        </div>
       )}
 
       <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start lg:gap-8">
@@ -209,6 +244,12 @@ export default async function InvestimentosPage() {
 
       </div>
       <div>
+      {alocacao && (
+        <div className="hidden lg:block">
+          <SectionTitle>Alocação</SectionTitle>
+          {alocacao}
+        </div>
+      )}
       <SectionTitle>Novo investimento</SectionTitle>
       <Card>
         <ActionForm action={criarInvestimentoAction} submitLabel="Cadastrar">
