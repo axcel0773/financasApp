@@ -56,16 +56,18 @@ test('login bloqueia depois de várias senhas erradas', async ({ page }, info) =
   test.skip(info.project.name !== 'mobile-390', 'basta um tamanho de tela');
   const alvo = `bloqueio-${info.project.name}@teste.local`;
   await page.goto('/login');
-  for (let i = 0; i < 5; i++) {
+  const tentar = async () => {
     await page.getByLabel(/e-?mail/i).fill(alvo);
     await page.getByLabel(/senha/i).fill('senha-errada-123');
     await page.getByRole('button', { name: /entrar/i }).click();
+    // o React limpa o formulário quando a resposta chega: é o sinal de que a tentativa terminou
+    await expect(page.getByLabel(/senha/i)).toHaveValue('');
+  };
+  for (let i = 0; i < 5; i++) {
+    await tentar();
     await expect(page.locator('form').getByRole('alert')).toContainText(/incorretos|muitas tentativas/i);
   }
-  // o React limpa o formulário depois de cada envio: preenche de novo
-  await page.getByLabel(/e-?mail/i).fill(alvo);
-  await page.getByLabel(/senha/i).fill('senha-errada-123');
-  await page.getByRole('button', { name: /entrar/i }).click();
+  await tentar();
   await expect(page.locator('form').getByRole('alert')).toContainText(/muitas tentativas/i);
 });
 
