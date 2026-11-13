@@ -35,7 +35,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             <span>{t.message}</span>
             {t.action && (
               <button
-                className="min-h-11 font-bold underline"
+                className="min-h-11 rounded-full bg-white/15 px-4 font-semibold hover:bg-white/25"
                 onClick={() => {
                   t.action?.run();
                   setItems((l) => l.filter((x) => x.id !== t.id));

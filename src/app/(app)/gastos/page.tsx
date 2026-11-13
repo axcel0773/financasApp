@@ -206,15 +206,12 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
           </ButtonLink>
         </div>
       )}
-      <p className="mt-6 text-center text-sm">
-        <Link
-          href="/gastos/lixeira"
-          className="inline-flex min-h-11 items-center gap-1 text-muted underline"
-        >
+      <div className="mt-6 flex justify-center">
+        <ButtonLink href="/gastos/lixeira" variant="secondary">
           <Icon name="trash" size={16} />
           Lixeira
-        </Link>
-      </p>
+        </ButtonLink>
+      </div>
     </>
   );
 }

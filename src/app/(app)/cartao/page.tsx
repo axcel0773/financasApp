@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { ButtonLink } from '@/ui/primitives/button';
 import { salvarCartaoAction } from '@/app/_actions/planejamento';
 import { agruparFaturas, competenciaDaFatura } from '@/core/card-invoices/domain';
 import { addMeses } from '@/core/shared/competencia';
@@ -145,14 +145,9 @@ export default async function CartaoPage({
               })}
             </Card>
           )}
-          <p className="mt-3 text-center text-sm">
-            <Link
-              href={`/gastos?carteira=${cartao.id}`}
-              className="inline-flex min-h-11 items-center text-link underline"
-            >
-              Ver todas as compras do cartão
-            </Link>
-          </p>
+          <ButtonLink href={`/gastos?carteira=${cartao.id}`} variant="secondary" block className="mt-3">
+            Ver todas as compras do cartão
+          </ButtonLink>
         </div>
       </div>
     </>

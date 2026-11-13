@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { ButtonLink } from '@/ui/primitives/button';
 import { useActionState } from 'react';
 import { pedirRedefinicao, type EsqueciState } from './actions';
 
@@ -17,9 +17,9 @@ export function EsqueciForm() {
         <p role="status" className="rounded-md bg-soft px-3 py-3 text-sm">
           Se o e-mail tiver conta, você vai receber um link para criar uma nova senha. Confira também a caixa de spam.
         </p>
-        <Link href="/login" className="block min-h-12 py-3 text-center text-sm font-medium text-link underline">
+        <ButtonLink href="/login" variant="secondary" block>
           Voltar ao login
-        </Link>
+        </ButtonLink>
       </div>
     );
 
@@ -41,9 +41,9 @@ export function EsqueciForm() {
       >
         {pending ? 'Enviando…' : 'Enviar link'}
       </button>
-      <Link href="/login" className="block min-h-12 py-3 text-center text-sm font-medium text-link underline">
+      <ButtonLink href="/login" variant="secondary" block>
         Voltar ao login
-      </Link>
+      </ButtonLink>
     </form>
   );
 }

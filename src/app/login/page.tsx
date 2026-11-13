@@ -1,4 +1,4 @@
-import Link from 'next/link';
+import { ButtonLink } from '@/ui/primitives/button';
 import { LoginForm } from './login-form';
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ erro?: string }> }) {
@@ -15,9 +15,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
         </p>
       )}
       <LoginForm />
-      <Link href="/login/esqueci" className="-mt-4 block min-h-12 py-3 text-center text-sm font-medium text-link underline">
+      <ButtonLink href="/login/esqueci" variant="secondary" block className="-mt-4">
         Esqueci a senha
-      </Link>
+      </ButtonLink>
     </main>
   );
 }

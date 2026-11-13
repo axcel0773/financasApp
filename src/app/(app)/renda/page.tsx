@@ -14,6 +14,7 @@ import { ReceiptRow } from '@/features/renda/receipt-row';
 import { centavosParaCampo, competenciaDoParam, dataLonga, rotuloCompetencia } from '@/ui/format';
 import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
+import { ButtonLink } from '@/ui/primitives/button';
 import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Field, Input, MoneyInput, Select } from '@/ui/primitives/fields';
 import { Icon } from '@/ui/primitives/icon';
@@ -132,14 +133,9 @@ export default async function RendaPage({
               <input type="hidden" name="competencia" value={mes} />
             </ActionForm>
           )}
-          <p className="mt-3 text-center text-sm">
-            <Link
-              href="/renda/historico"
-              className="inline-flex min-h-11 items-center text-link underline"
-            >
-              Ver histórico do salário
-            </Link>
-          </p>
+          <ButtonLink href="/renda/historico" variant="secondary" block className="mt-3">
+            Ver histórico do salário
+          </ButtonLink>
         </div>
 
         <div>
