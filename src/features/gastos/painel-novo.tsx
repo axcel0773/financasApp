@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { Icon } from '@/ui/primitives/icon';
 
@@ -9,15 +10,20 @@ import { Icon } from '@/ui/primitives/icon';
 export function PainelNovo({ fecharHref, children }: { fecharHref: string; children: React.ReactNode }) {
   const router = useRouter();
   const ref = useRef<HTMLElement>(null);
+  // Portal no <body>: dentro da página, um ancestral com transição/transform prenderia o painel à área do conteúdo.
+  const [montado, setMontado] = useState(false);
+  useEffect(() => setMontado(true), []);
   useEffect(() => {
+    if (!montado) return;
     ref.current?.focus();
     const aoTeclar = (e: KeyboardEvent) => {
       if (e.key === 'Escape') router.push(fecharHref, { scroll: false });
     };
     window.addEventListener('keydown', aoTeclar);
     return () => window.removeEventListener('keydown', aoTeclar);
-  }, [router, fecharHref]);
-  return (
+  }, [router, fecharHref, montado]);
+  if (!montado) return null;
+  return createPortal(
     <div className="fixed inset-0 z-30 hidden lg:block">
       <Link href={fecharHref} scroll={false} aria-label="Fechar painel" tabIndex={-1} className="absolute inset-0 bg-ink/40" />
       <aside
@@ -42,6 +48,7 @@ export function PainelNovo({ fecharHref, children }: { fecharHref: string; child
         {children}
         <p className="text-center text-xs text-muted">Esc fecha</p>
       </aside>
-    </div>
+    </div>,
+    document.body,
   );
 }
