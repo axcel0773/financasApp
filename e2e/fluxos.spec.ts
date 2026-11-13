@@ -171,7 +171,7 @@ test.describe('autenticado', () => {
   test('registra um gasto', async ({ page }) => {
     await entrar(page);
     await page.goto('/gastos/novo');
-    await page.getByLabel(/valor/i).first().fill('12,50');
+    await page.getByRole('textbox', { name: /^valor/i }).first().fill('12,50');
     await page.getByRole('button', { name: /salvar|registrar/i }).click();
     await expect(page).toHaveURL(/\/gastos/);
   });
