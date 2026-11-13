@@ -121,10 +121,23 @@ test.describe('autenticado', () => {
     await form.getByLabel('Nome').fill(`Fixo ${info.project.name} ${Date.now()}`);
     await form.getByLabel('Valor').fill('179,32');
     await form.getByLabel('Dia do mês').fill('7');
+    const posts: string[] = [];
+    page.on('response', (r) => {
+      if (r.request().method() === 'POST') posts.push(`${r.status()} ${r.url()}`);
+    });
     await form.getByRole('button', { name: /cadastrar fixo/i }).click();
     const toast = page.getByText(/fixo salvo/i);
     const alerta = form.getByRole('alert');
-    await expect(toast.or(alerta)).toBeVisible({ timeout: 15_000 });
+    try {
+      await expect(toast.or(alerta)).toBeVisible({ timeout: 15_000 });
+    } catch (e) {
+      const inval = await form.evaluate((f) =>
+        [...(f as HTMLFormElement).elements]
+          .filter((x) => !(x as HTMLInputElement).checkValidity?.())
+          .map((x) => `${(x as HTMLInputElement).name}=${(x as HTMLInputElement).validationMessage}`),
+      );
+      throw new Error(`sem retorno. POSTs: ${JSON.stringify(posts)}; campos inválidos: ${JSON.stringify(inval)}; url: ${page.url()}\n${String(e)}`);
+    }
     // se veio erro, mostra o texto dele na falha
     expect(await alerta.count() ? await alerta.first().textContent() : null).toBeNull();
     await expect(toast).toBeVisible();
