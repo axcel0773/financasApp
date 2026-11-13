@@ -43,7 +43,7 @@ export default async function MaisPage() {
   const a = await (await getContainer()).settings.get();
   return (
     <>
-      <PageHeader title="Mais" subtitle={user?.email ?? ''} />
+      <PageHeader title="Mais" subtitle={user?.email ?? ''} action={<LogoutForm variante="pill" />} />
       <div className="lg:grid lg:grid-cols-2 lg:gap-6">
         <div>
           <SectionTitle>Planejamento</SectionTitle>
@@ -121,9 +121,6 @@ export default async function MaisPage() {
             As tabelas de INSS e IRRF (2026) são editáveis e devem ser conferidas com a legislação
             vigente.
           </p>
-          <div className="mt-6">
-            <LogoutForm />
-          </div>
         </div>
       </div>
     </>

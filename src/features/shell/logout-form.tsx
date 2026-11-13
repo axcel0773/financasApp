@@ -7,7 +7,7 @@ import { Button } from '@/ui/primitives/button';
 import { Icon } from '@/ui/primitives/icon';
 
 /** Sair apaga a fila offline, o cache do service worker e o IndexedDB antes de encerrar a sessão. */
-export function LogoutForm() {
+export function LogoutForm({ variante = 'bloco' }: { variante?: 'bloco' | 'pill' | 'icone' }) {
   const pronto = useRef(false);
   return (
     <form
@@ -30,10 +30,16 @@ export function LogoutForm() {
         })();
       }}
     >
-      <Button type="submit" variant="secondary" block>
-        <Icon name="logout" size={18} />
-        Sair
-      </Button>
+      {variante === 'icone' ? (
+        <Button type="submit" variant="ghost" aria-label="Sair" title="Sair" className="mx-auto !px-0 h-12 w-12 text-muted">
+          <Icon name="logout" size={20} />
+        </Button>
+      ) : (
+        <Button type="submit" variant="secondary" block={variante === 'bloco'}>
+          <Icon name="logout" size={18} />
+          Sair
+        </Button>
+      )}
     </form>
   );
 }

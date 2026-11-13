@@ -4,7 +4,7 @@ import { NavLink } from './nav-link';
 import { NAV_INVESTIR, NAV_PLANEJAMENTO, NAV_PRINCIPAL } from './nav-items';
 
 /** ≥ 768px: trilho lateral (ícone + rótulo). ≥ 1024px: sidebar fixa de 240px com todas as seções. */
-export function Sidebar() {
+export function Sidebar({ sairIcone, sairBloco }: { sairIcone?: React.ReactNode; sairBloco?: React.ReactNode }) {
   return (
     <aside className="fixed inset-y-0 left-0 z-20 hidden w-20 flex-col overflow-y-auto border-r border-border bg-surface p-2 md:flex lg:w-60 lg:p-4">
       <p className="mb-4 hidden font-display text-xl font-semibold text-ink lg:block">
@@ -37,6 +37,12 @@ export function Sidebar() {
           <NavLink key={i.href} item={i} variante="side" />
         ))}
       </div>
+      {(sairIcone || sairBloco) && (
+        <div className="mt-auto pt-4">
+          <div className="lg:hidden">{sairIcone}</div>
+          <div className="hidden lg:block">{sairBloco}</div>
+        </div>
+      )}
     </aside>
   );
 }
