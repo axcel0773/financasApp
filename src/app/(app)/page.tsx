@@ -25,8 +25,8 @@ export default async function InicioPage() {
   const hoje = (await getContainer()).clock.hoje();
   return (
     <>
-      <PageHeader title="Início" subtitle={dataLonga(hoje)} action={<HideToggle />} />
-      <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+      <PageHeader title="Início" subtitle={dataLonga(hoje)} action={<div className="lg:hidden"><HideToggle /></div>} />
+      <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-8">
         <div>
           <Suspense fallback={fallback('h-44')}>
             <BlocoHero />

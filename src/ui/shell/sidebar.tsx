@@ -12,11 +12,10 @@ export function Sidebar({ sairIcone, sairBloco }: { sairIcone?: React.ReactNode;
       </p>
       <Link
         href="/gastos/novo"
-        className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-fg lg:mx-0 lg:h-11 lg:w-full lg:gap-2 lg:rounded-full"
+        className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full bg-primary text-primary-fg lg:hidden"
         aria-label="Novo lançamento"
       >
         <Icon name="plus" />
-        <span className="hidden font-semibold lg:inline">Novo lançamento</span>
       </Link>
       <nav aria-label="Navegação principal" className="flex flex-col gap-1">
         {NAV_PRINCIPAL.map((i) => (

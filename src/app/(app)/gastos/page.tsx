@@ -75,7 +75,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
         title="Gastos"
         subtitle={periodoLivre ? `${dataCurta(inicio)} a ${dataCurta(fim)}` : rotuloCompetencia(mes)}
         action={
-          <ButtonLink href="/gastos/novo" className="hidden md:inline-flex">
+          <ButtonLink href="/gastos/novo" className="hidden md:inline-flex lg:hidden">
             <Icon name="plus" size={18} />
             Novo
           </ButtonLink>
@@ -169,7 +169,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
           Toque em “+” para registrar o primeiro gasto.
         </EmptyState>
       ) : (
-        <Card className="px-4 py-2">
+        <Card className="px-4 py-2 lg:px-6 lg:py-3">
           <TransactionHeader />
           {itens.map((t) => (
             <TransactionRow
