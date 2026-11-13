@@ -7,7 +7,9 @@ function politica(nonce: string): string {
   return [
     "default-src 'self'",
     `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${dev ? " 'unsafe-eval'" : ''}`,
-    "style-src 'self' 'unsafe-inline'",
+    // <style> e <link> só com nonce; atributos style="" continuam liberados (cores e larguras dinâmicas)
+    `style-src 'self' 'nonce-${nonce}'`,
+    "style-src-attr 'unsafe-inline'",
     "img-src 'self' data: blob:",
     "font-src 'self'",
     "connect-src 'self' https://*.supabase.co wss://*.supabase.co",
@@ -16,6 +18,7 @@ function politica(nonce: string): string {
     "frame-ancestors 'none'",
     "base-uri 'self'",
     "form-action 'self'",
+    'report-uri /api/csp-report',
     ...(dev ? [] : ['upgrade-insecure-requests']),
   ].join('; ');
 }

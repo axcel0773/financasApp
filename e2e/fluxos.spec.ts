@@ -12,6 +12,14 @@ async function entrar(page: Page) {
   await page.waitForURL('/');
 }
 // devolve true se não há rolagem horizontal; senão, lista os elementos que passam da largura (diagnóstico)
+// violações da CSP aparecem no console do navegador; o teste falha se houver alguma
+function observarCsp(page: Page): string[] {
+  const violacoes: string[] = [];
+  page.on('console', (m) => {
+    if (/content security policy/i.test(m.text())) violacoes.push(m.text().slice(0, 200));
+  });
+  return violacoes;
+}
 const semRolagemHorizontal = (page: Page) =>
   page.evaluate(() => {
     const largura = window.innerWidth;
@@ -24,9 +32,39 @@ const semRolagemHorizontal = (page: Page) =>
   });
 
 test('login é acessível e sem rolagem horizontal', async ({ page }) => {
+  const csp = observarCsp(page);
   await page.goto('/login');
   expect(await semRolagemHorizontal(page)).toBe(true);
   expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  expect(csp).toEqual([]);
+});
+
+test('esqueci a senha: tela acessível e resposta que não revela se o e-mail existe', async ({ page }, info) => {
+  const csp = observarCsp(page);
+  await page.goto('/login');
+  await page.getByRole('link', { name: /esqueci a senha/i }).click();
+  await expect(page).toHaveURL(/\/login\/esqueci/);
+  expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+  await page.getByLabel(/e-?mail/i).fill(`ninguem-${info.project.name}@teste.local`);
+  await page.getByRole('button', { name: /enviar link/i }).click();
+  await expect(page.getByRole('status')).toContainText(/se o e-mail tiver conta/i);
+  expect(csp).toEqual([]);
+});
+
+test('login bloqueia depois de várias senhas erradas', async ({ page }, info) => {
+  // roda num só tamanho de tela: o limite por IP (20 erros) é compartilhado por todos os testes
+  test.skip(info.project.name !== 'mobile-390', 'basta um tamanho de tela');
+  const alvo = `bloqueio-${info.project.name}@teste.local`;
+  await page.goto('/login');
+  for (let i = 0; i < 5; i++) {
+    await page.getByLabel(/e-?mail/i).fill(alvo);
+    await page.getByLabel(/senha/i).fill('senha-errada-123');
+    await page.getByRole('button', { name: /entrar/i }).click();
+    await expect(page.getByRole('alert')).toContainText(/incorretos|muitas tentativas/i);
+  }
+  await page.getByLabel(/senha/i).fill('senha-errada-123');
+  await page.getByRole('button', { name: /entrar/i }).click();
+  await expect(page.getByRole('alert')).toContainText(/muitas tentativas/i);
 });
 
 test('rota protegida redireciona ao login', async ({ page }) => {
@@ -46,6 +84,7 @@ test.describe('autenticado', () => {
     '/mais',
   ]) {
     test(`${rota}: sem violações axe e sem rolagem horizontal`, async ({ page }) => {
+      const csp = observarCsp(page);
       await entrar(page);
       await page.goto(rota);
       // espera o conteúdo real (o esqueleto de carregamento não é o que se audita)
@@ -53,6 +92,7 @@ test.describe('autenticado', () => {
       await expect(page.locator('h1').first()).toBeVisible();
       expect(await semRolagemHorizontal(page)).toBe(true);
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
+      expect(csp).toEqual([]);
     });
   }
   test('registra um gasto', async ({ page }) => {

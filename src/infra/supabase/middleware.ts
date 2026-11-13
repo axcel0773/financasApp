@@ -2,7 +2,9 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 import { env } from '@/infra/env';
 
-const PUBLIC_PATHS = ['/login'];
+// acessíveis sem sessão; só `/login` manda quem já entrou de volta ao Início
+const PUBLIC_PATHS = ['/login', '/auth/callback', '/api/csp-report'];
+const SO_DESLOGADO = ['/login'];
 
 /** Renova a sessão e redireciona quem não está logado para /login. */
 export async function updateSession(request: NextRequest) {
@@ -35,7 +37,7 @@ export async function updateSession(request: NextRequest) {
     url.search = '';
     return NextResponse.redirect(url);
   }
-  if (user && isPublic) {
+  if (user && SO_DESLOGADO.some((p) => request.nextUrl.pathname.startsWith(p))) {
     const url = request.nextUrl.clone();
     url.pathname = '/';
     return NextResponse.redirect(url);
