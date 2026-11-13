@@ -7,7 +7,7 @@ import { compararMeses } from '@/core/reports/domain';
 import { Bars } from '@/ui/charts/bars';
 import { totalRecebido } from '@/core/income/domain';
 import { ocorrenciasPendentes } from '@/core/recurring/domain';
-import { addDias, competenciaDe, primeiroDia, ultimoDia } from '@/core/shared/competencia';
+import { addDias, addMeses, competenciaDe, primeiroDia, ultimoDia } from '@/core/shared/competencia';
 import { ehBeneficio } from '@/core/wallets/domain';
 import { centavosParaCampo, rotuloCompetencia } from '@/ui/format';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
@@ -87,8 +87,14 @@ export async function BlocoGastosMes() {
 
 export async function BlocoTendencia() {
   const c = await getContainer();
-  const meses = await c.queries.somaMensal(6);
-  if (meses.length === 0) return null;
+  const reais = await c.queries.somaMensal(6);
+  if (reais.length === 0) return null;
+  const fim = reais[reais.length - 1]!.competencia;
+  const porMes = new Map(reais.map((m) => [m.competencia, m]));
+  const meses = [-5, -4, -3, -2, -1, 0].map((d) => {
+    const comp = addMeses(fim, d);
+    return porMes.get(comp) ?? { competencia: comp, receivedCents: 0, spentCents: 0, benefitSpentCents: 0, leftoverCents: 0 };
+  });
   const atual = meses[meses.length - 1]!;
   const anterior = meses[meses.length - 2];
   const cmp = anterior ? compararMeses(atual.spentCents, anterior.spentCents) : null;

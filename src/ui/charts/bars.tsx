@@ -12,7 +12,9 @@ export function Bars({ barras, titulo }: { barras: Barra[]; titulo: string }) {
     h = 150,
     base = 120,
     gap = 10;
-  const bw = (w - gap * (barras.length + 1)) / Math.max(1, barras.length);
+  const n = Math.max(1, barras.length);
+  const bw = Math.min(44, (w - gap * (n + 1)) / n);
+  const x0 = (w - (bw * n + gap * (n - 1))) / 2;
   return (
     <svg
       viewBox={`0 0 ${w} ${h}`}
@@ -22,7 +24,7 @@ export function Bars({ barras, titulo }: { barras: Barra[]; titulo: string }) {
     >
       {barras.map((b, i) => {
         const bh = (b.value / max) * (base - 20);
-        const x = gap + i * (bw + gap);
+        const x = x0 + i * (bw + gap);
         return (
           <g key={b.label}>
             <rect
@@ -41,7 +43,7 @@ export function Bars({ barras, titulo }: { barras: Barra[]; titulo: string }) {
               fill="var(--muted)"
               className="amount"
             >
-              {Math.round(b.value / 100).toLocaleString('pt-BR')}
+              R$ {Math.round(b.value / 100).toLocaleString('pt-BR')}
             </text>
             <text x={x + bw / 2} y={base + 14} textAnchor="middle" fontSize="9" fill="var(--ink)">
               {b.label}
