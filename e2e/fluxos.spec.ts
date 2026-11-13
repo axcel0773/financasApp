@@ -115,6 +115,7 @@ test.describe('autenticado', () => {
   test('cadastra um gasto fixo (formulário de criação sem id)', async ({ page }, info) => {
     await entrar(page);
     await page.goto('/fixos');
+    await page.waitForLoadState('networkidle'); // espera hidratar: enviar antes disso recarrega a página
     await page.getByText('Novo gasto fixo').click();
     const form = page.locator('form', { has: page.getByRole('button', { name: /cadastrar fixo/i }) });
     await form.getByLabel('Nome').fill(`Fixo ${info.project.name} ${Date.now()}`);
@@ -123,7 +124,7 @@ test.describe('autenticado', () => {
     await form.getByRole('button', { name: /cadastrar fixo/i }).click();
     const toast = page.getByText(/fixo salvo/i);
     const alerta = form.getByRole('alert');
-    await expect(toast.or(alerta)).toBeVisible();
+    await expect(toast.or(alerta)).toBeVisible({ timeout: 15_000 });
     // se veio erro, mostra o texto dele na falha
     expect(await alerta.count() ? await alerta.first().textContent() : null).toBeNull();
     await expect(toast).toBeVisible();
