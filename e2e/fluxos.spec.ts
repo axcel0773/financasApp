@@ -131,3 +131,70 @@ test.describe('autenticado', () => {
     await expect(page).toHaveURL(/\/gastos/);
   });
 });
+
+// Varredura de formulários: preenche cada formulário de criação/edição com valores plausíveis, envia e
+// confirma que a resposta nunca é um erro técnico (campo faltando no schema, exceção do banco etc.).
+const ENVIAR = /^(criar|cadastrar|adicionar|salvar|registrar|lançar|transferir|aportar|resgatar|creditar|registrar|definir|atualizar)/i;
+const TECNICO = /invalid input|expected (string|number|object)|received|undefined|\brequired\b|zod|\[object|nan\b|não foi possível concluir/i;
+
+test.describe('formulários', () => {
+  test.skip(!email || !senha, 'defina E2E_EMAIL e E2E_PASSWORD');
+  const rotas = [
+    '/fixos',
+    '/mais/carteiras',
+    '/mais/categorias',
+    '/metas',
+    '/investimentos',
+    '/orcamento',
+    '/renda',
+    '/beneficios',
+    '/gastos/transferir',
+    '/cartao',
+    '/mais/impostos',
+    '/mais',
+    '/mais/viagens/nova',
+  ];
+  for (const rota of rotas) {
+    test(`${rota}: nenhum formulário devolve erro técnico`, async ({ page }, info) => {
+      test.skip(info.project.name !== 'mobile-390', 'basta um tamanho de tela');
+      test.setTimeout(120_000);
+      await entrar(page);
+      const seletor = 'form:has(button[type="submit"])';
+      await page.goto(rota);
+      const total = await page.locator(seletor).count();
+      const problemas: string[] = [];
+      for (let i = 0; i < total; i++) {
+        await page.goto(rota);
+        await page.evaluate(() => document.querySelectorAll('details').forEach((d) => (d.open = true)));
+        const form = page.locator(seletor).nth(i);
+        const botao = form.locator('button[type="submit"]').first();
+        const rotulo = ((await botao.textContent()) ?? '').trim();
+        if (!ENVIAR.test(rotulo)) continue;
+        // preenche cada campo visível conforme o tipo
+        const campos = await form.locator('input, select, textarea').all();
+        for (const c of campos) {
+          const tipo = (await c.getAttribute('type')) ?? '';
+          if (['hidden', 'checkbox', 'radio', 'file', 'password', 'color', 'date', 'submit'].includes(tipo)) continue;
+          if (!(await c.isVisible()) || !(await c.isEnabled())) continue;
+          const tag = await c.evaluate((el) => el.tagName.toLowerCase());
+          if (tag === 'select') {
+            const valores = await c.locator('option').evaluateAll((os) => os.map((o) => (o as HTMLOptionElement).value).filter(Boolean));
+            if (valores[0]) await c.selectOption(valores[0]);
+            continue;
+          }
+          const modo = (await c.getAttribute('inputmode')) ?? '';
+          if ((await c.inputValue()) !== '') continue; // já tem valor padrão
+          await c.fill(modo === 'numeric' ? '5' : modo === 'decimal' ? '10,00' : `Teste ${Date.now() % 100000}`);
+        }
+        await botao.click();
+        await page.waitForTimeout(1500); // resposta da Server Action
+        const alerta = form.getByRole('alert');
+        if ((await alerta.count()) > 0) {
+          const t = ((await alerta.first().textContent()) ?? '').trim();
+          if (TECNICO.test(t)) problemas.push(`[${rotulo}] ${t}`);
+        }
+      }
+      expect(problemas, `formulários com erro técnico em ${rota}`).toEqual([]);
+    });
+  }
+});
