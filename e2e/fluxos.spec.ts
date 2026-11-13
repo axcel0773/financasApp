@@ -99,6 +99,19 @@ test.describe('autenticado', () => {
       expect(csp).toEqual([]);
     });
   }
+  test('viagem sem volta e sem orçamento é aceita; erro de formulário não apaga o que foi digitado', async ({ page }, info) => {
+    await entrar(page);
+    await page.goto('/mais/viagens/nova');
+    const nome = `Teste ${info.project.name} ${Date.now()}`;
+    await page.getByLabel(/nome da viagem/i).fill(nome);
+    await page.getByLabel(/pessoas que dividem/i).fill('0'); // inválido: força o erro
+    await page.getByRole('button', { name: /criar viagem/i }).click();
+    await expect(page.locator('form').getByRole('alert')).toBeVisible();
+    await expect(page.getByLabel(/nome da viagem/i)).toHaveValue(nome);
+    await page.getByLabel(/pessoas que dividem/i).fill('2');
+    await page.getByRole('button', { name: /criar viagem/i }).click(); // volta e orçamento em branco
+    await expect(page.getByText(/viagem salva/i)).toBeVisible();
+  });
   test('registra um gasto', async ({ page }) => {
     await entrar(page);
     await page.goto('/gastos/novo');

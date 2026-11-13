@@ -8,7 +8,7 @@ import { criarTransacao } from '@/core/transactions/application/use-cases';
 import { validarViagem } from '@/core/trips/domain';
 import { executar } from '../_lib/action';
 import type { ActionState } from '../_lib/action-state';
-import { data, dataOpcional, dinheiro, dinheiroPositivo, inteiro, lerForm, texto, textoOpcional, uuid, uuidOpcional } from '../_lib/schemas';
+import { data, dataOpcional, dinheiro, dinheiroOpcional, dinheiroPositivo, inteiro, lerForm, texto, textoOpcional, uuid, uuidOpcional } from '../_lib/schemas';
 
 export async function salvarViagemAction(_: ActionState, fd: FormData): Promise<ActionState> {
   return executar(async () => {
@@ -18,7 +18,7 @@ export async function salvarViagemAction(_: ActionState, fd: FormData): Promise<
         name: texto(80),
         startOn: data,
         endOn: dataOpcional,
-        budget: dinheiro,
+        budget: dinheiroOpcional,
         people: inteiro(1, 20),
       }),
       fd,
@@ -28,7 +28,7 @@ export async function salvarViagemAction(_: ActionState, fd: FormData): Promise<
       name: p.value.name,
       startOn: p.value.startOn,
       endOn: p.value.endOn,
-      budgetCents: p.value.budget,
+      budgetCents: p.value.budget ?? 0, // em branco = viagem sem limite
       people: p.value.people,
     });
     if (!v.ok) return v;
