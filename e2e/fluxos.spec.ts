@@ -125,8 +125,11 @@ test.describe('autenticado', () => {
     const erros: string[] = [];
     page.on('console', (m) => m.type() === 'error' && erros.push(m.text().slice(0, 200)));
     page.on('pageerror', (e) => erros.push(String(e).slice(0, 200)));
+    let resposta: import('@playwright/test').Response | null = null;
     page.on('response', (r) => {
-      if (r.request().method() === 'POST') posts.push(`${r.status()} ${r.url()}`);
+      if (r.request().method() !== 'POST') return;
+      resposta = r;
+      posts.push(`${r.status()} ${r.url()} ${JSON.stringify(r.headers()['content-type'])} ${JSON.stringify(r.request().headers()['next-action'] ?? '').slice(0, 12)}`);
     });
     await form.getByRole('button', { name: /cadastrar fixo/i }).click();
     const toast = page.getByText(/fixo salvo/i);
@@ -139,7 +142,13 @@ test.describe('autenticado', () => {
         const alertas = [...document.querySelectorAll('[role=alert]')].map((a) => a.textContent);
         return { btns, alertas };
       });
-      throw new Error(`sem retorno. POSTs: ${JSON.stringify(posts)}; console: ${JSON.stringify(erros)}; ${JSON.stringify(estado)}; url: ${page.url()}\n${String(e)}`);
+      const corpo = resposta
+        ? await Promise.race([
+            (resposta as import('@playwright/test').Response).text().then((t) => `${t.length} bytes: ${t.slice(0, 300)} ... ${t.slice(-200)}`),
+            new Promise<string>((ok) => setTimeout(() => ok('corpo não terminou em 5s'), 5000)),
+          ]).catch((x) => `erro ao ler corpo: ${String(x)}`)
+        : 'sem resposta';
+      throw new Error(`sem retorno. corpo: ${corpo}. POSTs: ${JSON.stringify(posts)}; console: ${JSON.stringify(erros)}; ${JSON.stringify(estado)}; url: ${page.url()}\n${String(e)}`);
     }
     // se veio erro, mostra o texto dele na falha
     expect(await alerta.count() ? await alerta.first().textContent() : null).toBeNull();
