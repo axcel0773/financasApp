@@ -42,6 +42,7 @@ export const garantirDadosIniciais = cache(async () => {
   const carteiras = await c.wallets.list();
   if (carteiras.length === 0) {
     const { error } = await c.db.rpc('seed_defaults');
-    if (error) throw new Error(`Falha ao criar dados iniciais (${error.code})`);
+    // 23505 = chave duplicada: outra requisição do mesmo usuário já criou os dados (corrida na 1ª visita)
+    if (error && error.code !== '23505') throw new Error(`Falha ao criar dados iniciais (${error.code})`);
   }
 });
