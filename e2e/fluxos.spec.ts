@@ -11,8 +11,17 @@ async function entrar(page: Page) {
   await page.getByRole('button', { name: /entrar/i }).click();
   await page.waitForURL('/');
 }
+// devolve true se não há rolagem horizontal; senão, lista os elementos que passam da largura (diagnóstico)
 const semRolagemHorizontal = (page: Page) =>
-  page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth);
+  page.evaluate(() => {
+    const largura = window.innerWidth;
+    if (document.documentElement.scrollWidth <= largura) return true;
+    const culpados = [...document.querySelectorAll('body *')]
+      .filter((el) => el.getBoundingClientRect().right > largura + 1)
+      .slice(0, 8)
+      .map((el) => `${el.tagName.toLowerCase()}.${String(el.className).slice(0, 60)} right=${Math.round(el.getBoundingClientRect().right)}`);
+    return `scrollWidth=${document.documentElement.scrollWidth} innerWidth=${largura}: ${culpados.join(' | ')}`;
+  });
 
 test('login é acessível e sem rolagem horizontal', async ({ page }) => {
   await page.goto('/login');
