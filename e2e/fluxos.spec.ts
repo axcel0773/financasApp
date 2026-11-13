@@ -135,6 +135,33 @@ test.describe('autenticado', () => {
     await page.reload();
     await expect(page.getByText(nome)).toBeVisible();
   });
+  test('estresse: envio repetido do gasto fixo não deixa a tela em "Salvando…"', async ({ page }, info) => {
+    test.setTimeout(120_000);
+    await entrar(page);
+    await page.goto('/fixos');
+    await page.waitForLoadState('networkidle');
+    await page.getByText('Novo gasto fixo').click();
+    const form = page.locator('form', { has: page.getByRole('button', { name: /cadastrar fixo|salvando/i }) }).last();
+    const botao = page.getByRole('button', { name: /cadastrar fixo|salvando/i });
+    let travou = 0;
+    const N = 8;
+    for (let i = 0; i < N; i++) {
+      await form.getByLabel('Nome').fill(`Estresse ${info.project.name} ${i} ${Date.now()}`);
+      await form.getByLabel('Valor').fill('10,00');
+      await form.getByLabel('Dia do mês').fill('5');
+      const enviado = page.waitForResponse((r) => r.request().method() === 'POST' && r.url().includes('/fixos'));
+      await botao.click();
+      await enviado;
+      const livre = await page.getByRole('button', { name: /^cadastrar fixo$/i }).waitFor({ timeout: 6_000 }).then(() => true, () => false);
+      if (!livre) {
+        travou++;
+        await page.reload();
+        await page.waitForLoadState('networkidle');
+        await page.getByText('Novo gasto fixo').click();
+      }
+    }
+    expect(travou, `travou ${travou} de ${N} envios`).toBe(0);
+  });
   test('registra um gasto', async ({ page }) => {
     await entrar(page);
     await page.goto('/gastos/novo');
