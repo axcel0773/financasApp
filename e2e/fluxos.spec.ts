@@ -122,6 +122,9 @@ test.describe('autenticado', () => {
     await form.getByLabel('Valor').fill('179,32');
     await form.getByLabel('Dia do mês').fill('7');
     const posts: string[] = [];
+    const erros: string[] = [];
+    page.on('console', (m) => m.type() === 'error' && erros.push(m.text().slice(0, 200)));
+    page.on('pageerror', (e) => erros.push(String(e).slice(0, 200)));
     page.on('response', (r) => {
       if (r.request().method() === 'POST') posts.push(`${r.status()} ${r.url()}`);
     });
@@ -131,12 +134,12 @@ test.describe('autenticado', () => {
     try {
       await expect(toast.or(alerta)).toBeVisible({ timeout: 15_000 });
     } catch (e) {
-      const inval = await form.evaluate((f) =>
-        [...(f as HTMLFormElement).elements]
-          .filter((x) => !(x as HTMLInputElement).checkValidity?.())
-          .map((x) => `${(x as HTMLInputElement).name}=${(x as HTMLInputElement).validationMessage}`),
-      );
-      throw new Error(`sem retorno. POSTs: ${JSON.stringify(posts)}; campos inválidos: ${JSON.stringify(inval)}; url: ${page.url()}\n${String(e)}`);
+      const estado = await page.evaluate(() => {
+        const btns = [...document.querySelectorAll('form button[type=submit]')].map((b) => (b as HTMLButtonElement).textContent);
+        const alertas = [...document.querySelectorAll('[role=alert]')].map((a) => a.textContent);
+        return { btns, alertas };
+      });
+      throw new Error(`sem retorno. POSTs: ${JSON.stringify(posts)}; console: ${JSON.stringify(erros)}; ${JSON.stringify(estado)}; url: ${page.url()}\n${String(e)}`);
     }
     // se veio erro, mostra o texto dele na falha
     expect(await alerta.count() ? await alerta.first().textContent() : null).toBeNull();
