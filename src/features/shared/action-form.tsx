@@ -33,6 +33,15 @@ export function ActionForm({
   const [state, setState] = useState<ActionState>(ESTADO_INICIAL);
   const [pending, setPending] = useState(false);
   const { show } = useToast();
+  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(() => () => timers.current.forEach(clearTimeout), []);
+  // Contorno de um bug do Next 15/React 19: às vezes a tela não aplica a resposta de uma ação rápida (a ação
+  // termina, o dado é salvo, mas a lista não muda). Pedir a atualização de novo, em instantes, resolve na prática
+  // (medido no CI: ~50% de falha com uma só atualização). Tirar quando o Next/React corrigirem.
+  const atualizarTela = () => {
+    router.refresh();
+    for (const ms of [1200, 3000]) timers.current.push(setTimeout(() => router.refresh(), ms));
+  };
   useEffect(() => {
     if (state.ok && state.message) {
       show(state.message);
@@ -73,7 +82,7 @@ export function ActionForm({
       setState(r);
       if (r.ok) {
         formRef.current?.reset();
-        router.refresh();
+        atualizarTela();
       }
     } catch {
       setState({ ok: false, message: 'Não foi possível concluir. Tente novamente.' });
