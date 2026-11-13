@@ -7,6 +7,7 @@ import {
 import {
   alocacaoPorTipo,
   calcularRendimento,
+  calcularRendimentoMes,
   type TipoInvestimento,
 } from '@/core/investments/domain';
 import { arquivarInvestimentoAction, editarInvestimentoAction } from '@/app/_actions/gestao';
@@ -14,7 +15,8 @@ import { carregarBase } from '@/features/base';
 import { AcoesInvestimento } from '@/features/investir/acoes-investimento';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { Donut } from '@/ui/charts/donut';
-import { centavosParaCampo, dataLonga } from '@/ui/format';
+import { centavosParaCampo, dataCurta, dataLonga, rotuloCompetencia } from '@/ui/format';
+import { competenciaDe, primeiroDia, ultimoDia } from '@/core/shared/competencia';
 import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
@@ -42,10 +44,11 @@ const COR: Record<TipoInvestimento, string> = {
 
 export default async function InvestimentosPage() {
   const { c, hoje } = await carregarBase();
-  const [lista, aportes, saldos] = await Promise.all([
+  const [lista, aportes, saldos, historico] = await Promise.all([
     c.investments.list(),
     c.investments.entries(),
     c.investments.latestBalances(),
+    c.investments.balances(),
   ]);
   const saldo = new Map(saldos.map((s) => [s.investmentId, s]));
   const linhas = lista.map((i) => {
@@ -58,9 +61,20 @@ export default async function InvestimentosPage() {
   });
   const total = linhas.reduce((t, l) => t + l.valor, 0);
   const investido = linhas.reduce((t, l) => t + l.r.investidoCents, 0);
-  const rend = total - investido;
   const aloc = alocacaoPorTipo(linhas.map((l) => ({ kind: l.i.kind, valorCents: l.valor })));
 
+  const mes = competenciaDe(hoje);
+  const mesIni = primeiroDia(mes);
+  const mesFim = ultimoDia(mes);
+  const rm = calcularRendimentoMes(lista.map((i) => i.id), historico, aportes, mesIni, mesFim);
+  const nomeInv = new Map(lista.map((i) => [i.id, i.name]));
+  const aportesMes = aportes
+    .filter((a) => a.occurredOn >= mesIni && a.occurredOn <= mesFim && nomeInv.has(a.investmentId))
+    .sort((a, b) => (a.occurredOn < b.occurredOn ? 1 : -1));
+  const notaRend =
+    rm.semReferencia > 0
+      ? `${rm.semReferencia} ${rm.semReferencia === 1 ? 'investimento ficou' : 'investimentos ficaram'} de fora: sem saldo informado antes do mês.`
+      : 'Saldo do fim do mês menos o do começo, sem contar aportes e resgates.';
   const proximoVenc = lista
     .filter((i) => i.maturityOn && i.maturityOn >= hoje)
     .sort((a, b) => (a.maturityOn! < b.maturityOn! ? -1 : 1))[0];
@@ -106,8 +120,8 @@ export default async function InvestimentosPage() {
             <AmountDisplay cents={investido} size="md" tom="onDark" />
           </div>
           <div className="rounded-md bg-white/10 p-3">
-            <p className="opacity-80">Rendimento</p>
-            <AmountDisplay cents={rend} size="md" tom="onDark" sinal />
+            <p className="opacity-80">Rendeu em {rotuloCompetencia(mes)}</p>
+            <AmountDisplay cents={rm.rendidoCents} size="md" tom="onDark" sinal />
           </div>
         </div>
       </Hero>
@@ -122,9 +136,9 @@ export default async function InvestimentosPage() {
           </p>
         </Card>
         <Card>
-          <p className="text-sm text-muted">Rendimento</p>
-          <AmountDisplay cents={rend} size="xl" tom={rend >= 0 ? 'income' : 'expense'} sinal />
-          <p className="mt-1 text-sm text-muted">Saldo menos o que foi aportado</p>
+          <p className="text-sm text-muted">Rendeu em {rotuloCompetencia(mes)}</p>
+          <AmountDisplay cents={rm.rendidoCents} size="xl" tom={rm.rendidoCents >= 0 ? 'income' : 'expense'} sinal />
+          <p className="mt-1 text-sm text-muted">{notaRend}</p>
         </Card>
         <Card>
           <p className="text-sm text-muted">Vencimento mais próximo</p>
@@ -147,6 +161,29 @@ export default async function InvestimentosPage() {
 
       <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start lg:gap-8">
       <div>
+      <SectionTitle>Aportes de {rotuloCompetencia(mes)}</SectionTitle>
+      {aportesMes.length === 0 ? (
+        <Card>
+          <p className="text-sm text-muted">Nenhum aporte ou resgate neste mês.</p>
+        </Card>
+      ) : (
+        <Card className="px-4 py-1">
+          <ul className="divide-y divide-border">
+            {aportesMes.map((a, n) => (
+              <li key={`${a.investmentId}-${a.occurredOn}-${n}`} className="flex items-center gap-3 py-3 text-sm">
+                <span className="w-14 text-muted">{dataCurta(a.occurredOn)}</span>
+                <span className="min-w-0 flex-1 truncate font-medium">{nomeInv.get(a.investmentId)}</span>
+                <span className="text-xs text-muted">{a.amountCents >= 0 ? 'Aporte' : 'Resgate'}</span>
+                <AmountDisplay cents={a.amountCents} size="sm" tom={a.amountCents >= 0 ? 'income' : 'expense'} sinal />
+              </li>
+            ))}
+          </ul>
+          <div className="flex items-center justify-between border-t border-border py-3 text-sm font-semibold">
+            <span>Total do mês</span>
+            <AmountDisplay cents={rm.movimentoCents} size="sm" sinal />
+          </div>
+        </Card>
+      )}
       <SectionTitle>Seus investimentos</SectionTitle>
       {linhas.length === 0 ? (
         <EmptyState title="Nenhum investimento">Cadastre o primeiro abaixo.</EmptyState>

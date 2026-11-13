@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import {
   alocacaoPorTipo,
   calcularRendimento,
+  calcularRendimentoMes,
   simularAportes,
   taxaMensalEquivalente,
 } from './domain';
@@ -66,5 +67,47 @@ describe('simulador', () => {
     });
     expect(p[11]?.saldoRealCents).toBeLessThan(p[11]?.saldoCents ?? 0);
     expect(p[11]?.competencia).toBe('2027-11');
+  });
+});
+
+describe('rendimento do mês', () => {
+  const ini = '2026-11-01';
+  const fim = '2026-11-30';
+  it('desconta aportes e resgates do mês: só o que rendeu de verdade', () => {
+    const r = calcularRendimentoMes(
+      ['a'],
+      [
+        { investmentId: 'a', balanceOn: '2026-10-31', balanceCents: 1_000_000 },
+        { investmentId: 'a', balanceOn: '2026-11-20', balanceCents: 1_310_000 },
+      ],
+      [
+        { investmentId: 'a', occurredOn: '2026-09-10', amountCents: 1_000_000 },
+        { investmentId: 'a', occurredOn: '2026-11-05', amountCents: 200_000 },
+      ],
+      ini,
+      fim,
+    );
+    expect(r).toEqual({ rendidoCents: 110_000, movimentoCents: 200_000, considerados: 1, semReferencia: 0 });
+  });
+  it('investimento criado no mês com saldo inicial não rende nada', () => {
+    const r = calcularRendimentoMes(
+      ['a'],
+      [{ investmentId: 'a', balanceOn: '2026-11-13', balanceCents: 500_000 }],
+      [{ investmentId: 'a', occurredOn: '2026-11-13', amountCents: 500_000 }],
+      ini,
+      fim,
+    );
+    expect(r.rendidoCents).toBe(0);
+    expect(r.considerados).toBe(1);
+  });
+  it('sem saldo antes do mês e com aportes antigos: fica de fora e é contado à parte', () => {
+    const r = calcularRendimentoMes(
+      ['a'],
+      [{ investmentId: 'a', balanceOn: '2026-11-13', balanceCents: 1_200_000 }],
+      [{ investmentId: 'a', occurredOn: '2026-08-01', amountCents: 1_000_000 }],
+      ini,
+      fim,
+    );
+    expect(r).toMatchObject({ rendidoCents: 0, considerados: 0, semReferencia: 1 });
   });
 });

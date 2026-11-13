@@ -78,6 +78,18 @@ export class SupabaseInvestmentRepository implements InvestmentRepository {
       }
     return out;
   }
+  async balances() {
+    const { data, error } = await this.db
+      .from('investment_balances')
+      .select('investment_id,balance_on,balance_cents')
+      .order('balance_on', { ascending: true });
+    check(error, 'ler histórico de saldos');
+    return (data ?? []).map((b) => ({
+      investmentId: b.investment_id,
+      balanceOn: b.balance_on,
+      balanceCents: num(b.balance_cents),
+    }));
+  }
   async setBalance(investmentId: string, balanceOn: string, cents: number): Promise<void> {
     const { error } = await this.db
       .from('investment_balances')

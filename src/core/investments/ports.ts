@@ -10,5 +10,7 @@ export interface InvestmentRepository {
   addEntry(a: Aporte): Promise<void>;
   /** Último saldo informado por investimento. */
   latestBalances(): Promise<{ investmentId: string; balanceOn: string; balanceCents: Cents }[]>;
+  /** Histórico completo de saldos informados (um por investimento e data). */
+  balances(): Promise<{ investmentId: string; balanceOn: string; balanceCents: Cents }[]>;
   setBalance(investmentId: string, balanceOn: string, cents: Cents): Promise<void>;
 }
