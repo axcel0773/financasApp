@@ -62,6 +62,8 @@ test('login bloqueia depois de várias senhas erradas', async ({ page }, info) =
     await page.getByRole('button', { name: /entrar/i }).click();
     await expect(page.locator('form').getByRole('alert')).toContainText(/incorretos|muitas tentativas/i);
   }
+  // o React limpa o formulário depois de cada envio: preenche de novo
+  await page.getByLabel(/e-?mail/i).fill(alvo);
   await page.getByLabel(/senha/i).fill('senha-errada-123');
   await page.getByRole('button', { name: /entrar/i }).click();
   await expect(page.locator('form').getByRole('alert')).toContainText(/muitas tentativas/i);
