@@ -71,7 +71,10 @@ export function ActionForm({
     try {
       const r = await action(state, fd);
       setState(r);
-      if (r.ok) formRef.current?.reset();
+      if (r.ok) {
+        formRef.current?.reset();
+        router.refresh();
+      }
     } catch {
       setState({ ok: false, message: 'Não foi possível concluir. Tente novamente.' });
     } finally {

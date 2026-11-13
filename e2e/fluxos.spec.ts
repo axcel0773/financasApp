@@ -144,6 +144,8 @@ test.describe('autenticado', () => {
     const form = page.locator('form', { has: page.getByRole('button', { name: /cadastrar fixo|salvando/i }) }).last();
     const botao = page.getByRole('button', { name: /cadastrar fixo|salvando/i });
     let travou = 0;
+    let botaoPreso = 0;
+    let listaSemItem = 0;
     const N = 8;
     for (let i = 0; i < N; i++) {
       const nomeFixo = `Estresse ${info.project.name} ${i} ${Date.now()}`;
@@ -154,15 +156,17 @@ test.describe('autenticado', () => {
       await botao.click();
       await enviado;
       const livre = await page.getByRole('button', { name: /^cadastrar fixo$/i }).waitFor({ timeout: 6_000 }).then(() => true, () => false);
-      const naLista = livre && (await page.getByText(nomeFixo).waitFor({ timeout: 6_000 }).then(() => true, () => false));
-      if (!naLista) {
+      if (!livre) botaoPreso++;
+      const naLista = await page.getByText(nomeFixo).waitFor({ timeout: 6_000 }).then(() => true, () => false);
+      if (livre && !naLista) listaSemItem++;
+      if (!livre || !naLista) {
         travou++;
         await page.reload();
         await page.waitForLoadState('networkidle');
         await page.getByText('Novo gasto fixo').click();
       }
     }
-    expect(travou, `travou ${travou} de ${N} envios`).toBe(0);
+    expect(travou, `travou ${travou} de ${N} envios (botão preso: ${botaoPreso}; item fora da lista: ${listaSemItem})`).toBe(0);
   });
   test('registra um gasto', async ({ page }) => {
     await entrar(page);
