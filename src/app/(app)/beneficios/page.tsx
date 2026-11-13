@@ -23,33 +23,34 @@ export const metadata = { title: 'VR / VA' };
 export default async function BeneficiosPage() {
   const { c, wallets, hoje } = await carregarBase();
   const carteiras = wallets.filter((w) => ehBeneficio(w.kind));
-  const saldos = new Map((await c.wallets.balances()).map((b) => [b.walletId, b.balanceCents]));
-  const blocos = await Promise.all(
-    carteiras.map(async (w) => {
-      const creditos = await c.benefits.credits(w.id);
-      const ultimo = creditos[0];
-      const gastos = await c.transactions.list({
-        walletId: w.id,
-        de: ultimo?.creditedOn,
-        limite: 200,
-      });
-      const gastoPeriodo = gastos
-        .filter((g) => g.kind === 'expense')
-        .reduce((s, g) => s + g.amountCents, 0);
-      const proximo = ultimo ? proximoCredito(ultimo.creditedOn, hoje) : null;
-      const resumo =
-        ultimo && proximo
-          ? resumirBeneficio({
-              saldoCents: saldos.get(w.id) ?? 0,
-              hoje,
-              proximoCredito: proximo,
-              gastoNoPeriodoCents: gastoPeriodo,
-              diasDecorridos: Math.max(1, diffDias(ultimo.creditedOn, hoje)),
-            })
-          : null;
-      return { w, creditos, gastos, proximo, resumo, saldo: saldos.get(w.id) ?? 0 };
-    }),
-  );
+  // saldos e, por carteira, créditos + gastos (o gasto depende do último crédito) em paralelo
+  const [saldoLista, brutos] = await Promise.all([
+    c.wallets.balances(),
+    Promise.all(
+      carteiras.map(async (w) => {
+        const creditos = await c.benefits.credits(w.id);
+        const ultimo = creditos[0];
+        const gastos = await c.transactions.list({ walletId: w.id, de: ultimo?.creditedOn, limite: 200 });
+        return { w, creditos, ultimo, gastos };
+      }),
+    ),
+  ]);
+  const saldos = new Map(saldoLista.map((b) => [b.walletId, b.balanceCents]));
+  const blocos = brutos.map(({ w, creditos, ultimo, gastos }) => {
+    const gastoPeriodo = gastos.filter((g) => g.kind === 'expense').reduce((s, g) => s + g.amountCents, 0);
+    const proximo = ultimo ? proximoCredito(ultimo.creditedOn, hoje) : null;
+    const resumo =
+      ultimo && proximo
+        ? resumirBeneficio({
+            saldoCents: saldos.get(w.id) ?? 0,
+            hoje,
+            proximoCredito: proximo,
+            gastoNoPeriodoCents: gastoPeriodo,
+            diasDecorridos: Math.max(1, diffDias(ultimo.creditedOn, hoje)),
+          })
+        : null;
+    return { w, creditos, gastos, proximo, resumo, saldo: saldos.get(w.id) ?? 0 };
+  });
 
   return (
     <>

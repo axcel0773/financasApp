@@ -8,9 +8,10 @@ import type { ActionState } from './action-state';
 
 export async function exigirUsuario(): Promise<{ id: string; email: string }> {
   const db = await createSupabaseServer();
-  const { data } = await db.auth.getUser(); // valida o token no servidor
-  if (!data.user) throw new Error('Não autenticado.');
-  return { id: data.user.id, email: data.user.email ?? '' };
+  const { data } = await db.auth.getClaims(); // confere a assinatura do token localmente
+  const c = data?.claims;
+  if (!c?.sub) throw new Error('Não autenticado.');
+  return { id: c.sub, email: typeof c.email === 'string' ? c.email : '' };
 }
 
 /**

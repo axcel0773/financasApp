@@ -1,7 +1,8 @@
 import Link from 'next/link';
 import { salvarOrcamentoAction } from '@/app/_actions/planejamento';
 import { statusOrcamento } from '@/core/budgets/domain';
-import { addMeses } from '@/core/shared/competencia';
+import { addMeses, competenciaDe } from '@/core/shared/competencia';
+import { getContainer } from '@/composition/container';
 import { carregarBase } from '@/features/base';
 import { centavosParaCampo, competenciaDoParam, rotuloCompetencia } from '@/ui/format';
 import { ActionForm } from '@/features/shared/action-form';
@@ -20,11 +21,11 @@ export default async function OrcamentoPage({
   searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const sp = await searchParams;
-  const { c, categories, mesAtual } = await carregarBase();
-  const mes = competenciaDoParam(sp.mes, mesAtual);
-  const gasto = new Map(
-    (await c.categories.spendByCategory(mes)).map((g) => [g.categoryId, g.spentCents]),
-  );
+  const c = await getContainer();
+  const mes = competenciaDoParam(sp.mes, competenciaDe(c.clock.hoje()));
+  // base (carteiras/categorias) e gasto por categoria em paralelo
+  const [{ categories }, gastos] = await Promise.all([carregarBase(), c.categories.spendByCategory(mes)]);
+  const gasto = new Map(gastos.map((g) => [g.categoryId, g.spentCents]));
   const comLimite = categories.filter((x) => x.monthlyBudgetCents);
   const totalLimite = comLimite.reduce((s, x) => s + (x.monthlyBudgetCents ?? 0), 0);
   const totalGasto = comLimite.reduce((s, x) => s + (gasto.get(x.id) ?? 0), 0);

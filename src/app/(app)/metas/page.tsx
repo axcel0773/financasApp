@@ -68,9 +68,11 @@ function FormMeta({
 
 export default async function MetasPage() {
   const { c, hoje, mesAtual } = await carregarBase();
-  const metas = await c.goals.list();
   const meses = [addMeses(mesAtual, -3), addMeses(mesAtual, -2), addMeses(mesAtual, -1)];
-  const det = await c.queries.detalhado(primeiroDia(meses[0]!), ultimoDia(meses[2]!));
+  const [metas, det] = await Promise.all([
+    c.goals.list(),
+    c.queries.detalhado(primeiroDia(meses[0]!), ultimoDia(meses[2]!)),
+  ]);
   const porMes = meses.map((m) =>
     det
       .filter(

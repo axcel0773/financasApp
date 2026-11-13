@@ -142,13 +142,12 @@ export async function BlocoAvisos() {
   );
   const ate = addDias(hoje, 3);
   const comps = [...new Set([mes, competenciaDe(ate)])];
-  const contas = [];
-  for (const comp of comps)
-    contas.push(
-      ...ocorrenciasPendentes(regras, comp, await c.recurring.chavesGeradas(comp))
-        .filter((o) => o.date >= hoje && o.date <= ate)
-        .map((o) => ({ nome: o.name, date: o.date, amountCents: o.amountCents })),
-    );
+  const ja = await Promise.all(comps.map((comp) => c.recurring.chavesGeradas(comp)));
+  const contas = comps.flatMap((comp, i) =>
+    ocorrenciasPendentes(regras, comp, ja[i]!)
+      .filter((o) => o.date >= hoje && o.date <= ate)
+      .map((o) => ({ nome: o.name, date: o.date, amountCents: o.amountCents })),
+  );
   const avisos = gerarAvisos({
     hoje,
     beneficios,

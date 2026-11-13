@@ -20,9 +20,9 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { c, wallets, categories, hoje } = await carregarBase();
-  const viagem = await c.trips.get(id);
+  const [viagem, todos] = await Promise.all([c.trips.get(id), c.transactions.list({ tripId: id, limite: 500 })]);
   if (!viagem) notFound();
-  const lancamentos = (await c.transactions.list({ tripId: id, limite: 500 })).filter((t) => t.kind === 'expense');
+  const lancamentos = todos.filter((t) => t.kind === 'expense');
   const r = resumirViagem(viagem, lancamentos.map((t) => ({ categoryId: t.categoryId, cents: t.amountCents })), hoje);
   const cats = Object.fromEntries(categories.map((x) => [x.id, { nome: x.name, cor: x.color ?? '#667085' }]));
   const carteiras = Object.fromEntries(wallets.map((w) => [w.id, w.name]));

@@ -185,27 +185,36 @@ export class SupabaseTransactionRepository implements TransactionRepository, Tra
     }));
   }
 
+  /** Somado no banco (função `gastos_agregados`) e lido em páginas: sem limite oculto de linhas. */
   async detalhado(de: string, ate: string): Promise<GastoDetalhado[]> {
-    const { data, error } = await this.db
-      .from('transactions')
-      .select('wallet_id,category_id,kind,amount_cents,occurred_on,trip_id,wallets!inner(kind)')
-      .is('deleted_at', null)
-      .gte('occurred_on', de)
-      .lte('occurred_on', ate)
-      .limit(5000);
-    check(error, 'ler movimentações do período');
-    return (data ?? []).map((r) => {
-      const w = r.wallets as unknown as { kind: WalletKind } | { kind: WalletKind }[];
-      return {
-        walletId: r.wallet_id,
-        walletKind: Array.isArray(w) ? w[0]!.kind : w.kind,
-        categoryId: r.category_id,
-        cents: num(r.amount_cents),
-        occurredOn: r.occurred_on,
-        kind: r.kind,
-        tripId: r.trip_id,
-      };
-    });
+    const PAGINA = 1000; // teto padrão de linhas por resposta da API
+    const out: GastoDetalhado[] = [];
+    for (let ini = 0; ; ini += PAGINA) {
+      const { data, error } = await this.db
+        .rpc('gastos_agregados', { p_de: de, p_ate: ate })
+        .range(ini, ini + PAGINA - 1);
+      check(error, 'ler movimentações do período');
+      const linhas = (data ?? []) as {
+        wallet_id: string;
+        wallet_kind: WalletKind;
+        category_id: string | null;
+        kind: 'expense' | 'income';
+        amount_cents: number | string;
+        occurred_on: string;
+        trip_id: string | null;
+      }[];
+      for (const r of linhas)
+        out.push({
+          walletId: r.wallet_id,
+          walletKind: r.wallet_kind,
+          categoryId: r.category_id,
+          cents: num(r.amount_cents),
+          occurredOn: r.occurred_on,
+          kind: r.kind,
+          tripId: r.trip_id,
+        });
+      if (linhas.length < PAGINA) return out;
+    }
   }
 
   async somaMensal(ultimos: number) {

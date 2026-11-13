@@ -25,10 +25,11 @@ export async function updateSession(request: NextRequest) {
     },
   );
 
-  // getUser() valida o token no servidor do Supabase (getSession() não valida).
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  // getClaims() confere a assinatura do token localmente (chave pública ES256 do projeto, em cache),
+  // sem ida ao Supabase a cada tela; só renova a sessão quando o token vence (~1 h).
+  // Contrapartida: um logout feito em outro aparelho vale no máximo até o token vencer.
+  const { data } = await supabase.auth.getClaims();
+  const user = data?.claims?.sub ? data.claims : null;
   const isPublic = PUBLIC_PATHS.some((p) => request.nextUrl.pathname.startsWith(p));
 
   if (!user && !isPublic) {

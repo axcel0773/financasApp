@@ -24,26 +24,50 @@ export async function POST(req: Request) {
       headers: { 'Cache-Control': 'no-store' },
     });
   const c = await getContainer();
-  const [txs, wallets, cats] = await Promise.all([
-    c.transactions.list({ limite: 50000 }),
-    c.wallets.list(),
-    c.categories.list(),
-  ]);
-  const linhas = [['data', 'tipo', 'valor', 'carteira', 'categoria', 'descricao'].join(';')];
-  for (const t of txs)
-    linhas.push(
-      [
-        t.occurredOn,
-        t.kind,
-        (t.amountCents / 100).toFixed(2).replace('.', ','),
-        wallets.find((w) => w.id === t.walletId)?.name ?? '',
-        cats.find((x) => x.id === t.categoryId)?.name ?? '',
-        t.note ?? '',
-      ]
-        .map(csv)
-        .join(';'),
-    );
-  return new NextResponse('﻿' + linhas.join('\r\n'), {
+  const [wallets, cats] = await Promise.all([c.wallets.list(), c.categories.list()]);
+  const carteira = new Map(wallets.map((w) => [w.id, w.name]));
+  const categoria = new Map(cats.map((x) => [x.id, x.name]));
+  const enc = new TextEncoder();
+  const PAGINA = 1000;
+  let cursor: { occurredOn: string; id: string } | undefined;
+
+  // Transmite em páginas (cursor): a memória não cresce com o número de lançamentos.
+  const corpo = new ReadableStream<Uint8Array>({
+    async start(ctl) {
+      ctl.enqueue(enc.encode('\uFEFF' + ['data', 'tipo', 'valor', 'carteira', 'categoria', 'descricao'].join(';') + '\r\n'));
+    },
+    async pull(ctl) {
+      try {
+        const pag = await c.transactions.list({ limite: PAGINA, cursor });
+        if (pag.length === 0) return ctl.close();
+        ctl.enqueue(
+          enc.encode(
+            pag
+              .map((t) =>
+                [
+                  t.occurredOn,
+                  t.kind,
+                  (t.amountCents / 100).toFixed(2).replace('.', ','),
+                  carteira.get(t.walletId) ?? '',
+                  (t.categoryId && categoria.get(t.categoryId)) || '',
+                  t.note ?? '',
+                ]
+                  .map(csv)
+                  .join(';') + '\r\n',
+              )
+              .join(''),
+          ),
+        );
+        const ult = pag[pag.length - 1]!;
+        cursor = { occurredOn: ult.occurredOn, id: ult.id };
+        if (pag.length < PAGINA) ctl.close();
+      } catch (e) {
+        console.error('export_error', e instanceof Error ? e.name : 'unexpected');
+        ctl.error(e);
+      }
+    },
+  });
+  return new NextResponse(corpo, {
     headers: {
       'Content-Type': 'text/csv; charset=utf-8',
       'Content-Disposition': 'attachment; filename="lancamentos.csv"',

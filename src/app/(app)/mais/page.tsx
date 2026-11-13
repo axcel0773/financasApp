@@ -37,13 +37,12 @@ function Links({
 
 export default async function MaisPage() {
   const db = await createSupabaseServer();
-  const {
-    data: { user },
-  } = await db.auth.getUser();
+  const { data: auth } = await db.auth.getClaims();
+  const email = typeof auth?.claims?.email === 'string' ? auth.claims.email : '';
   const a = await (await getContainer()).settings.get();
   return (
     <>
-      <PageHeader title="Mais" subtitle={user?.email ?? ''} action={<LogoutForm variante="pill" />} />
+      <PageHeader title="Mais" subtitle={email} action={<LogoutForm variante="pill" />} />
       <div className="lg:grid lg:grid-cols-2 lg:gap-6">
         <div>
           <SectionTitle>Planejamento</SectionTitle>

@@ -50,13 +50,10 @@ export async function BlocoContas() {
     ate = addDias(hoje, 14);
   const regras = await c.recurring.regras();
   const comps = [...new Set([competenciaDe(hoje), competenciaDe(ate)])];
-  const out = [];
-  for (const comp of comps)
-    out.push(
-      ...ocorrenciasPendentes(regras, comp, await c.recurring.chavesGeradas(comp)).filter(
-        (o) => o.date >= hoje && o.date <= ate,
-      ),
-    );
+  const ja = await Promise.all(comps.map((comp) => c.recurring.chavesGeradas(comp)));
+  const out = comps.flatMap((comp, i) =>
+    ocorrenciasPendentes(regras, comp, ja[i]!).filter((o) => o.date >= hoje && o.date <= ate),
+  );
   out.sort((a, b) => a.date.localeCompare(b.date));
   return (
     <>

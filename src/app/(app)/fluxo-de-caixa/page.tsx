@@ -26,12 +26,17 @@ export default async function FluxoPage({
   const comps: Competencia[] = [];
   for (let m = mesAtual; m <= competenciaDe(ate); m = addMeses(m, 1)) comps.push(m);
 
-  const [saldos, ajustes, receb, regras, futuros] = await Promise.all([
+  const cartoes = wallets.filter((x) => x.kind === 'credit_card' && x.closingDay && x.dueDay);
+  const [saldos, ajustes, receb, regras, futuros, jaPorComp, comprasPorCartao] = await Promise.all([
     c.wallets.balances(),
     c.settings.get(),
     c.income.recebimentos(mesAtual, competenciaDe(ate)),
     c.recurring.regras(),
     c.queries.detalhado(addDias(hoje, 1), ate),
+    Promise.all(comps.map((comp) => c.recurring.chavesGeradas(comp))),
+    Promise.all(
+      cartoes.map((w) => c.transactions.list({ walletId: w.id, de: `${addMeses(mesAtual, -2)}-01`, limite: 500 })),
+    ),
   ]);
   const caixa = (k: string) => k === 'checking' || k === 'cash';
   const kindDe = new Map(wallets.map((w) => [w.id, w.kind]));
@@ -45,8 +50,8 @@ export default async function FluxoPage({
         cents: r.expectedNetCents,
         label: rotuloRecebimento(r.kind),
       });
-  for (const comp of comps) {
-    const ja = await c.recurring.chavesGeradas(comp);
+  for (const [i, comp] of comps.entries()) {
+    const ja = jaPorComp[i]!;
     for (const o of ocorrenciasPendentes(regras, comp, ja))
       if (caixa(kindDe.get(o.walletId) ?? ''))
         eventos.push({ date: o.date, cents: -o.amountCents, label: o.name });
@@ -58,10 +63,8 @@ export default async function FluxoPage({
         cents: f.kind === 'expense' ? -f.cents : f.cents,
         label: f.kind === 'expense' ? 'Gasto agendado' : 'Entrada agendada',
       });
-  for (const w of wallets.filter((x) => x.kind === 'credit_card' && x.closingDay && x.dueDay)) {
-    const compras = (
-      await c.transactions.list({ walletId: w.id, de: `${addMeses(mesAtual, -2)}-01`, limite: 500 })
-    )
+  for (const [i, w] of cartoes.entries()) {
+    const compras = comprasPorCartao[i]!
       .filter((t) => t.kind === 'expense')
       .map((t) => ({ id: t.id, date: t.occurredOn, amountCents: t.amountCents }));
     for (const f of agruparFaturas(compras, w.closingDay!, w.dueDay!))
