@@ -36,7 +36,7 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
         title={viagem.name}
         subtitle={`${viagem.endOn ? `${dataCurta(viagem.startOn)} a ${dataCurta(viagem.endOn)}` : `${dataCurta(viagem.startOn)} · volta em aberto`}${estado === 'andamento' ? (r.diasTotal === null ? ` · dia ${r.diaAtual}` : ` · dia ${r.diaAtual} de ${r.diasTotal}`) : estado === 'planejada' ? ' · planejada' : ' · concluída'}`}
       />
-      <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+      <div className="lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start lg:gap-8">
         <div className="space-y-3">
           <div className="rounded-xl bg-[#1f3f9c] p-5 text-white">
             <p className="text-sm opacity-85">Gasto na viagem</p>
@@ -97,7 +97,7 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
           )}
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-3 lg:sticky lg:top-20">
           <SectionTitle>Novo gasto da viagem</SectionTitle>
           <Card>
             <ActionForm action={criarGastoViagemAction} submitLabel="Registrar gasto">

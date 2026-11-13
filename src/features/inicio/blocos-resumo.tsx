@@ -31,10 +31,37 @@ export async function BlocoHero() {
     .map((d) => ({ walletKind: d.walletKind, cents: d.cents }));
   const sobra = calcularSobraDoMes(recebido, gastos);
   const gasto = gastos.filter((g) => !ehBeneficio(g.walletKind)).reduce((s, g) => s + g.cents, 0);
+  // Desktop: evolução diária da sobra no mês (recebido acumulado menos gasto acumulado, sem VR/VA).
+  const diaAtual = Number(hoje.slice(8, 10));
+  const porDia = new Array<number>(diaAtual + 1).fill(0);
+  const dia = (iso: string) => Math.min(diaAtual, Math.max(1, Number(iso.slice(8, 10))));
+  for (const r of receb)
+    if (r.receivedOn && r.netCents) porDia[dia(r.receivedOn)]! += r.netCents;
+  for (const d of detalhe) {
+    if (d.kind === 'income') porDia[dia(d.occurredOn)]! += d.cents;
+    else if (!ehBeneficio(d.walletKind)) porDia[dia(d.occurredOn)]! -= d.cents;
+  }
+  let acc = 0;
+  const serie = porDia.slice(1).map((v) => (acc += v));
+  const lo = Math.min(0, ...serie);
+  const hi = Math.max(1, ...serie);
+  const pts = serie.map((v, i) => `${serie.length === 1 ? 0 : (i * 460) / (serie.length - 1)},${72 - ((v - lo) / (hi - lo)) * 64}`);
   return (
     <Hero>
       <p className="text-sm text-white/75">Sobra de {rotuloCompetencia(mes)}</p>
       <AmountDisplay cents={sobra} size="xl" tom="onDark" />
+      {serie.length > 1 && (
+        <svg
+          viewBox="0 0 460 80"
+          role="img"
+          aria-label={`Evolução da sobra do mês, dia 1 a ${diaAtual}`}
+          className="mt-4 hidden h-20 w-full lg:block"
+          preserveAspectRatio="none"
+        >
+          <polyline points={`${pts.join(' ')} 460,80 0,80`} fill="white" fillOpacity="0.12" stroke="none" />
+          <polyline points={pts.join(' ')} fill="none" stroke="white" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+        </svg>
+      )}
       <div className="mt-5 grid grid-cols-2 gap-2.5 text-sm">
         <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
           <p className="text-white/75">Recebido</p>
