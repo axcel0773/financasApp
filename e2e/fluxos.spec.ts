@@ -121,7 +121,12 @@ test.describe('autenticado', () => {
     await form.getByLabel('Valor').fill('179,32');
     await form.getByLabel('Dia do mês').fill('7');
     await form.getByRole('button', { name: /cadastrar fixo/i }).click();
-    await expect(page.getByText(/fixo salvo/i)).toBeVisible();
+    const toast = page.getByText(/fixo salvo/i);
+    const alerta = form.getByRole('alert');
+    await expect(toast.or(alerta)).toBeVisible();
+    // se veio erro, mostra o texto dele na falha
+    expect(await alerta.count() ? await alerta.first().textContent() : null).toBeNull();
+    await expect(toast).toBeVisible();
   });
   test('registra um gasto', async ({ page }) => {
     await entrar(page);
