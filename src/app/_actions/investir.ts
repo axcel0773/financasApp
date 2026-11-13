@@ -28,21 +28,30 @@ export async function criarInvestimentoAction(_: ActionState, fd: FormData): Pro
         institution: textoOpcional(80),
         rate: z.string().trim(),
         maturityOn: dataOpcional,
+        balance: dinheiroOpcional,
       }),
       fd,
     );
     if (!p.ok) return p;
+    if (p.value.balance !== null && p.value.balance < 0)
+      return { ok: false as const, error: 'O saldo não pode ser negativo.' };
     const taxa = p.value.rate === '' ? null : Number(p.value.rate.replace(',', '.'));
     if (taxa !== null && (!Number.isFinite(taxa) || taxa < 0 || taxa > 1000))
       return { ok: false as const, error: 'Taxa inválida.' };
     const c = await getContainer();
-    await c.investments.create({
+    const id = await c.investments.create({
       kind: p.value.kind,
       name: p.value.name,
       institution: p.value.institution,
       annualRatePercent: taxa,
       maturityOn: p.value.maturityOn,
     });
+    // Saldo informado já no cadastro: vira o saldo de hoje e o valor aplicado (o rendimento conta daqui em diante).
+    if (p.value.balance !== null && p.value.balance > 0) {
+      const hoje = c.clock.hoje();
+      await c.investments.setBalance(id, hoje, p.value.balance);
+      await c.investments.addEntry({ investmentId: id, occurredOn: hoje, amountCents: p.value.balance });
+    }
     return ok(undefined);
   }, 'Investimento cadastrado.');
 }

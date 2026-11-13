@@ -1,8 +1,10 @@
 import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react';
 import { cx } from '../cx';
+import { MoneyInput } from './money-input';
 
-export const FIELD =
-  'min-h-12 w-full rounded-[14px] border border-border bg-surface px-4 text-ink outline-none focus:border-primary focus:ring-2 focus:ring-primary/20';
+import { FIELD } from './fields-base';
+
+export { FIELD, MoneyInput };
 
 export function Field({
   label,
@@ -30,11 +32,6 @@ export function Select({ className, ...p }: SelectHTMLAttributes<HTMLSelectEleme
 export function Textarea({ className, ...p }: TextareaHTMLAttributes<HTMLTextAreaElement>) {
   return <textarea {...p} className={cx(FIELD, 'py-3', className)} />;
 }
-/** Campo de valor em reais ("1.234,56"). O servidor converte para centavos com parseBRL. */
-export function MoneyInput(p: InputHTMLAttributes<HTMLInputElement>) {
-  return <Input inputMode="decimal" autoComplete="off" placeholder="0,00" {...p} />;
-}
-
 /** Switch sem JavaScript: checkbox com role="switch". */
 export function Switch({
   name,

@@ -81,6 +81,8 @@ export function ActionForm({
       const r = await action(state, fd);
       setState(r);
       if (r.ok) {
+        // avisa quem estiver em volta (ex.: painéis que se fecham sozinhos ao salvar)
+        form.dispatchEvent(new CustomEvent('action-ok', { bubbles: true }));
         formRef.current?.reset();
         atualizarTela();
       }

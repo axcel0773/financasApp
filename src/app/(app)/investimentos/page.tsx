@@ -11,6 +11,7 @@ import {
 } from '@/core/investments/domain';
 import { arquivarInvestimentoAction, editarInvestimentoAction } from '@/app/_actions/gestao';
 import { carregarBase } from '@/features/base';
+import { AcoesInvestimento } from '@/features/investir/acoes-investimento';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { Donut } from '@/ui/charts/donut';
 import { centavosParaCampo, dataLonga } from '@/ui/format';
@@ -144,14 +145,13 @@ export default async function InvestimentosPage() {
                 Aportado <span className="amount">{centavosParaCampo(r.investidoCents)}</span> ·
                 rendeu <span className="amount">{centavosParaCampo(r.rendimentoCents)}</span>
               </p>
-              <details className="mt-1">
-                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">
-                  Aporte ou resgate
-                </summary>
-                <ActionForm
+              <AcoesInvestimento
+                paineis={[
+                  { chave: 'mov', rotulo: 'Aporte/resgate', conteudo: (
+<ActionForm
                   action={registrarAporteAction}
                   submitLabel="Registrar"
-                  className="space-y-3 pb-1"
+                  className="space-y-3"
                 >
                   <input type="hidden" name="investmentId" value={i.id} />
                   <RadioChips
@@ -169,15 +169,12 @@ export default async function InvestimentosPage() {
                     <Input type="date" name="occurredOn" defaultValue={hoje} required />
                   </Field>
                 </ActionForm>
-              </details>
-              <details>
-                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">
-                  Atualizar saldo
-                </summary>
-                <ActionForm
+                  ) },
+                  { chave: 'saldo', rotulo: 'Saldo', conteudo: (
+<ActionForm
                   action={atualizarSaldoAction}
                   submitLabel="Salvar saldo"
-                  className="space-y-3 pb-1"
+                  className="space-y-3"
                 >
                   <input type="hidden" name="investmentId" value={i.id} />
                   <Field label="Saldo atual">
@@ -187,12 +184,9 @@ export default async function InvestimentosPage() {
                     <Input type="date" name="balanceOn" defaultValue={hoje} required />
                   </Field>
                 </ActionForm>
-              </details>
-              <details>
-                <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">
-                  Editar dados
-                </summary>
-                <ActionForm action={editarInvestimentoAction} submitLabel="Salvar" className="space-y-3 pb-1">
+                  ) },
+                  { chave: 'editar', rotulo: 'Editar', conteudo: (
+<ActionForm action={editarInvestimentoAction} submitLabel="Salvar" className="space-y-3">
                   <input type="hidden" name="id" value={i.id} />
                   <Field label="Nome"><Input name="name" defaultValue={i.name} required maxLength={80} /></Field>
                   <Field label="Tipo">
@@ -204,8 +198,10 @@ export default async function InvestimentosPage() {
                   <Field label="Taxa % a.a."><Input name="rate" inputMode="decimal" defaultValue={i.annualRatePercent === null ? '' : String(i.annualRatePercent).replace('.', ',')} /></Field>
                   <Field label="Vencimento"><Input type="date" name="maturityOn" defaultValue={i.maturityOn ?? ''} /></Field>
                 </ActionForm>
-              </details>
-              <ExcluirConfirmado action={arquivarInvestimentoAction} id={i.id} rotulo="Arquivar" aviso="O investimento some da lista e da alocação; o histórico de aportes fica guardado." />
+                  ) },
+                ]}
+              />
+              <div className="mt-3 border-t border-border pt-2"><ExcluirConfirmado action={arquivarInvestimentoAction} id={i.id} rotulo="Arquivar" aviso="O investimento some da lista e da alocação; o histórico de aportes fica guardado." /></div>
             </Card>
           ))}
         </div>
@@ -227,6 +223,9 @@ export default async function InvestimentosPage() {
                 </option>
               ))}
             </Select>
+          </Field>
+          <Field label="Saldo atual (opcional)" hint="Quanto você já tem aplicado hoje. Entra como valor aportado; o rendimento passa a contar daqui.">
+            <MoneyInput name="balance" />
           </Field>
           <Field label="Instituição (opcional)">
             <Input name="institution" maxLength={80} />
