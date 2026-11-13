@@ -19,7 +19,7 @@ export default async function ViagensPage() {
   const viagens = await c.trips.list();
   const ids = new Set(viagens.map((v) => v.id));
   const gastos = ids.size
-    ? (await c.transactions.list({ limite: 5000, de: viagens.reduce((m, v) => (v.startOn < m ? v.startOn : m), hoje) }))
+    ? (await c.transactions.list({ escopo: 'viagens', limite: 1000, de: viagens.reduce((m, v) => (v.startOn < m ? v.startOn : m), hoje) }))
     : [];
   const porViagem = new Map<string, { categoryId: string | null; cents: number }[]>();
   for (const t of gastos)

@@ -21,7 +21,7 @@ export default async function FixosPage() {
   const [regras, planos, todas] = await Promise.all([
     c.recurring.regras(),
     c.recurring.planos(),
-    c.transactions.list({ limite: 1000 }),
+    c.transactions.list({ apenasParcelas: true, limite: 1000 }),
   ]);
   const pagas = (id: string) =>
     todas.filter((t) => t.installmentPlanId === id && t.occurredOn <= hoje).length;

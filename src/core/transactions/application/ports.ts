@@ -12,6 +12,8 @@ export interface TransactionFilter {
   escopo?: 'dia' | 'viagens';
   /** Busca na descrição (sem diferenciar maiúsculas). */
   texto?: string;
+  /** Só lançamentos que são parcelas de uma compra parcelada. */
+  apenasParcelas?: boolean;
   apenasLixeira?: boolean;
   limite?: number;
   /** Paginação por cursor: itens antes desta data/id. */
