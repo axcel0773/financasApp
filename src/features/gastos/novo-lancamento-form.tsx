@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useState, useTransition } from 'react';
+import { useState } from 'react';
 import { criarLancamentoAction } from '@/app/_actions/gastos';
 import { parseBRL } from '@/core/shared/money';
 import { centavosParaCampo } from '@/ui/format';
@@ -33,7 +33,7 @@ export function NovoLancamentoForm({
 }) {
   const router = useRouter();
   const { show } = useToast();
-  const [pending, start] = useTransition();
+  const [pending, setPending] = useState(false);
   const [clientId] = useState(() => crypto.randomUUID());
   const [cents, setCents] = useState(0);
   const [kind, setKind] = useState<'expense' | 'income'>('expense');
@@ -43,7 +43,16 @@ export function NovoLancamentoForm({
   const [note, setNote] = useState('');
   const [erro, setErro] = useState<string | null>(null);
 
-  const salvar = () => {
+  // Navegação com garantia: se o router do Next não concluir (bug conhecido do Next 15/React 19), força a ida.
+  const irParaGastos = () => {
+    router.push('/gastos');
+    setTimeout(() => {
+      if (window.location.pathname.startsWith('/gastos/novo')) window.location.assign('/gastos');
+    }, 2500);
+  };
+
+  const salvar = async () => {
+    if (pending) return;
     setErro(null);
     if (cents <= 0) return setErro('Informe um valor maior que zero.');
     const item = {
@@ -56,23 +65,26 @@ export function NovoLancamentoForm({
       occurredOn: data,
       note: note.trim() || null,
     };
-    start(async () => {
+    setPending(true);
+    try {
       if (!navigator.onLine) {
         await enfileirar(item);
         show('Sem conexão: salvo no aparelho e será enviado quando voltar.');
-        return router.push('/gastos');
+        return irParaGastos();
       }
       try {
         const r = await criarLancamentoAction(item);
         if (!r.ok) return setErro(r.message);
         show('Lançamento salvo.');
-        router.push('/gastos');
+        irParaGastos();
       } catch {
         await enfileirar(item); // queda de rede no meio do envio: o reenvio é idempotente
         show('Conexão instável: salvo no aparelho e será reenviado.');
-        router.push('/gastos');
+        irParaGastos();
       }
-    });
+    } finally {
+      setPending(false);
+    }
   };
 
   const chip = (ativo: boolean) =>

@@ -28,7 +28,7 @@ export function Topbar() {
     return () => window.removeEventListener('keydown', aoTeclar);
   }, [router]);
   return (
-    <div className="sticky top-0 z-10 hidden items-center justify-end gap-3 border-b border-border bg-surface/95 px-8 py-3 backdrop-blur lg:flex">
+    <header className="sticky top-0 z-10 hidden items-center justify-end gap-3 border-b border-border bg-surface/95 px-8 py-3 backdrop-blur lg:flex">
       <form
         role="search"
         className="relative"
@@ -56,6 +56,6 @@ export function Topbar() {
         Novo lançamento
         <kbd className="rounded bg-white/20 px-1.5 text-xs font-medium">N</kbd>
       </Link>
-    </div>
+    </header>
   );
 }
