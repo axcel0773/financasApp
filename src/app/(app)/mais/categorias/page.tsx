@@ -23,7 +23,7 @@ export default async function CategoriasPage() {
   return (
     <>
       <PageHeader voltar={{ href: '/mais' }} title="Categorias" subtitle="Organize seus gastos" />
-      <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
+      <div className="space-y-3 lg:grid lg:grid-cols-3 lg:gap-4 lg:space-y-0">
         {categories.map((x) => (
           <Card key={x.id}>
             <p className="flex items-center gap-2 font-semibold"><span aria-hidden className="h-3.5 w-3.5 rounded-full" style={{ background: x.color ?? '#667085' }} />{x.name}</p>

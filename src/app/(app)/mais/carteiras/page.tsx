@@ -18,7 +18,7 @@ export default async function CarteirasPage() {
   return (
     <>
       <PageHeader voltar={{ href: '/mais' }} title="Carteiras" subtitle="Contas, cartões, VR/VA e dinheiro" />
-      <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
+      <div className="space-y-3 lg:grid lg:grid-cols-3 lg:gap-4 lg:space-y-0">
         {wallets.map((w) => (
           <Card key={w.id}>
             <div className="flex items-start justify-between gap-2">

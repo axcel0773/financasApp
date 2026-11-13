@@ -109,6 +109,8 @@ export default async function InvestimentosPage() {
         </>
       )}
 
+      <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start lg:gap-8">
+      <div>
       <SectionTitle>Seus investimentos</SectionTitle>
       {linhas.length === 0 ? (
         <EmptyState title="Nenhum investimento">Cadastre o primeiro abaixo.</EmptyState>
@@ -209,6 +211,8 @@ export default async function InvestimentosPage() {
         </div>
       )}
 
+      </div>
+      <div>
       <SectionTitle>Novo investimento</SectionTitle>
       <Card>
         <ActionForm action={criarInvestimentoAction} submitLabel="Cadastrar">
@@ -235,6 +239,8 @@ export default async function InvestimentosPage() {
           </Field>
         </ActionForm>
       </Card>
+      </div>
+      </div>
     </>
   );
 }

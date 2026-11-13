@@ -42,7 +42,7 @@ export default async function ViagensPage() {
             return (
               <section key={g.estado}>
                 <SectionTitle>{g.titulo}</SectionTitle>
-                <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
+                <div className="space-y-3 lg:grid lg:grid-cols-3 lg:gap-4 lg:space-y-0">
                   {itens.map(({ v, r }) => (
                     <Link key={v.id} href={`/mais/viagens/${v.id}`} className="block">
                       <Card className="space-y-2">

@@ -47,7 +47,7 @@ export function NovoLancamentoForm({
   const irParaGastos = () => {
     router.push('/gastos');
     setTimeout(() => {
-      if (window.location.pathname.startsWith('/gastos/novo')) window.location.assign('/gastos');
+      if (window.location.pathname.startsWith('/gastos/novo') || window.location.search.includes('novo=1')) window.location.assign('/gastos');
     }, 2500);
   };
 

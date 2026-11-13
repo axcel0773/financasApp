@@ -2,6 +2,7 @@ const P = {
   home: 'M3 11l9-8 9 8M5 10v10h14V10',
   list: 'M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01',
   plus: 'M12 5v14M5 12h14',
+  close: 'M6 6l12 12M18 6L6 18',
   wallet: 'M3 7h18v12H3zM3 7l2-3h14l2 3M16 13h2',
   card: 'M2 6h20v12H2zM2 10h20',
   menu: 'M4 6h16M4 12h16M4 18h16',

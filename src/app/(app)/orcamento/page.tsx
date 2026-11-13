@@ -71,7 +71,7 @@ export default async function OrcamentoPage({
           <p className="text-sm text-muted">Defina limites mensais por categoria abaixo.</p>
         )}
       </Card>
-      <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
+      <div className="space-y-3 lg:grid lg:grid-cols-3 lg:gap-4 lg:space-y-0">
         {categories.map((cat) => {
           const g = gasto.get(cat.id) ?? 0;
           const s = statusOrcamento(cat.monthlyBudgetCents, g);

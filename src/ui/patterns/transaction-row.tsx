@@ -1,12 +1,14 @@
-import Link from 'next/link';
 import { cx } from '../cx';
 import { Chip } from '../primitives/chip';
 import { Icon } from '../primitives/icon';
+import { LinkLinha } from './link-linha';
 import { AmountDisplay } from './amount-display';
 
 export interface LinhaTransacao {
   id: string;
   href?: string;
+  /** Desktop: em vez de abrir a página, seleciona a linha (detalhe ao lado). */
+  hrefDesktop?: string;
   descricao: string;
   categoria: { nome: string; cor: string } | null;
   carteira: string;
@@ -21,7 +23,15 @@ export interface LinhaTransacao {
 
 /** Linha de lista no mobile; vira linha de tabela (data, descrição, categoria, carteira, valor) a partir de 1024px. */
 /** `compacto`: mantém o layout de lista mesmo no desktop (para colunas estreitas, como no Início). */
-export function TransactionRow({ t, compacto = false }: { t: LinhaTransacao; compacto?: boolean }) {
+export function TransactionRow({
+  t,
+  compacto = false,
+  selecionada = false,
+}: {
+  t: LinhaTransacao;
+  compacto?: boolean;
+  selecionada?: boolean;
+}) {
   const tabela = !compacto;
   const conteudo = (
     <div
@@ -77,9 +87,17 @@ export function TransactionRow({ t, compacto = false }: { t: LinhaTransacao; com
     </div>
   );
   return t.href ? (
-    <Link href={t.href} className="block border-b border-border last:border-0 hover:bg-soft">
+    <LinkLinha
+      href={t.href}
+      hrefDesktop={t.hrefDesktop}
+      selecionada={selecionada}
+      className={cx(
+        'block border-b border-border last:border-0 hover:bg-soft focus-visible:bg-soft',
+        selecionada && 'lg:bg-soft',
+      )}
+    >
       {conteudo}
-    </Link>
+    </LinkLinha>
   ) : (
     <div className="border-b border-border last:border-0">{conteudo}</div>
   );

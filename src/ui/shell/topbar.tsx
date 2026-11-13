@@ -21,7 +21,7 @@ export function Topbar() {
         busca.current?.focus();
       } else if (e.key.toLowerCase() === 'n') {
         e.preventDefault();
-        router.push('/gastos/novo');
+        router.push('/gastos?novo=1');
       }
     };
     window.addEventListener('keydown', aoTeclar);
@@ -49,7 +49,7 @@ export function Topbar() {
       </form>
       <HideToggle />
       <Link
-        href="/gastos/novo"
+        href="/gastos?novo=1"
         className="inline-flex h-11 items-center gap-2 rounded-full bg-primary px-5 text-sm font-semibold text-primary-fg"
       >
         <Icon name="plus" size={18} />

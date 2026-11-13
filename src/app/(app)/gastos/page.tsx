@@ -2,8 +2,11 @@ import Link from 'next/link';
 import { addMeses, isIsoDate, primeiroDia, ultimoDia } from '@/core/shared/competencia';
 import { ROTULO_CARTEIRA } from '@/core/wallets/domain';
 import { carregarBase } from '@/features/base';
+import { ExcluirButton } from '@/features/gastos/acoes-gasto';
+import { NovoLancamentoForm } from '@/features/gastos/novo-lancamento-form';
+import { PainelNovo } from '@/features/gastos/painel-novo';
 import { PendingQueue } from '@/features/gastos/pending-queue';
-import { centavosParaCampo, competenciaDoParam, dataCurta, rotuloCompetencia } from '@/ui/format';
+import { centavosParaCampo, competenciaDoParam, dataCurta, dataLonga, rotuloCompetencia } from '@/ui/format';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { TransactionHeader, TransactionRow } from '@/ui/patterns/transaction-row';
 import { ButtonLink } from '@/ui/primitives/button';
@@ -19,11 +22,13 @@ type SP = Promise<Record<string, string | string[] | undefined>>;
 
 export default async function GastosPage({ searchParams }: { searchParams: SP }) {
   const sp = await searchParams;
-  const { c, wallets, categories, mesAtual } = await carregarBase();
+  const { c, wallets, categories, mesAtual, hoje } = await carregarBase();
   const mes = competenciaDoParam(sp.mes, mesAtual);
   const carteira = typeof sp.carteira === 'string' ? sp.carteira : undefined;
   const categoria = typeof sp.categoria === 'string' ? sp.categoria : undefined;
   const tipo = sp.tipo === 'dia' || sp.tipo === 'viagens' ? sp.tipo : undefined;
+  const selId = typeof sp.sel === 'string' && /^[0-9a-f-]{36}$/i.test(sp.sel) ? sp.sel : undefined;
+  const novoAberto = sp.novo === '1';
   const q = typeof sp.q === 'string' ? sp.q.trim().slice(0, 80) : '';
   const deP = typeof sp.de === 'string' && isIsoDate(sp.de) ? sp.de : undefined;
   const ateP = typeof sp.ate === 'string' && isIsoDate(sp.ate) ? sp.ate : undefined;
@@ -35,7 +40,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
       ? { occurredOn: sp.cursor.slice(0, 10), id: sp.cursor.slice(11) }
       : undefined;
 
-  const [lista, mensal, viagensTodas] = await Promise.all([
+  const [lista, mensal, viagensTodas, selecionado] = await Promise.all([
     c.transactions.list({
       de: inicio,
       ate: fim,
@@ -48,7 +53,9 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
     }),
     c.queries.detalhado(inicio, fim),
     c.trips.list(),
+    selId ? c.transactions.get(selId) : Promise.resolve(null),
   ]);
+  const sel = selecionado && !selecionado.deletedAt ? selecionado : null;
   const nomeViagem = new Map(viagensTodas.map((v) => [v.id, v.name]));
   const temMais = lista.length > PAGINA;
   const itens = lista.slice(0, PAGINA);
@@ -164,6 +171,8 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
         ))}
       </div>
       <PendingQueue carteiras={carteiras} categorias={cats} />
+      <div className={sel ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6' : undefined}>
+      <div className="min-w-0">
       {itens.length === 0 ? (
         <EmptyState title="Nenhum lançamento neste período">
           Toque em “+” para registrar o primeiro gasto.
@@ -174,9 +183,12 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
           {itens.map((t) => (
             <TransactionRow
               key={t.id}
+              compacto={!!sel}
+              selecionada={sel?.id === t.id}
               t={{
                 id: t.id,
                 href: `/gastos/${t.id}`,
+                hrefDesktop: url({ sel: t.id, novo: undefined }),
                 descricao: t.note ?? cats[t.categoryId ?? '']?.nome ?? 'Lançamento',
                 categoria: t.categoryId ? (cats[t.categoryId] ?? null) : null,
                 carteira: carteiras[t.walletId] ?? '',
@@ -195,6 +207,57 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
           ))}
         </Card>
       )}
+      </div>
+      {sel && (
+        <aside aria-label="Detalhe do lançamento" className="mt-4 hidden lg:sticky lg:top-20 lg:mt-0 lg:block">
+          <Card className="space-y-4 p-6">
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-sm text-muted">Lançamento selecionado</p>
+                <h2 className="mt-1 break-words font-display text-xl font-semibold">
+                  {sel.note ?? cats[sel.categoryId ?? '']?.nome ?? 'Lançamento'}
+                </h2>
+              </div>
+              <Link
+                href={url({ sel: undefined, cursor: undefined })}
+                scroll={false}
+                aria-label="Fechar detalhe"
+                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border"
+              >
+                <Icon name="close" size={18} />
+              </Link>
+            </div>
+            <AmountDisplay
+              cents={sel.kind === 'expense' ? -sel.amountCents : sel.amountCents}
+              sinal
+              tom={sel.kind === 'expense' ? 'expense' : 'income'}
+              size="lg"
+            />
+            <dl className="grid grid-cols-[96px_1fr] gap-y-3 text-sm">
+              <dt className="text-muted">Data</dt>
+              <dd>{dataLonga(sel.occurredOn)}</dd>
+              <dt className="text-muted">Categoria</dt>
+              <dd>{sel.categoryId ? (cats[sel.categoryId]?.nome ?? '—') : 'Sem categoria'}</dd>
+              <dt className="text-muted">Carteira</dt>
+              <dd>{carteiras[sel.walletId] ?? '—'}</dd>
+              {sel.tripId && (
+                <>
+                  <dt className="text-muted">Viagem</dt>
+                  <dd>{nomeViagem.get(sel.tripId) ?? 'Viagem'}</dd>
+                </>
+              )}
+            </dl>
+            <div className="grid gap-2">
+              <ButtonLink href={`/gastos/${sel.id}`}>
+                <Icon name="edit" size={16} />
+                Editar lançamento
+              </ButtonLink>
+              <ExcluirButton id={sel.id} />
+            </div>
+          </Card>
+        </aside>
+      )}
+      </div>
       {temMais && ultimo && (
         <div className="mt-4">
           <ButtonLink
@@ -212,6 +275,19 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
           Lixeira
         </ButtonLink>
       </div>
+      {novoAberto && (
+        <PainelNovo fecharHref={url({ novo: undefined, sel: undefined, cursor: undefined })}>
+          <NovoLancamentoForm
+            carteiras={wallets.map((w) => ({
+              id: w.id,
+              nome: w.kind === 'checking' || w.kind === 'cash' ? w.name : `${ROTULO_CARTEIRA[w.kind]} · ${w.name}`,
+            }))}
+            categorias={categories.map((x) => ({ id: x.id, nome: x.name, cor: x.color }))}
+            hoje={hoje}
+            carteiraInicial={(wallets.find((w) => w.kind === 'checking') ?? wallets[0])?.id ?? ''}
+          />
+        </PainelNovo>
+      )}
     </>
   );
 }

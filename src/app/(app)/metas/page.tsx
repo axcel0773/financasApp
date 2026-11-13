@@ -117,6 +117,8 @@ export default async function MetasPage() {
         )}
       </Card>
 
+      <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start lg:gap-8">
+      <div>
       <SectionTitle>Suas metas</SectionTitle>
       {metas.length === 0 ? (
         <EmptyState title="Nenhuma meta">Crie a primeira abaixo.</EmptyState>
@@ -166,10 +168,14 @@ export default async function MetasPage() {
           })}
         </div>
       )}
+      </div>
+      <div>
       <SectionTitle>Nova meta</SectionTitle>
       <Card>
         <FormMeta hoje={hoje} />
       </Card>
+      </div>
+      </div>
     </>
   );
 }
