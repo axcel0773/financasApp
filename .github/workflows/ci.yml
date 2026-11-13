@@ -21,7 +21,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with: { node-version: 22, cache: npm }
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
       - run: npm ci
       # Banco local e descartável: aplica supabase/migrations e cria o usuário de teste. Sem segredos.
       - run: supabase start
@@ -35,6 +35,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
       - run: supabase start
       - run: supabase test db
