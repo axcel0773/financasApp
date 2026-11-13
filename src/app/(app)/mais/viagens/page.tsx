@@ -47,7 +47,7 @@ export default async function ViagensPage() {
                     <Link key={v.id} href={`/mais/viagens/${v.id}`} className="block">
                       <Card className="space-y-2">
                         <div className="flex items-start justify-between gap-2">
-                          <div><p className="font-semibold">{v.name}</p><p className="text-xs text-muted">{dataCurta(v.startOn)} a {dataCurta(v.endOn)}</p></div>
+                          <div><p className="font-semibold">{v.name}</p><p className="text-xs text-muted">{v.endOn ? `${dataCurta(v.startOn)} a ${dataCurta(v.endOn)}` : `${dataCurta(v.startOn)} · volta em aberto`}</p></div>
                           {r.usadoPct !== null && <Chip tom={r.estourou ? 'danger' : 'info'}>{r.usadoPct}%</Chip>}
                         </div>
                         {r.usadoPct !== null && (

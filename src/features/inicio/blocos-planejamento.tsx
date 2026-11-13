@@ -140,7 +140,7 @@ export async function BlocoViagens() {
           <Link key={v.id} href={`/mais/viagens/${v.id}`} className="block">
             <Card className="space-y-2">
               <div className="flex items-start justify-between gap-2">
-                <div><p className="font-semibold">{v.name}</p><p className="text-xs text-muted">Dia {r.diaAtual} de {r.diasTotal}</p></div>
+                <div><p className="font-semibold">{v.name}</p><p className="text-xs text-muted">{r.diasTotal === null ? `Dia ${r.diaAtual}` : `Dia ${r.diaAtual} de ${r.diasTotal}`}</p></div>
                 {r.usadoPct !== null && <Chip tom={r.estourou ? 'danger' : 'info'}>{r.usadoPct}% do orçamento</Chip>}
               </div>
               {r.usadoPct !== null && <ProgressBar pct={Math.min(100, r.usadoPct)} tom={r.estourou ? 'alert' : 'ok'} label={`${v.name}: orçamento usado`} />}

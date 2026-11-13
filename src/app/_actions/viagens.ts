@@ -8,7 +8,7 @@ import { criarTransacao } from '@/core/transactions/application/use-cases';
 import { validarViagem } from '@/core/trips/domain';
 import { executar } from '../_lib/action';
 import type { ActionState } from '../_lib/action-state';
-import { data, dinheiro, dinheiroPositivo, inteiro, lerForm, texto, textoOpcional, uuid, uuidOpcional } from '../_lib/schemas';
+import { data, dataOpcional, dinheiro, dinheiroPositivo, inteiro, lerForm, texto, textoOpcional, uuid, uuidOpcional } from '../_lib/schemas';
 
 export async function salvarViagemAction(_: ActionState, fd: FormData): Promise<ActionState> {
   return executar(async () => {
@@ -17,7 +17,7 @@ export async function salvarViagemAction(_: ActionState, fd: FormData): Promise<
         id: z.string().optional(),
         name: texto(80),
         startOn: data,
-        endOn: data,
+        endOn: dataOpcional,
         budget: dinheiro,
         people: inteiro(1, 20),
       }),

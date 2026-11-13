@@ -27,14 +27,14 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
   const cats = Object.fromEntries(categories.map((x) => [x.id, { nome: x.name, cor: x.color ?? '#667085' }]));
   const carteiras = Object.fromEntries(wallets.map((w) => [w.id, w.name]));
   const estado = estadoViagem(viagem, hoje);
-  const dataPadrao = hoje < viagem.startOn ? viagem.startOn : hoje > viagem.endOn ? viagem.endOn : hoje;
+  const dataPadrao = hoje < viagem.startOn ? viagem.startOn : viagem.endOn && hoje > viagem.endOn ? viagem.endOn : hoje;
 
   return (
     <>
       <PageHeader
         voltar={{ href: '/mais/viagens' }}
         title={viagem.name}
-        subtitle={`${dataCurta(viagem.startOn)} a ${dataCurta(viagem.endOn)}${estado === 'andamento' ? ` · dia ${r.diaAtual} de ${r.diasTotal}` : estado === 'planejada' ? ' · planejada' : ' · concluída'}`}
+        subtitle={`${viagem.endOn ? `${dataCurta(viagem.startOn)} a ${dataCurta(viagem.endOn)}` : `${dataCurta(viagem.startOn)} · volta em aberto`}${estado === 'andamento' ? (r.diasTotal === null ? ` · dia ${r.diaAtual}` : ` · dia ${r.diaAtual} de ${r.diasTotal}`) : estado === 'planejada' ? ' · planejada' : ' · concluída'}`}
       />
       <div className="lg:grid lg:grid-cols-2 lg:gap-6">
         <div className="space-y-3">
@@ -54,8 +54,8 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
           <div className="grid grid-cols-2 gap-3">
             <Card><p className="text-xs text-muted">Média por dia</p><p className="amount font-bold">{brl(r.mediaPorDiaCents)}</p></Card>
             <Card>
-              <p className="text-xs text-muted">{r.podeGastarPorDiaCents !== null ? 'Pode gastar por dia' : viagem.people > 1 ? 'Por pessoa' : 'Dias da viagem'}</p>
-              <p className="amount font-bold">{r.podeGastarPorDiaCents !== null ? brl(r.podeGastarPorDiaCents) : viagem.people > 1 ? brl(r.porPessoaCents) : `${r.diasTotal}`}</p>
+              <p className="text-xs text-muted">{r.podeGastarPorDiaCents !== null ? 'Pode gastar por dia' : viagem.people > 1 ? 'Por pessoa' : r.diasTotal === null ? 'Dias até agora' : 'Dias da viagem'}</p>
+              <p className="amount font-bold">{r.podeGastarPorDiaCents !== null ? brl(r.podeGastarPorDiaCents) : viagem.people > 1 ? brl(r.porPessoaCents) : r.diasTotal === null ? `${r.diaAtual}` : `${r.diasTotal}`}</p>
             </Card>
           </div>
           {viagem.people > 1 && r.podeGastarPorDiaCents !== null && <p className="text-xs text-muted">Por pessoa ({viagem.people}): {brl(r.porPessoaCents)}</p>}

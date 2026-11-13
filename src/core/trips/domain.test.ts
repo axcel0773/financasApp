@@ -16,6 +16,21 @@ describe('validarViagem', () => {
   });
 });
 
+describe('viagem com volta em aberto', () => {
+  const aberta: Viagem = { ...v, endOn: null };
+  it('é válida sem data de volta', () => {
+    expect(validarViagem(aberta).ok).toBe(true);
+  });
+  it('fica em andamento depois da ida, sem nunca concluir sozinha', () => {
+    expect(estadoViagem(aberta, '2026-11-09')).toBe('planejada');
+    expect(estadoViagem(aberta, '2027-03-01')).toBe('andamento');
+  });
+  it('resume sem total de dias e sem "pode gastar por dia"', () => {
+    const r = resumirViagem(aberta, [{ categoryId: 'a', cents: 100000 }], '2026-11-12');
+    expect(r).toMatchObject({ diasTotal: null, diasRestantes: null, diaAtual: 3, podeGastarPorDiaCents: null });
+  });
+});
+
 describe('estadoViagem', () => {
   it('separa planejada, em andamento e concluída', () => {
     expect(estadoViagem(v, '2026-11-09')).toBe('planejada');

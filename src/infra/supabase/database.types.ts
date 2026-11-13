@@ -33,7 +33,7 @@ export interface Tables {
   transaction_history: { changed_at: string; id: string; new_amount_cents: number; new_note: string | null; old_amount_cents: number; old_note: string | null; transaction_id: string; user_id: string };
   transactions: { amount_cents: number; category_id: string | null; client_id: string; created_at: string; deleted_at: string | null; id: string; installment_number: number | null; installment_plan_id: string | null; kind: Enums['tx_kind']; note: string | null; occurred_on: string; origin: Enums['tx_origin']; recurring_rule_id: string | null; trip_id: string | null; updated_at: string; user_id: string; wallet_id: string };
   transfers: { amount_cents: number; client_id: string; created_at: string; deleted_at: string | null; from_wallet_id: string; id: string; note: string | null; occurred_on: string; to_wallet_id: string; user_id: string };
-  trips: { budget_cents: number; created_at: string; end_on: string; id: string; name: string; people: number; start_on: string; user_id: string };
+  trips: { budget_cents: number; created_at: string; end_on: string | null; id: string; name: string; people: number; start_on: string; user_id: string };
   wallets: { archived: boolean; closing_day: number | null; created_at: string; due_day: number | null; id: string; kind: Enums['wallet_kind']; limit_cents: number | null; name: string; opening_cents: number; updated_at: string; user_id: string };
   // views (colunas podem vir nulas)
   v_category_spend: { category_id: string | null; competencia: string | null; spent_cents: number | null; user_id: string | null };
