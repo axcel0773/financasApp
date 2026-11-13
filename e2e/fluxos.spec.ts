@@ -39,6 +39,9 @@ test.describe('autenticado', () => {
     test(`${rota}: sem violações axe e sem rolagem horizontal`, async ({ page }) => {
       await entrar(page);
       await page.goto(rota);
+      // espera o conteúdo real (o esqueleto de carregamento não é o que se audita)
+      await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
+      await expect(page.locator('h1').first()).toBeVisible();
       expect(await semRolagemHorizontal(page)).toBe(true);
       expect((await new AxeBuilder({ page }).analyze()).violations).toEqual([]);
     });
