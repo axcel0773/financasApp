@@ -53,7 +53,7 @@ export const inteiroOpcional = (min: number, max: number) =>
     });
 export const inteiro = (min: number, max: number) =>
   z.coerce
-    .number({ invalid_type_error: 'Número inválido.' })
+    .number({ error: 'Número inválido.' })
     .int('Número inválido.')
     .min(min, `Mínimo ${min}.`)
     .max(max, `Máximo ${max}.`);
