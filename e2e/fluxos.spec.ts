@@ -146,14 +146,16 @@ test.describe('autenticado', () => {
     let travou = 0;
     const N = 8;
     for (let i = 0; i < N; i++) {
-      await form.getByLabel('Nome').fill(`Estresse ${info.project.name} ${i} ${Date.now()}`);
+      const nomeFixo = `Estresse ${info.project.name} ${i} ${Date.now()}`;
+      await form.getByLabel('Nome').fill(nomeFixo);
       await form.getByLabel('Valor').fill('10,00');
       await form.getByLabel('Dia do mês').fill('5');
       const enviado = page.waitForResponse((r) => r.request().method() === 'POST' && r.url().includes('/fixos'));
       await botao.click();
       await enviado;
       const livre = await page.getByRole('button', { name: /^cadastrar fixo$/i }).waitFor({ timeout: 6_000 }).then(() => true, () => false);
-      if (!livre) {
+      const naLista = livre && (await page.getByText(nomeFixo).waitFor({ timeout: 6_000 }).then(() => true, () => false));
+      if (!naLista) {
         travou++;
         await page.reload();
         await page.waitForLoadState('networkidle');
