@@ -60,11 +60,11 @@ test('login bloqueia depois de várias senhas erradas', async ({ page }, info) =
     await page.getByLabel(/e-?mail/i).fill(alvo);
     await page.getByLabel(/senha/i).fill('senha-errada-123');
     await page.getByRole('button', { name: /entrar/i }).click();
-    await expect(page.getByRole('alert')).toContainText(/incorretos|muitas tentativas/i);
+    await expect(page.locator('form').getByRole('alert')).toContainText(/incorretos|muitas tentativas/i);
   }
   await page.getByLabel(/senha/i).fill('senha-errada-123');
   await page.getByRole('button', { name: /entrar/i }).click();
-  await expect(page.getByRole('alert')).toContainText(/muitas tentativas/i);
+  await expect(page.locator('form').getByRole('alert')).toContainText(/muitas tentativas/i);
 });
 
 test('rota protegida redireciona ao login', async ({ page }) => {
