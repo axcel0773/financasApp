@@ -1,7 +1,7 @@
 import { excluirCategoriaAction, removerRegraCategoriaAction, salvarCategoriaAction, salvarRegraCategoriaAction } from '@/app/_actions/gestao';
 import { carregarBase } from '@/features/base';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Field, Input, Select } from '@/ui/primitives/fields';
 

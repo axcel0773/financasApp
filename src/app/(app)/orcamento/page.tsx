@@ -4,7 +4,7 @@ import { statusOrcamento } from '@/core/budgets/domain';
 import { addMeses } from '@/core/shared/competencia';
 import { carregarBase } from '@/features/base';
 import { centavosParaCampo, competenciaDoParam, rotuloCompetencia } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { Card, PageHeader } from '@/ui/primitives/card';
 import { Chip } from '@/ui/primitives/chip';

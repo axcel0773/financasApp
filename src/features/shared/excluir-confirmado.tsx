@@ -1,5 +1,5 @@
 import type { ActionState } from '@/app/_lib/action-state';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 
 /** Exclusão em dois passos: abrir o aviso e só então confirmar. Serve para qualquer ação que receba `id`. */
 export function ExcluirConfirmado({

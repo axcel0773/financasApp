@@ -9,7 +9,7 @@ import { diffDias } from '@/core/shared/competencia';
 import { ehBeneficio, ROTULO_CARTEIRA } from '@/core/wallets/domain';
 import { carregarBase } from '@/features/base';
 import { centavosParaCampo, dataCurta } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { TransactionRow } from '@/ui/patterns/transaction-row';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';

@@ -1,7 +1,7 @@
 import { salvarViagemAction } from '@/app/_actions/viagens';
 import type { Viagem } from '@/core/trips/domain';
 import { centavosParaCampo } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { Field, Input, MoneyInput } from '@/ui/primitives/fields';
 
 export function FormViagem({ viagem, hoje }: { viagem?: Viagem; hoje: string }) {

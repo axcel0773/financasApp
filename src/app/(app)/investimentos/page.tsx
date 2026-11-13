@@ -14,7 +14,7 @@ import { carregarBase } from '@/features/base';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { Donut } from '@/ui/charts/donut';
 import { centavosParaCampo, dataLonga } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Chip } from '@/ui/primitives/chip';

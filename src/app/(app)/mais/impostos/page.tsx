@@ -3,7 +3,7 @@ import { tabelaDesatualizada } from '@/core/income/tabelas';
 import type { Faixa } from '@/core/income/holerite';
 import { carregarBase } from '@/features/base';
 import { centavosParaCampo, dataLonga } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Chip } from '@/ui/primitives/chip';
 import { Field, Input, MoneyInput, Switch } from '@/ui/primitives/fields';

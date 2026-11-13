@@ -10,7 +10,7 @@ import { addMeses, primeiroDia, ultimoDia } from '@/core/shared/competencia';
 import { ehBeneficio } from '@/core/wallets/domain';
 import { carregarBase } from '@/features/base';
 import { centavosParaCampo, dataLonga } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { excluirMetaAction } from '@/app/_actions/gestao';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';

@@ -4,7 +4,7 @@ import { agruparFaturas, competenciaDaFatura } from '@/core/card-invoices/domain
 import { addMeses } from '@/core/shared/competencia';
 import { carregarBase } from '@/features/base';
 import { centavosParaCampo, competenciaDoParam, dataCurta, rotuloCompetencia } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { TransactionRow } from '@/ui/patterns/transaction-row';
 import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';

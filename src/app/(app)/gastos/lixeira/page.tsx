@@ -4,7 +4,7 @@ import { carregarBase } from '@/features/base';
 import { RestaurarButton } from '@/features/gastos/acoes-gasto';
 import { dataCurta } from '@/ui/format';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { ButtonLink } from '@/ui/primitives/button';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Input, Field } from '@/ui/primitives/fields';

@@ -3,7 +3,7 @@ import { criarTransferenciaAction, excluirTransferenciaAction } from '@/app/_act
 import { carregarBase } from '@/features/base';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { dataCurta } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Field, Input, MoneyInput, Select } from '@/ui/primitives/fields';

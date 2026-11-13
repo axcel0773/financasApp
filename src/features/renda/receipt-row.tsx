@@ -2,7 +2,7 @@ import { confirmarRecebimentoAction } from '@/app/_actions/renda';
 import type { Recebimento } from '@/core/income/domain';
 import { diferencaPrevistoRecebido } from '@/core/income/domain';
 import { centavosParaCampo, dataCurta } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { Chip } from '@/ui/primitives/chip';
 import { Field, Input, MoneyInput, Select } from '@/ui/primitives/fields';

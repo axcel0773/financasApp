@@ -5,7 +5,7 @@ import { createSupabaseServer } from '@/infra/supabase/client.server';
 import { LogoutForm } from '@/features/shell/logout-form';
 import { NAV_INVESTIR, NAV_PLANEJAMENTO } from '@/ui/shell/nav-items';
 import { centavosParaCampo } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { Button } from '@/ui/primitives/button';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Field, Input, MoneyInput, RadioChips, Switch } from '@/ui/primitives/fields';

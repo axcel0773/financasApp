@@ -5,8 +5,8 @@ import { useActionState, useEffect } from 'react';
 import { parseBRL } from '@/core/shared/money';
 import { enfileirar } from '@/infra/offline/queue';
 import { ESTADO_INICIAL, type ActionState } from '@/app/_lib/action-state';
-import { Button } from '../primitives/button';
-import { useToast } from '../primitives/toast';
+import { Button } from '@/ui/primitives/button';
+import { useToast } from '@/ui/primitives/toast';
 
 /** Formulário com Server Action: mostra erro no lugar e confirma o sucesso num toast. */
 export function ActionForm({

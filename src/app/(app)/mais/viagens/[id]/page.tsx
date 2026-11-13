@@ -7,7 +7,7 @@ import { carregarBase } from '@/features/base';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { FormViagem } from '@/features/viagens/form-viagem';
 import { centavosParaCampo, dataCurta } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { TransactionHeader, TransactionRow } from '@/ui/patterns/transaction-row';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Chip } from '@/ui/primitives/chip';

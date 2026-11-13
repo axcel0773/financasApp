@@ -12,7 +12,7 @@ import { carregarBase } from '@/features/base';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { ReceiptRow } from '@/features/renda/receipt-row';
 import { centavosParaCampo, competenciaDoParam, dataLonga, rotuloCompetencia } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Field, Input, MoneyInput, Select } from '@/ui/primitives/fields';

@@ -3,7 +3,7 @@ import { arquivarCarteiraAction, criarCarteiraAction, renomearCarteiraAction } f
 import { ROTULO_CARTEIRA, type WalletKind } from '@/core/wallets/domain';
 import { carregarBase } from '@/features/base';
 import { centavosParaCampo } from '@/ui/format';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Chip } from '@/ui/primitives/chip';

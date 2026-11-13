@@ -3,7 +3,7 @@ import { editarLancamentoAction } from '@/app/_actions/gastos';
 import { carregarBase } from '@/features/base';
 import { ExcluirButton } from '@/features/gastos/acoes-gasto';
 import { formatBRL } from '@/core/shared/money';
-import { ActionForm } from '@/ui/patterns/action-form';
+import { ActionForm } from '@/features/shared/action-form';
 import Link from 'next/link';
 import { ButtonLink } from '@/ui/primitives/button';
 import { Chip } from '@/ui/primitives/chip';
