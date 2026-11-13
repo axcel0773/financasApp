@@ -67,3 +67,14 @@ Dependências só apontam para dentro (ADR 001), validadas em `npm run arch`.
 - Backup semanal criptografado por GitHub Actions: [`docs/backup.md`](docs/backup.md).
 - O projeto gratuito do Supabase pausa após ~7 dias sem uso; o backup semanal também serve de atividade.
 - Commits seguem Conventional Commits (commitlint + husky).
+
+## Testes E2E com Supabase local
+
+Requer Docker e o Supabase CLI. Sobe um banco descartável (aplica `supabase/migrations`), cria um usuário de teste e roda todos os testes, inclusive os autenticados, sem tocar na produção:
+
+```bash
+npm run test:e2e:local
+supabase stop   # desliga o banco local
+```
+
+No CI, o job `build-e2e` faz o mesmo, sem segredos. Os testes de RLS rodam com `supabase test db`.

@@ -14,6 +14,7 @@ export default defineConfig({
   webServer: {
     command: 'npm run start',
     url: 'http://localhost:3000/login',
-    reuseExistingServer: true,
+    // com E2E_LOCAL, nunca reutiliza um servidor já aberto (poderia estar apontando para a produção)
+    reuseExistingServer: !process.env.E2E_LOCAL,
   },
 });

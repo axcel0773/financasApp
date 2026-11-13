@@ -1,0 +1,20 @@
+# Configuração do Supabase LOCAL (Docker), usada em `supabase start`, nos testes de RLS e no E2E.
+# Não afeta o projeto na nuvem.
+project_id = "financas-app"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "graphql_public"]
+
+[db]
+port = 54322
+major_version = 17
+
+[auth]
+enabled = true
+site_url = "http://127.0.0.1:3000"
+enable_signup = false
+
+[auth.email]
+enable_confirmations = false

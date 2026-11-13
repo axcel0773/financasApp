@@ -12,6 +12,7 @@
     "format": "prettier --write .",
     "prepare": "husky",
     "test:e2e": "playwright test",
+    "test:e2e:local": "bash scripts/e2e-local.sh",
     "test:ui": "vitest run --project ui",
     "arch": "depcruise src --config .dependency-cruiser.cjs",
     "audit": "npm audit --omit=dev --audit-level=high"
