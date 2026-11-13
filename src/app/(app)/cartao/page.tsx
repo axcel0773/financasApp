@@ -123,6 +123,7 @@ export default async function CartaoPage({
                 const t = porId.get(cp.id)!;
                 return (
                   <TransactionRow
+                    compacto
                     key={cp.id}
                     t={{
                       id: t.id,

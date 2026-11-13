@@ -8,7 +8,7 @@ import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { FormViagem } from '@/features/viagens/form-viagem';
 import { centavosParaCampo, dataCurta } from '@/ui/format';
 import { ActionForm } from '@/features/shared/action-form';
-import { TransactionHeader, TransactionRow } from '@/ui/patterns/transaction-row';
+import { TransactionRow } from '@/ui/patterns/transaction-row';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Chip } from '@/ui/primitives/chip';
 import { Field, Input, MoneyInput, Select } from '@/ui/primitives/fields';
@@ -77,9 +77,9 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
             <Card><p className="text-sm text-muted">Registre o primeiro gasto abaixo.</p></Card>
           ) : (
             <Card className="px-4 py-2">
-              <TransactionHeader />
               {lancamentos.map((t) => (
                 <TransactionRow
+                  compacto
                   key={t.id}
                   t={{
                     id: t.id,

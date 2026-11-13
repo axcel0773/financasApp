@@ -198,6 +198,7 @@ export default async function BeneficiosPage() {
               <Card className="px-4 py-1">
                 {gastos.slice(0, 8).map((t) => (
                   <TransactionRow
+                    compacto
                     key={t.id}
                     t={{
                       id: t.id,
