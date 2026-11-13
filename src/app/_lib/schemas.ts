@@ -3,6 +3,8 @@ import { isIsoDate } from '@/core/shared/competencia';
 import { parseBRL } from '@/core/shared/money';
 import { err, ok, type Result } from '@/core/shared/result';
 
+/** Campo opcional que pode nem vir no formulário (ex.: `id` do formulário de criação): ausente vale vazio. */
+const textoOuVazio = z.preprocess((v) => v ?? '', z.string());
 export const dinheiro = z
   .string()
   .trim()
@@ -16,9 +18,8 @@ export const dinheiro = z
     return r.value;
   });
 export const dinheiroPositivo = dinheiro.refine((v) => v > 0, 'O valor deve ser maior que zero.');
-export const dinheiroOpcional = z
-  .string()
-  .trim()
+export const dinheiroOpcional = textoOuVazio
+  .pipe(z.string().trim())
   .transform((s, ctx) => {
     if (s === '') return null;
     const r = parseBRL(s);
@@ -29,19 +30,16 @@ export const dinheiroOpcional = z
     return r.value;
   });
 export const data = z.string().refine(isIsoDate, 'Data inválida.');
-export const dataOpcional = z
-  .string()
+export const dataOpcional = textoOuVazio
   .transform((s) => (s === '' ? null : s))
   .refine((s) => s === null || isIsoDate(s), 'Data inválida.');
 export const uuid = z.string().uuid('Seleção inválida.');
-export const uuidOpcional = z
-  .string()
+export const uuidOpcional = textoOuVazio
   .transform((s) => (s === '' ? null : s))
   .pipe(z.string().uuid('Seleção inválida.').nullable());
 export const inteiroOpcional = (min: number, max: number) =>
-  z
-    .string()
-    .trim()
+  textoOuVazio
+    .pipe(z.string().trim())
     .transform((s, ctx) => {
       if (s === '') return null;
       const n = Number(s);
@@ -61,11 +59,13 @@ export const competencia = z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Mês inv
 export const texto = (max: number, min = 1) =>
   z.string().trim().min(min, 'Campo obrigatório.').max(max, `Máximo de ${max} caracteres.`);
 export const textoOpcional = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max, `Máximo de ${max} caracteres.`)
-    .transform((s) => (s === '' ? null : s));
+  textoOuVazio.pipe(
+    z
+      .string()
+      .trim()
+      .max(max, `Máximo de ${max} caracteres.`)
+      .transform((s) => (s === '' ? null : s)),
+  );
 
 export function lerForm<T extends z.ZodTypeAny>(
   schema: T,

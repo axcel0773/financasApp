@@ -112,6 +112,17 @@ test.describe('autenticado', () => {
     await page.getByRole('button', { name: /criar viagem/i }).click(); // volta e orçamento em branco
     await expect(page.getByText(/viagem salva/i)).toBeVisible();
   });
+  test('cadastra um gasto fixo (formulário de criação sem id)', async ({ page }, info) => {
+    await entrar(page);
+    await page.goto('/fixos');
+    await page.getByText('Novo gasto fixo').click();
+    const form = page.locator('form', { has: page.getByRole('button', { name: /cadastrar fixo/i }) });
+    await form.getByLabel('Nome').fill(`Fixo ${info.project.name} ${Date.now()}`);
+    await form.getByLabel('Valor').fill('179,32');
+    await form.getByLabel('Dia do mês').fill('7');
+    await form.getByRole('button', { name: /cadastrar fixo/i }).click();
+    await expect(page.getByText(/fixo salvo/i)).toBeVisible();
+  });
   test('registra um gasto', async ({ page }) => {
     await entrar(page);
     await page.goto('/gastos/novo');
