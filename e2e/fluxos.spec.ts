@@ -213,8 +213,18 @@ test.describe('autenticado', () => {
     // clicar na linha seleciona e mostra o detalhe ao lado (sem sair da lista)
     const linha = page.getByRole('link', { name: new RegExp(nota) }).first();
     await expect(linha).toBeVisible({ timeout: 15_000 });
+    const erros: string[] = [];
+    page.on('console', (m) => m.type() === 'error' && erros.push(m.text().slice(0, 200)));
+    page.on('pageerror', (e) => erros.push(`pageerror: ${e.message.slice(0, 200)}`));
+    const pedidos: string[] = [];
+    page.on('response', (r) => r.url().includes('/gastos') && pedidos.push(`${r.status()} ${r.request().method()} ${r.url().replace(/^https?:\/\/[^/]+/, '')}`));
+    const hrefs = await linha.evaluate((el) => `${el.getAttribute('href')} | w=${window.innerWidth}`);
     await linha.click();
-    await expect(page).toHaveURL(/sel=/);
+    try {
+      await expect(page).toHaveURL(/sel=/, { timeout: 15_000 });
+    } catch {
+      throw new Error(`seleção não aconteceu. url=${page.url()} link=${hrefs} pedidos=${JSON.stringify(pedidos)} erros=${JSON.stringify(erros)}`);
+    }
     const detalhe = page.getByRole('complementary', { name: 'Detalhe do lançamento' });
     await expect(detalhe).toContainText(nota);
     // atalho / leva à busca da barra superior, que procura em todo o histórico
