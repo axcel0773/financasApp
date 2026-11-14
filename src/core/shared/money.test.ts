@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatBRL, parseBRL, splitInstallments, percentOf } from './money';
+import { formatBRL, formatarCentavos, parseBRL, splitInstallments, percentOf } from './money';
 
 describe('parseBRL', () => {
   it.each([
@@ -38,4 +38,31 @@ describe('splitInstallments', () => {
 
 describe('percentOf', () => {
   it('arredonda em centavos', () => expect(percentOf(100_000, 7.5)).toBe(7500));
+});
+
+describe('formatarCentavos (máscara de digitação)', () => {
+  it.each([
+    ['', ''],
+    ['1', '0,01'],
+    ['12', '0,12'],
+    ['123', '1,23'],
+    ['12345', '123,45'],
+    ['1234567', '12.345,67'],
+    ['0,005', '0,05'], // campo que começou em 0,00 e recebeu um dígito
+    ['50,005', '500,05'], // dígito acrescentado a um valor já formatado
+    ['R$ 1.234,56', '1.234,56'],
+    ['abc', ''],
+    ['000', ''],
+    ['-', '-'], // sinal digitado antes dos números
+    ['-5', '-0,05'],
+    ['-150,00', '-150,00'],
+  ])('%s → %s', (bruto, esperado) => {
+    expect(formatarCentavos(bruto)).toBe(esperado);
+  });
+  it('o resultado é sempre aceito pelo parseBRL (ou é vazio / só o sinal)', () => {
+    for (const bruto of ['1', '99', '100', '123456789', '-42']) {
+      const f = formatarCentavos(bruto);
+      expect(parseBRL(f).ok).toBe(true);
+    }
+  });
 });

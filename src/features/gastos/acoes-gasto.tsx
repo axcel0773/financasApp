@@ -8,7 +8,8 @@ import { Button } from '@/ui/primitives/button';
 import { Icon } from '@/ui/primitives/icon';
 import { useToast } from '@/ui/primitives/toast';
 
-export function ExcluirButton({ id }: { id: string }) {
+/** `voltarPara`: para onde ir depois de excluir (mantém mês e filtros de quem chamou). */
+export function ExcluirButton({ id, voltarPara = '/gastos' }: { id: string; voltarPara?: string }) {
   const router = useRouter();
   const { show } = useToast();
   const [pending, start] = useTransition();
@@ -22,7 +23,7 @@ export function ExcluirButton({ id }: { id: string }) {
           const guardar = async () => {
             await enfileirar({ clientId: `excluir:${id}`, op: 'excluir', alvoId: id });
             show('Sem conexão: a exclusão será enviada quando voltar.');
-            router.push('/gastos');
+            router.push(voltarPara);
           };
           if (!navigator.onLine) return guardar();
           let r;
@@ -38,7 +39,7 @@ export function ExcluirButton({ id }: { id: string }) {
               void desfazerExclusaoAction(id).then(() => router.refresh());
             },
           });
-          router.push('/gastos');
+          router.push(voltarPara);
         })
       }
     >

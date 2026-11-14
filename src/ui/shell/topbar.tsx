@@ -35,14 +35,14 @@ export function Topbar() {
         onSubmit={(e) => {
           e.preventDefault();
           const q = busca.current?.value.trim();
-          router.push(q ? `/gastos?q=${encodeURIComponent(q)}` : '/gastos');
+          router.push(q ? `/gastos?tudo=1&q=${encodeURIComponent(q)}` : '/gastos');
         }}
       >
         <input
           ref={busca}
           type="search"
           maxLength={80}
-          aria-label="Buscar lançamentos"
+          aria-label="Buscar lançamentos em todo o histórico"
           placeholder="Buscar lançamentos  ( / )"
           className="h-11 w-72 rounded-md border border-border bg-surface pl-3 pr-3 text-sm text-ink placeholder:text-muted"
         />

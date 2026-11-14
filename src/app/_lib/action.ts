@@ -30,7 +30,10 @@ export async function executar(
     revalidatePath('/', 'layout');
     return { ok: true, message: sucesso };
   } catch (e) {
-    console.error('action_error', e instanceof RepositoryError ? e.code : 'unexpected');
+    // Sem monitoramento externo, este log é a única pista: nome e mensagem do erro (nunca valores nem e-mail).
+    const pista =
+      e instanceof RepositoryError ? e.code : e instanceof Error ? `${e.name}: ${e.message}`.slice(0, 300) : 'unexpected';
+    console.error('action_error', pista);
     return { ok: false, message: 'Não foi possível concluir. Tente novamente.' };
   }
 }

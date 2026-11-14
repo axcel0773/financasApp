@@ -33,12 +33,13 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
   const deP = typeof sp.de === 'string' && isIsoDate(sp.de) ? sp.de : undefined;
   const ateP = typeof sp.ate === 'string' && isIsoDate(sp.ate) ? sp.ate : undefined;
   const periodoLivre = !!deP && !!ateP && deP <= ateP;
-  const inicio = periodoLivre ? deP! : primeiroDia(mes);
-  const fim = periodoLivre ? ateP! : ultimoDia(mes);
-  const cursor =
-    typeof sp.cursor === 'string' && /^\d{4}-\d{2}-\d{2}_[0-9a-f-]{36}$/i.test(sp.cursor)
-      ? { occurredOn: sp.cursor.slice(0, 10), id: sp.cursor.slice(11) }
-      : undefined;
+  // Busca vinda da barra superior (desktop): procura em todo o histórico, não só no mês.
+  const buscaGlobal = sp.tudo === '1' && !!q && !periodoLivre;
+  const inicio = buscaGlobal ? '2000-01-01' : periodoLivre ? deP! : primeiroDia(mes);
+  const fim = buscaGlobal ? '2999-12-31' : periodoLivre ? ateP! : ultimoDia(mes);
+  const cursorStr =
+    typeof sp.cursor === 'string' && /^\d{4}-\d{2}-\d{2}_[0-9a-f-]{36}$/i.test(sp.cursor) ? sp.cursor : undefined;
+  const cursor = cursorStr ? { occurredOn: cursorStr.slice(0, 10), id: cursorStr.slice(11) } : undefined;
 
   const [lista, mensal, viagensTodas, selecionado] = await Promise.all([
     c.transactions.list({
@@ -51,7 +52,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
       limite: PAGINA + 1,
       cursor,
     }),
-    c.queries.detalhado(inicio, fim),
+    buscaGlobal ? Promise.resolve([]) : c.queries.detalhado(inicio, fim),
     c.trips.list(),
     selId ? c.transactions.get(selId) : Promise.resolve(null),
   ]);
@@ -70,7 +71,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
 
   const url = (extra: Record<string, string | undefined>) => {
     const params = new URLSearchParams();
-    const base = { mes, carteira, categoria, tipo, q: q || undefined, de: periodoLivre ? deP : undefined, ate: periodoLivre ? ateP : undefined, ...extra };
+    const base = { mes, carteira, categoria, tipo, cursor: cursorStr, tudo: buscaGlobal ? '1' : undefined, q: q || undefined, de: periodoLivre ? deP : undefined, ate: periodoLivre ? ateP : undefined, ...extra };
     for (const [k, v] of Object.entries(base)) if (v) params.set(k, v);
     return `/gastos?${params.toString()}`;
   };
@@ -80,7 +81,13 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
     <>
       <PageHeader
         title="Gastos"
-        subtitle={periodoLivre ? `${dataCurta(inicio)} a ${dataCurta(fim)}` : rotuloCompetencia(mes)}
+        subtitle={
+          buscaGlobal
+            ? `Busca por “${q}” em todo o histórico`
+            : periodoLivre
+              ? `${dataCurta(inicio)} a ${dataCurta(fim)}`
+              : rotuloCompetencia(mes)
+        }
         action={
           <ButtonLink href="/gastos/novo" className="hidden md:inline-flex lg:hidden">
             <Icon name="plus" size={18} />
@@ -93,7 +100,11 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
         {carteira && <input type="hidden" name="carteira" value={carteira} />}
         {categoria && <input type="hidden" name="categoria" value={categoria} />}
         {tipo && <input type="hidden" name="tipo" value={tipo} />}
-        <Input type="search" name="q" defaultValue={q} placeholder="Buscar na descrição" aria-label="Buscar lançamentos" maxLength={80} />
+        {buscaGlobal && <input type="hidden" name="tudo" value="1" />}
+        {/* No desktop a busca fica na barra superior (procura em todo o histórico). */}
+        <div className="lg:hidden">
+          <Input type="search" name="q" defaultValue={q} placeholder="Buscar na descrição" aria-label="Buscar lançamentos" maxLength={80} />
+        </div>
         <details open={periodoLivre}>
           <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">Período livre</summary>
           <div className="grid grid-cols-2 gap-2">
@@ -108,6 +119,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
           <Link href="/gastos/importar" className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-link">Importar extrato</Link>
         </div>
       </form>
+      {!buscaGlobal && (
       <div className="mb-3 flex items-center justify-between">
         <Link
           href={url({ mes: addMeses(mes, -1), cursor: undefined })}
@@ -133,6 +145,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
           <Icon name="chevron" />
         </Link>
       </div>
+      )}
       <div className="mb-3 flex gap-2" aria-label="Filtrar por tipo de gasto">
         <FilterChip href={url({ tipo: undefined, cursor: undefined })} ativo={!tipo}>Tudo</FilterChip>
         <FilterChip href={url({ tipo: 'dia', cursor: undefined })} ativo={tipo === 'dia'}>Dia a dia</FilterChip>
@@ -174,9 +187,15 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
       <div className={sel ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6' : undefined}>
       <div className="min-w-0">
       {itens.length === 0 ? (
-        <EmptyState title="Nenhum lançamento neste período">
-          Toque em “+” para registrar o primeiro gasto.
-        </EmptyState>
+        q ? (
+          <EmptyState title={`Nada encontrado para “${q}”`}>
+            {buscaGlobal ? 'A busca olhou todo o histórico.' : 'A busca olhou só este período.'}
+          </EmptyState>
+        ) : (
+          <EmptyState title="Nenhum lançamento neste período">
+            Toque em “+” para registrar o primeiro gasto.
+          </EmptyState>
+        )
       ) : (
         <Card className="px-4 py-2 lg:px-6 lg:py-3">
           <TransactionHeader />
@@ -219,7 +238,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
                 </h2>
               </div>
               <Link
-                href={url({ sel: undefined, cursor: undefined })}
+                href={url({ sel: undefined })}
                 scroll={false}
                 aria-label="Fechar detalhe"
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-md border border-border"
@@ -252,7 +271,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
                 <Icon name="edit" size={16} />
                 Editar lançamento
               </ButtonLink>
-              <ExcluirButton id={sel.id} />
+              <ExcluirButton id={sel.id} voltarPara={url({ sel: undefined })} />
             </div>
           </Card>
         </aside>

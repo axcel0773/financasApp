@@ -36,3 +36,16 @@ export function splitInstallments(total: Cents, n: number): Cents[] {
 export function percentOf(value: Cents, percent: number): Cents {
   return Math.round((value * percent) / 100);
 }
+
+/**
+ * Máscara de digitação: só números, as casas se formam sozinhas da direita para a esquerda
+ * (1 → 0,01 · 12345 → 123,45 · 1234567 → 12.345,67). Um "-" no início é mantido (saldo negativo).
+ */
+export function formatarCentavos(bruto: string): string {
+  const negativo = bruto.trim().startsWith('-');
+  const digitos = bruto.replace(/\D/g, '').replace(/^0+/, '');
+  if (!digitos) return negativo ? '-' : '';
+  const n = digitos.padStart(3, '0');
+  const inteiro = n.slice(0, -2).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+  return `${negativo ? '-' : ''}${inteiro},${n.slice(-2)}`;
+}
