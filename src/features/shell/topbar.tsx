@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
+import { navegarComGarantia } from '@/ui/navegacao';
 import { Icon } from '@/ui/primitives/icon';
 import { HideToggle } from './hide-toggle';
 
@@ -21,7 +22,7 @@ export function Topbar() {
         busca.current?.focus();
       } else if (e.key.toLowerCase() === 'n') {
         e.preventDefault();
-        router.push('/gastos?novo=1');
+        navegarComGarantia(router, '/gastos?novo=1');
       }
     };
     window.addEventListener('keydown', aoTeclar);
@@ -35,7 +36,7 @@ export function Topbar() {
         onSubmit={(e) => {
           e.preventDefault();
           const q = busca.current?.value.trim();
-          router.push(q ? `/gastos?tudo=1&q=${encodeURIComponent(q)}` : '/gastos');
+          navegarComGarantia(router, q ? `/gastos?tudo=1&q=${encodeURIComponent(q)}` : '/gastos');
         }}
       >
         <input

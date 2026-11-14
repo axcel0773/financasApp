@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
+import { navegarComGarantia } from '@/ui/navegacao';
 import { Icon } from '@/ui/primitives/icon';
 
 /** Desktop (≥1024px): "Novo lançamento" abre em painel lateral sobre a lista. Esc fecha. */
@@ -17,7 +18,7 @@ export function PainelNovo({ fecharHref, children }: { fecharHref: string; child
     if (!montado) return;
     ref.current?.focus();
     const aoTeclar = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') router.push(fecharHref, { scroll: false });
+      if (e.key === 'Escape') navegarComGarantia(router, fecharHref, { scroll: false });
     };
     window.addEventListener('keydown', aoTeclar);
     return () => window.removeEventListener('keydown', aoTeclar);

@@ -2,6 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useCallback, useEffect, useRef, useState } from 'react';
+import { navegarComGarantia } from '@/ui/navegacao';
 
 /**
  * Envio de Server Actions sem useTransition/useActionState.
@@ -37,17 +38,7 @@ export function useEnvio() {
   }, [router]);
 
   /** Navega; se o router não concluir em 2,5 s, força a ida pelo navegador. */
-  const navegar = useCallback(
-    (href: string) => {
-      const origem = window.location.pathname + window.location.search;
-      router.push(href);
-      // sem guardar em `timers`: precisa disparar mesmo se este componente sair da tela
-      setTimeout(() => {
-        if (window.location.pathname + window.location.search === origem) window.location.assign(href);
-      }, 2500);
-    },
-    [router],
-  );
+  const navegar = useCallback((href: string) => navegarComGarantia(router, href), [router]);
 
   return { pending, enviar, atualizarTela, navegar };
 }

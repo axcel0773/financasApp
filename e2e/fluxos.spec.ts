@@ -213,21 +213,8 @@ test.describe('autenticado', () => {
     // clicar na linha seleciona e mostra o detalhe ao lado (sem sair da lista)
     const linha = page.getByRole('link', { name: new RegExp(nota) }).first();
     await expect(linha).toBeVisible({ timeout: 15_000 });
-    const erros: string[] = [];
-    page.on('console', (m) => m.type() === 'error' && erros.push(m.text().slice(0, 200)));
-    page.on('pageerror', (e) => erros.push(`pageerror: ${e.message.slice(0, 200)}`));
-    const pedidos: string[] = [];
-    const t0 = Date.now();
-    page.on('request', (r) => r.url().includes('/gastos') && pedidos.push(`+${Date.now() - t0}ms > ${r.method()} ${r.url().replace(/^https?:\/\/[^/]+/, '').slice(0, 90)}`));
-    page.on('response', (r) => r.url().includes('/gastos') && pedidos.push(`+${Date.now() - t0}ms < ${r.status()} ${r.url().replace(/^https?:\/\/[^/]+/, '').slice(0, 90)}`));
-    const hrefs = await linha.evaluate((el) => `${el.getAttribute('href')} | w=${window.innerWidth}`);
     await linha.click();
-    try {
-      await expect(page).toHaveURL(/sel=/, { timeout: 15_000 });
-    } catch {
-      throw new Error(`seleção não aconteceu. url=${page.url()} link=${hrefs} pedidos=${JSON.stringify(pedidos)} erros=${JSON.stringify(erros)}`);
-    }
-    console.log(`DIAG seleção em ${Date.now() - t0}ms`, JSON.stringify(pedidos), JSON.stringify(erros));
+    await expect(page).toHaveURL(/sel=/, { timeout: 10_000 });
     const detalhe = page.getByRole('complementary', { name: 'Detalhe do lançamento' });
     await expect(detalhe).toContainText(nota);
     // atalho / leva à busca da barra superior, que procura em todo o histórico
@@ -235,15 +222,12 @@ test.describe('autenticado', () => {
     const busca = page.getByRole('searchbox', { name: /todo o histórico/i });
     await expect(busca).toBeFocused();
     await busca.fill(nota);
-    pedidos.length = 0;
-    const t1 = Date.now();
     await busca.press('Enter');
-    await expect(page).toHaveURL(/tudo=1/, { timeout: 20_000 });
-    console.log(`DIAG busca em ${Date.now() - t1}ms`, JSON.stringify(pedidos));
+    await expect(page).toHaveURL(/tudo=1/, { timeout: 10_000 });
     await expect(page.getByText(/em todo o histórico/i).first()).toBeVisible();
     // excluir pelo painel de detalhe mantém a busca aplicada
     await page.getByRole('link', { name: new RegExp(nota) }).first().click();
-    await expect(page).toHaveURL(/sel=/, { timeout: 20_000 });
+    await expect(page).toHaveURL(/sel=/, { timeout: 10_000 });
     await page.getByRole('complementary', { name: 'Detalhe do lançamento' }).getByRole('button', { name: /excluir/i }).click();
     await expect(page.getByRole('complementary', { name: 'Detalhe do lançamento' })).toHaveCount(0, { timeout: 15_000 });
     await expect(page).toHaveURL(/tudo=1/);
