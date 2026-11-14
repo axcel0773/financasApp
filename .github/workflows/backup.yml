@@ -39,7 +39,7 @@ jobs:
             --symmetric --cipher-algo AES256 -o "financas-$stamp.sql.gpg" dump.sql
           shred -u dump.sql
           echo "ARQUIVO=financas-$stamp.sql.gpg" >> "$GITHUB_ENV"
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: backup-banco
           path: ${{ env.ARQUIVO }}
