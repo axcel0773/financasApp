@@ -1,6 +1,5 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { criarLancamentoAction } from '@/app/_actions/gastos';
 import { parseBRL } from '@/core/shared/money';
@@ -12,6 +11,7 @@ import { Keypad } from '@/ui/patterns/keypad';
 import { Button } from '@/ui/primitives/button';
 import { Field, Input, MoneyInput } from '@/ui/primitives/fields';
 import { useToast } from '@/ui/primitives/toast';
+import { useEnvio } from '@/features/shared/use-envio';
 
 interface Op {
   id: string;
@@ -31,9 +31,8 @@ export function NovoLancamentoForm({
   hoje: string;
   carteiraInicial: string;
 }) {
-  const router = useRouter();
   const { show } = useToast();
-  const [pending, setPending] = useState(false);
+  const { pending, enviar, navegar } = useEnvio();
   const [clientId] = useState(() => crypto.randomUUID());
   const [cents, setCents] = useState(0);
   const [kind, setKind] = useState<'expense' | 'income'>('expense');
@@ -43,16 +42,9 @@ export function NovoLancamentoForm({
   const [note, setNote] = useState('');
   const [erro, setErro] = useState<string | null>(null);
 
-  // Navegação com garantia: se o router do Next não concluir (bug conhecido do Next 15/React 19), força a ida.
-  const irParaGastos = () => {
-    router.push('/gastos');
-    setTimeout(() => {
-      if (window.location.pathname.startsWith('/gastos/novo') || window.location.search.includes('novo=1')) window.location.assign('/gastos');
-    }, 2500);
-  };
+  const irParaGastos = () => navegar('/gastos');
 
   const salvar = async () => {
-    if (pending) return;
     setErro(null);
     if (cents <= 0) return setErro('Informe um valor maior que zero.');
     const item = {
@@ -65,8 +57,7 @@ export function NovoLancamentoForm({
       occurredOn: data,
       note: note.trim() || null,
     };
-    setPending(true);
-    try {
+    await enviar(async () => {
       if (!navigator.onLine) {
         await enfileirar(item);
         show('Sem conexão: salvo no aparelho e será enviado quando voltar.');
@@ -82,9 +73,7 @@ export function NovoLancamentoForm({
         show('Conexão instável: salvo no aparelho e será reenviado.');
         irParaGastos();
       }
-    } finally {
-      setPending(false);
-    }
+    });
   };
 
   const chip = (ativo: boolean) =>

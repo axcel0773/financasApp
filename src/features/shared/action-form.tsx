@@ -1,12 +1,12 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useRef, useState } from 'react';
 import { parseBRL } from '@/core/shared/money';
 import { enfileirar } from '@/infra/offline/queue';
 import { ESTADO_INICIAL, type ActionState } from '@/app/_lib/action-state';
 import { Button } from '@/ui/primitives/button';
 import { useToast } from '@/ui/primitives/toast';
+import { useEnvio } from './use-envio';
 
 /** Formulário com Server Action: mostra erro no lugar e confirma o sucesso num toast. */
 export function ActionForm({
@@ -27,21 +27,10 @@ export function ActionForm({
   /** Se estiver sem rede ao enviar, guarda a edição deste lançamento na fila offline. */
   offlineEditar?: { alvoId: string };
 }) {
-  const router = useRouter();
   const formRef = useRef<HTMLFormElement>(null);
-  const emVoo = useRef(false);
   const [state, setState] = useState<ActionState>(ESTADO_INICIAL);
-  const [pending, setPending] = useState(false);
+  const { pending, enviar: comTrava, atualizarTela, navegar } = useEnvio();
   const { show } = useToast();
-  const timers = useRef<ReturnType<typeof setTimeout>[]>([]);
-  useEffect(() => () => timers.current.forEach(clearTimeout), []);
-  // Contorno de um bug do Next 15/React 19: às vezes a tela não aplica a resposta de uma ação rápida (a ação
-  // termina, o dado é salvo, mas a lista não muda). Pedir a atualização de novo, em instantes, resolve na prática
-  // (medido no CI: ~50% de falha com uma só atualização). Tirar quando o Next/React corrigirem.
-  const atualizarTela = () => {
-    router.refresh();
-    for (const ms of [1200, 3000]) timers.current.push(setTimeout(() => router.refresh(), ms));
-  };
   useEffect(() => {
     if (state.ok && state.message) {
       show(state.message);
@@ -49,9 +38,6 @@ export function ActionForm({
     }
   }, [state, show, onOk]);
 
-  // Envio feito à mão, sem useActionState/useTransition: nesta combinação (Next 15 + React 19) a transição
-  // às vezes nunca termina — a resposta chega, o dado é salvo e a tela fica em "Salvando…". Aqui o estado
-  // de envio é nosso e sempre volta ao normal.
   async function enviar(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     const form = e.currentTarget;
@@ -70,28 +56,24 @@ export function ActionForm({
         note: String(fd.get('note') ?? '').trim() || null,
       }).then(() => {
         show('Sem conexão: a edição será enviada quando voltar.');
-        router.push('/gastos');
+        navegar('/gastos');
       });
       return;
     }
-    if (emVoo.current) return;
-    emVoo.current = true;
-    setPending(true);
-    try {
-      const r = await action(state, fd);
-      setState(r);
-      if (r.ok) {
-        // avisa quem estiver em volta (ex.: painéis que se fecham sozinhos ao salvar)
-        form.dispatchEvent(new CustomEvent('action-ok', { bubbles: true }));
-        formRef.current?.reset();
-        atualizarTela();
+    await comTrava(async () => {
+      try {
+        const r = await action(state, fd);
+        setState(r);
+        if (r.ok) {
+          // avisa quem estiver em volta (ex.: painéis que se fecham sozinhos ao salvar)
+          form.dispatchEvent(new CustomEvent('action-ok', { bubbles: true }));
+          formRef.current?.reset();
+          atualizarTela();
+        }
+      } catch {
+        setState({ ok: false, message: 'Não foi possível concluir. Tente novamente.' });
       }
-    } catch {
-      setState({ ok: false, message: 'Não foi possível concluir. Tente novamente.' });
-    } finally {
-      emVoo.current = false;
-      setPending(false);
-    }
+    });
   }
   return (
     <form

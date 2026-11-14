@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState, useTransition } from 'react';
+import { useMemo, useState } from 'react';
 import { importarLancamentosAction } from '@/app/_actions/importar';
 import { categorizar, lerExtrato, type ResultadoExtrato } from '@/core/import/extrato';
 import { formatBRL } from '@/core/shared/money';
@@ -9,6 +9,7 @@ import { Button } from '@/ui/primitives/button';
 import { Card } from '@/ui/primitives/card';
 import { Field, Select } from '@/ui/primitives/fields';
 import { useToast } from '@/ui/primitives/toast';
+import { useEnvio } from '@/features/shared/use-envio';
 
 interface Op {
   id: string;
@@ -28,7 +29,7 @@ export function ImportarExtrato({
   regras: { keyword: string; categoryId: string }[];
 }) {
   const { show } = useToast();
-  const [pending, start] = useTransition();
+  const { pending, enviar: comTrava } = useEnvio();
   const [texto, setTexto] = useState<string | null>(null);
   const [cartao, setCartao] = useState(false);
   const [walletId, setWalletId] = useState(carteiras[0]?.id ?? '');
@@ -52,14 +53,16 @@ export function ImportarExtrato({
     setTexto(await f.text());
   };
   const enviar = () =>
-    start(async () => {
-      const r = await importarLancamentosAction({
-        walletId,
-        itens: incluidas.map((l) => ({ data: l.data, descricao: l.descricao, cents: l.cents, kind: l.kind, categoryId: catDe(l.linha, l.descricao) || null })),
-      });
-      show(r.message ?? (r.ok ? 'Importado.' : 'Não foi possível importar.'));
-      if (r.ok) {
-        setTexto(null);
+    comTrava(async () => {
+      try {
+        const r = await importarLancamentosAction({
+          walletId,
+          itens: incluidas.map((l) => ({ data: l.data, descricao: l.descricao, cents: l.cents, kind: l.kind, categoryId: catDe(l.linha, l.descricao) || null })),
+        });
+        show(r.message ?? (r.ok ? 'Importado.' : 'Não foi possível importar.'));
+        if (r.ok) setTexto(null);
+      } catch {
+        show('Não foi possível importar. Confira a conexão e tente de novo.');
       }
     });
 
@@ -121,7 +124,7 @@ export function ImportarExtrato({
               O arquivo tem {lido.linhas.length} linhas. Só as {MAX_LINHAS} primeiras serão importadas agora; importe de novo para o restante (as já importadas são ignoradas).
             </p>
           )}
-          <Button block disabled={pending || incluidas.length === 0 || !walletId} onClick={enviar}>
+          <Button block disabled={pending || incluidas.length === 0 || !walletId} onClick={() => void enviar()}>
             {pending ? 'Importando…' : `Importar ${incluidas.length} lançamento(s)`}
           </Button>
         </>
