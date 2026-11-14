@@ -1,6 +1,7 @@
 import { garantirDadosIniciais, getContainer } from '@/composition/container';
 import { LogoutForm } from '@/features/shell/logout-form';
 import { ShellEffects } from '@/features/shell/shell-effects';
+import { Topbar } from '@/features/shell/topbar';
 import { AppShell } from '@/ui/shell/app-shell';
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -8,6 +9,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const [ajustes] = await Promise.all([(await getContainer()).settings.get(), garantirDadosIniciais()]);
   return (
     <AppShell
+      topbar={<Topbar />}
       sairIcone={<LogoutForm variante="icone" />}
       sairBloco={<LogoutForm />}
       extras={<ShellEffects tema={ajustes.theme} ocultar={ajustes.hideValues} />}>

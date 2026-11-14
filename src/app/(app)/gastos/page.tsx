@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { addMeses, isIsoDate, primeiroDia, ultimoDia } from '@/core/shared/competencia';
 import { ROTULO_CARTEIRA } from '@/core/wallets/domain';
-import { carregarBase } from '@/features/base';
+import { carregarBase, opcoesLancamento } from '@/features/base';
 import { ExcluirButton } from '@/features/gastos/acoes-gasto';
 import { NovoLancamentoForm } from '@/features/gastos/novo-lancamento-form';
 import { PainelNovo } from '@/features/gastos/painel-novo';
@@ -296,15 +296,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
       </div>
       {novoAberto && (
         <PainelNovo fecharHref={url({ novo: undefined, sel: undefined, cursor: undefined })}>
-          <NovoLancamentoForm
-            carteiras={wallets.map((w) => ({
-              id: w.id,
-              nome: w.kind === 'checking' || w.kind === 'cash' ? w.name : `${ROTULO_CARTEIRA[w.kind]} · ${w.name}`,
-            }))}
-            categorias={categories.map((x) => ({ id: x.id, nome: x.name, cor: x.color }))}
-            hoje={hoje}
-            carteiraInicial={(wallets.find((w) => w.kind === 'checking') ?? wallets[0])?.id ?? ''}
-          />
+          <NovoLancamentoForm {...opcoesLancamento({ wallets, categories })} hoje={hoje} />
         </PainelNovo>
       )}
     </>

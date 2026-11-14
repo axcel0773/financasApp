@@ -3,7 +3,17 @@ updates:
   - package-ecosystem: npm
     directory: /
     schedule: { interval: weekly }
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 3
+    # Um PR só por semana com as atualizações pequenas; versões maiores ficam para quando houver motivo.
+    groups:
+      menores:
+        update-types: [minor, patch]
+    ignore:
+      - dependency-name: '*'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
-    schedule: { interval: weekly }
+    schedule: { interval: monthly }
+    groups:
+      actions:
+        patterns: ['*']

@@ -5,7 +5,11 @@ export interface InvestmentRepository {
   list(): Promise<Investimento[]>;
   update(id: string, i: Omit<Investimento, 'id' | 'archived'>): Promise<void>;
   setArchived(id: string, archived: boolean): Promise<void>;
-  create(i: Omit<Investimento, 'id' | 'archived'>): Promise<string>;
+  /** `inicial`: saldo já informado no cadastro — vira o saldo do dia e o aporte correspondente, na mesma transação. */
+  create(
+    i: Omit<Investimento, 'id' | 'archived'>,
+    inicial?: { on: string; balanceCents: Cents },
+  ): Promise<string>;
   entries(): Promise<Aporte[]>;
   addEntry(a: Aporte): Promise<void>;
   /** Último saldo informado por investimento. */

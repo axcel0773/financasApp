@@ -3,8 +3,8 @@
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useEffect, useRef } from 'react';
-import { HideToggle } from '@/features/shell/hide-toggle';
-import { Icon } from '../primitives/icon';
+import { Icon } from '@/ui/primitives/icon';
+import { HideToggle } from './hide-toggle';
 
 /** Só no desktop (≥1024px): busca, ocultar valores e novo lançamento sempre à mão. Atalhos: "/" busca, "N" novo. */
 export function Topbar() {

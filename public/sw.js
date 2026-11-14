@@ -2,7 +2,11 @@
 const SHELL = 'shell-v1';
 const STATIC = 'static-v1';
 const OFFLINE_URL = '/offline.html';
+const MAX_ESTATICOS = 250; // cada versão publicada traz arquivos novos; sem teto o cache só cresce
 const FORM_URL = '/gastos/novo'; // formulário de lançamento (só nomes de carteiras e categorias) abre offline
+
+// Apaga os mais antigos quando passa do teto (cache.keys() devolve na ordem em que entraram).
+const aparar = (c) => c.keys().then((ks) => (ks.length > MAX_ESTATICOS ? Promise.all(ks.slice(0, ks.length - MAX_ESTATICOS).map((k) => c.delete(k))) : null));
 
 self.addEventListener('install', (e) => {
   e.waitUntil(caches.open(SHELL).then((c) => c.addAll([OFFLINE_URL, '/icon-192.png'])));
@@ -24,7 +28,7 @@ self.addEventListener('fetch', (e) => {
 
   // Estáticos versionados do Next, ícones, fontes: cache primeiro
   if (url.pathname.startsWith('/_next/static/') || /\.(?:png|svg|ico|woff2?)$/.test(url.pathname)) {
-    e.respondWith(caches.open(STATIC).then(async (c) => (await c.match(req)) ?? fetch(req).then((r) => { if (r.ok) c.put(req, r.clone()); return r; })));
+    e.respondWith(caches.open(STATIC).then(async (c) => (await c.match(req)) ?? fetch(req).then((r) => { if (r.ok) c.put(req, r.clone()).then(() => aparar(c)); return r; })));
     return;
   }
   // Navegações (HTML)

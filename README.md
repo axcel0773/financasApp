@@ -78,3 +78,14 @@ supabase stop   # desliga o banco local
 ```
 
 No CI, o job `build-e2e` faz o mesmo, sem segredos. Os testes de RLS rodam com `supabase test db`.
+
+## Rotina de trabalho (ramo `wip/**`)
+
+A Vercel publica todo push na `main`, mesmo com teste vermelho. Para não publicar código quebrado, as mudanças vão
+primeiro para um ramo `wip/<assunto>`: o CI roda nele (a Vercel ignora ramos que não são a `main`) e, só com tudo
+verde, a `main` avança por fast-forward.
+
+```bash
+git checkout -b wip/minha-mudanca && git push -u origin wip/minha-mudanca   # CI roda aqui
+git checkout main && git merge --ff-only wip/minha-mudanca && git push      # publica
+```

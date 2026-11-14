@@ -22,20 +22,21 @@ export class SupabaseInvestmentRepository implements InvestmentRepository {
       archived: i.archived,
     }));
   }
-  async create(i: Omit<Investimento, 'id' | 'archived'>): Promise<string> {
-    const { data, error } = await this.db
-      .from('investments')
-      .insert({
-        kind: i.kind,
-        name: i.name,
-        institution: i.institution,
-        annual_rate_percent: i.annualRatePercent,
-        maturity_on: i.maturityOn,
-      })
-      .select('id')
-      .single();
+  async create(
+    i: Omit<Investimento, 'id' | 'archived'>,
+    inicial?: { on: string; balanceCents: number },
+  ): Promise<string> {
+    const { data, error } = await this.db.rpc('criar_investimento', {
+      p_kind: i.kind,
+      p_name: i.name,
+      p_institution: i.institution,
+      p_rate: i.annualRatePercent,
+      p_maturity: i.maturityOn,
+      p_balance_cents: inicial?.balanceCents ?? null,
+      p_on: inicial?.on ?? null,
+    });
     check(error, 'criar investimento');
-    return (data as { id: string }).id;
+    return data as string;
   }
   async entries(): Promise<Aporte[]> {
     const { data, error } = await this.db

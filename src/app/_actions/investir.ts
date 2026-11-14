@@ -39,19 +39,18 @@ export async function criarInvestimentoAction(_: ActionState, fd: FormData): Pro
     if (taxa !== null && (!Number.isFinite(taxa) || taxa < 0 || taxa > 1000))
       return { ok: false as const, error: 'Taxa inválida.' };
     const c = await getContainer();
-    const id = await c.investments.create({
-      kind: p.value.kind,
-      name: p.value.name,
-      institution: p.value.institution,
-      annualRatePercent: taxa,
-      maturityOn: p.value.maturityOn,
-    });
+    const saldo = p.value.balance !== null && p.value.balance > 0 ? p.value.balance : null;
     // Saldo informado já no cadastro: vira o saldo de hoje e o valor aplicado (o rendimento conta daqui em diante).
-    if (p.value.balance !== null && p.value.balance > 0) {
-      const hoje = c.clock.hoje();
-      await c.investments.setBalance(id, hoje, p.value.balance);
-      await c.investments.addEntry({ investmentId: id, occurredOn: hoje, amountCents: p.value.balance });
-    }
+    await c.investments.create(
+      {
+        kind: p.value.kind,
+        name: p.value.name,
+        institution: p.value.institution,
+        annualRatePercent: taxa,
+        maturityOn: p.value.maturityOn,
+      },
+      saldo !== null ? { on: c.clock.hoje(), balanceCents: saldo } : undefined,
+    );
     return ok(undefined);
   }, 'Investimento cadastrado.');
 }

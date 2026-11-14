@@ -175,6 +175,64 @@ test.describe('autenticado', () => {
     await page.getByRole('button', { name: /salvar|registrar/i }).click();
     await expect(page).toHaveURL(/\/gastos/);
   });
+
+  test('investimento: saldo já no cadastro (com máscara) e painel de ação que fecha ao salvar', async ({ page }, info) => {
+    const nome = `E2E CDB ${info.project.name} ${Date.now() % 100000}`;
+    await entrar(page);
+    await page.goto('/investimentos');
+    await page.waitForLoadState('networkidle');
+    const form = page.locator('form').filter({ has: page.getByRole('button', { name: 'Cadastrar', exact: true }) });
+    await form.getByLabel('Nome', { exact: true }).fill(nome);
+    const saldo = form.getByLabel(/saldo atual/i);
+    await saldo.pressSequentially('123456');
+    await expect(saldo).toHaveValue('1.234,56'); // as casas se formam sozinhas
+    await form.getByRole('button', { name: 'Cadastrar', exact: true }).click();
+    // aparece no bloco de aportes do mês (o saldo inicial conta como aporte) e na lista
+    await expect(page.locator('li').filter({ hasText: nome }).filter({ hasText: 'Aporte' })).toBeVisible({ timeout: 15_000 });
+    // abre o painel "Saldo" do investimento novo (o último da lista), salva e o painel some
+    await page.getByRole('button', { name: 'Saldo', exact: true }).last().click();
+    const salvar = page.getByRole('button', { name: 'Salvar saldo' });
+    await expect(salvar).toBeVisible();
+    await salvar.click();
+    await expect(salvar).toHaveCount(0, { timeout: 15_000 });
+  });
+
+  test('desktop: novo lançamento em painel lateral, detalhe ao lado e busca em todo o histórico', async ({ page }) => {
+    test.skip((page.viewportSize()?.width ?? 0) < 1024, 'recursos só do desktop');
+    const nota = `E2E painel ${Date.now() % 100000}`;
+    await entrar(page);
+    await page.waitForLoadState('networkidle');
+    // atalho N abre o painel sobre a lista de gastos
+    await page.keyboard.press('n');
+    const painel = page.getByRole('dialog', { name: 'Novo lançamento' });
+    await expect(painel).toBeVisible();
+    await painel.getByRole('textbox', { name: /^valor/i }).fill('7,77');
+    await painel.getByLabel(/descrição/i).fill(nota);
+    await painel.getByRole('button', { name: 'Salvar lançamento' }).click();
+    await expect(painel).toHaveCount(0, { timeout: 15_000 });
+    // clicar na linha seleciona e mostra o detalhe ao lado (sem sair da lista)
+    const linha = page.getByRole('link', { name: new RegExp(nota) }).first();
+    await expect(linha).toBeVisible({ timeout: 15_000 });
+    await linha.click();
+    await expect(page).toHaveURL(/sel=/);
+    const detalhe = page.getByRole('complementary', { name: 'Detalhe do lançamento' });
+    await expect(detalhe).toContainText(nota);
+    // atalho / leva à busca da barra superior, que procura em todo o histórico
+    await page.keyboard.press('/');
+    const busca = page.getByRole('searchbox', { name: /todo o histórico/i });
+    await expect(busca).toBeFocused();
+    await busca.fill(nota);
+    await busca.press('Enter');
+    await expect(page).toHaveURL(/tudo=1/);
+    await expect(page.getByText(/em todo o histórico/i).first()).toBeVisible();
+    // excluir pelo painel de detalhe mantém a busca aplicada
+    await page.getByRole('link', { name: new RegExp(nota) }).first().click();
+    await expect(page).toHaveURL(/sel=/);
+    await page.getByRole('complementary', { name: 'Detalhe do lançamento' }).getByRole('button', { name: /excluir/i }).click();
+    await expect(page.getByRole('complementary', { name: 'Detalhe do lançamento' })).toHaveCount(0, { timeout: 15_000 });
+    await expect(page).toHaveURL(/tudo=1/);
+    await expect(page.getByRole('link', { name: new RegExp(nota) })).toHaveCount(0, { timeout: 15_000 });
+  });
 });
 
 // Varredura de formulários: preenche cada formulário de criação/edição com valores plausíveis, envia e
