@@ -1,6 +1,14 @@
 import { addMeses, dataNoMes, type Competencia, type IsoDate } from '../shared/competencia';
+import { enesimoDiaUtil, ultimoDiaUtil } from '../shared/dias-uteis';
 import type { Cents } from '../shared/money';
 import { dividirSalario, type Holerite } from './holerite';
+
+/**
+ * Quando cai o pagamento final: num dia fixo do mês seguinte à referência (`finalDay`), no 5º dia útil
+ * do mês seguinte, ou no último dia útil do próprio mês de referência.
+ */
+export type RegraPagamentoFinal = 'dia' | 'quinto_dia_util' | 'ultimo_dia_util';
+export const REGRAS_PAGAMENTO_FINAL: readonly RegraPagamentoFinal[] = ['dia', 'quinto_dia_util', 'ultimo_dia_util'];
 
 export type TipoRecebimento =
   'advance' | 'final' | 'thirteenth_1' | 'thirteenth_2' | 'vacation' | 'plr' | 'extra';
@@ -13,6 +21,7 @@ export interface FonteRenda {
   advancePercent: number | null;
   advanceDay: number | null;
   finalDay: number | null;
+  finalRule: RegraPagamentoFinal;
   walletId: string | null;
   active: boolean;
   dependents: number;
@@ -39,7 +48,7 @@ export type NovoPrevisto = Pick<
 
 /**
  * Previstos de um mês de referência. Datas são OPCIONAIS: sem advance_day/final_day não gera previsto
- * (o app aceita lançamento manual). O pagamento final cai no mês seguinte ao da referência.
+ * (o app aceita lançamento manual). A data do pagamento final segue `finalRule`.
  */
 export function gerarPrevistos(
   fonte: FonteRenda,
@@ -58,15 +67,30 @@ export function gerarPrevistos(
       expectedOn: dataNoMes(competencia, fonte.advanceDay),
       expectedNetCents: adiantamentoCents,
     });
-  if (fonte.finalDay)
+  const dataFinal = dataDoPagamentoFinal(fonte, competencia);
+  if (dataFinal)
     out.push({
       ...base,
       kind: 'final',
-      expectedOn: dataNoMes(addMeses(competencia, 1), fonte.finalDay),
+      expectedOn: dataFinal,
       expectedNetCents: finalCents,
     });
   return out;
 }
+
+/** Data prevista do pagamento final de uma referência; null quando a regra é "dia" e o dia não foi informado. */
+export function dataDoPagamentoFinal(
+  fonte: Pick<FonteRenda, 'finalDay' | 'finalRule'>,
+  competencia: Competencia,
+): IsoDate | null {
+  if (fonte.finalRule === 'ultimo_dia_util') return ultimoDiaUtil(competencia);
+  if (fonte.finalRule === 'quinto_dia_util') return enesimoDiaUtil(addMeses(competencia, 1), 5);
+  return fonte.finalDay ? dataNoMes(addMeses(competencia, 1), fonte.finalDay) : null;
+}
+
+/** Tem alguma data cadastrada (adiantamento ou final), ou seja, o app consegue gerar previstos. */
+export const temDatas = (f: Pick<FonteRenda, 'advanceDay' | 'finalDay' | 'finalRule'>): boolean =>
+  !!f.advanceDay || !!f.finalDay || f.finalRule !== 'dia';
 
 export const totalRecebido = (rs: Recebimento[]): Cents =>
   rs.reduce((s, r) => s + (r.netCents ?? 0), 0);

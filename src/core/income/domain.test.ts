@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { gerarPrevistos, proximoRecebimento, type FonteRenda, type Recebimento } from './domain';
+import { dataDoPagamentoFinal, gerarPrevistos, proximoRecebimento, temDatas, type FonteRenda, type Recebimento } from './domain';
 
 const fonte = (o: Partial<FonteRenda> = {}): FonteRenda => ({
   id: 's1',
@@ -10,6 +10,7 @@ const fonte = (o: Partial<FonteRenda> = {}): FonteRenda => ({
   advancePercent: 40,
   advanceDay: 20,
   finalDay: 5,
+  finalRule: 'dia',
   walletId: null,
   active: true,
   dependents: 0,
@@ -55,5 +56,24 @@ describe('próximo recebimento', () => {
   it('previsto para hoje conta; sem data ou já recebido, não', () => {
     expect(proximoRecebimento([rec('a', '2026-11-16')], '2026-11-16')?.id).toBe('a');
     expect(proximoRecebimento([rec('a', null), rec('b', '2026-11-20', '2026-11-15')], '2026-11-16')).toBeNull();
+  });
+});
+
+describe('regra do pagamento final', () => {
+  it('último dia útil cai no próprio mês de referência', () => {
+    const p = gerarPrevistos(fonte({ finalRule: 'ultimo_dia_util', finalDay: null }), '2026-05', holerite);
+    expect(p.find((x) => x.kind === 'final')?.expectedOn).toBe('2026-05-29');
+  });
+  it('5º dia útil cai no mês seguinte', () => {
+    const p = gerarPrevistos(fonte({ finalRule: 'quinto_dia_util', finalDay: null }), '2026-11', holerite);
+    expect(p.find((x) => x.kind === 'final')?.expectedOn).toBe('2026-12-07');
+  });
+  it('dia fixo continua no mês seguinte', () => {
+    expect(dataDoPagamentoFinal({ finalRule: 'dia', finalDay: 5 }, '2026-11')).toBe('2026-12-05');
+    expect(dataDoPagamentoFinal({ finalRule: 'dia', finalDay: null }, '2026-11')).toBeNull();
+  });
+  it('temDatas considera a regra', () => {
+    expect(temDatas({ advanceDay: null, finalDay: null, finalRule: 'ultimo_dia_util' })).toBe(true);
+    expect(temDatas({ advanceDay: null, finalDay: null, finalRule: 'dia' })).toBe(false);
   });
 });

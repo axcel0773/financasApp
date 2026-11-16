@@ -4,7 +4,7 @@ import {
   registrarExtraAction,
   salvarFonteAction,
 } from '@/app/_actions/renda';
-import { proximoRecebimento, totalPrevistoPendente, totalRecebido } from '@/core/income/domain';
+import { proximoRecebimento, temDatas, totalPrevistoPendente, totalRecebido } from '@/core/income/domain';
 import { dividirSalario, estimarHolerite } from '@/core/income/holerite';
 import { addMeses } from '@/core/shared/competencia';
 import { desativarFonteAction } from '@/app/_actions/gestao';
@@ -123,7 +123,7 @@ export default async function RendaPage({
           <SectionTitle>Recebimentos</SectionTitle>
           {recebimentos.length === 0 ? (
             <EmptyState icone="wallet" title="Nenhum recebimento neste mês">
-              {fonte?.advanceDay || fonte?.finalDay
+              {fonte && temDatas(fonte)
                 ? 'Gere os previstos abaixo ou registre um recebimento manual.'
                 : 'As datas do salário são opcionais: registre cada recebimento quando acontecer.'}
             </EmptyState>
@@ -148,7 +148,7 @@ export default async function RendaPage({
               ))}
             </Card>
           )}
-          {fonte && (fonte.advanceDay || fonte.finalDay) && (
+          {fonte && temDatas(fonte) && (
             <ActionForm
               action={gerarPrevistosAction}
               submitLabel={`Gerar previstos de ${rotuloCompetencia(mes)}`}
@@ -221,7 +221,7 @@ export default async function RendaPage({
                   required
                 />
               </Field>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 <Field label="Adiant. %">
                   <Input
                     name="advancePercent"
@@ -238,7 +238,16 @@ export default async function RendaPage({
                     placeholder="20"
                   />
                 </Field>
-                <Field label="Dia final">
+              </div>
+              <div className="grid grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-3">
+                <Field label="Pagamento final">
+                  <Select name="finalRule" defaultValue={fonte?.finalRule ?? 'dia'}>
+                    <option value="dia">Dia fixo do mês seguinte</option>
+                    <option value="quinto_dia_util">5º dia útil do mês seguinte</option>
+                    <option value="ultimo_dia_util">Último dia útil do mês</option>
+                  </Select>
+                </Field>
+                <Field label="Dia fixo">
                   <Input
                     name="finalDay"
                     inputMode="numeric"
@@ -265,8 +274,9 @@ export default async function RendaPage({
                 </Field>
               </div>
               <p className="text-xs text-muted">
-                Dependentes e pensão reduzem o IRRF estimado. Datas e percentual são opcionais. O pagamento final cai no mês seguinte ao de
-                referência. Sem datas, o app não gera previstos e você registra manualmente.
+                Dependentes e pensão reduzem o IRRF estimado. Datas e percentual são opcionais. O dia fixo só vale para
+                “Dia fixo do mês seguinte”; no último dia útil, o pagamento cai no próprio mês. Dias úteis descontam fins de
+                semana e feriados nacionais. Sem datas, o app não gera previstos e você registra manualmente.
               </p>
               <Field label="Cai na carteira">
                 <Select name="walletId" defaultValue={fonte?.walletId ?? carteiras[0]?.id ?? ''}>

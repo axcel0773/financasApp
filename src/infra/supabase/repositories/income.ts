@@ -52,7 +52,7 @@ export class SupabaseIncomeRepository implements IncomeRepository {
     const { data, error } = await this.db
       .from('income_sources')
       .select(
-        'id,kind,name,employer,gross_cents,advance_percent,advance_day,final_day,wallet_id,active,dependents,alimony_cents',
+        'id,kind,name,employer,gross_cents,advance_percent,advance_day,final_day,final_rule,wallet_id,active,dependents,alimony_cents',
       )
       .order('created_at');
     check(error, 'listar fontes de renda');
@@ -65,6 +65,7 @@ export class SupabaseIncomeRepository implements IncomeRepository {
       advancePercent: numOrNull(s.advance_percent),
       advanceDay: numOrNull(s.advance_day),
       finalDay: numOrNull(s.final_day),
+      finalRule: s.final_rule ?? 'dia',
       walletId: s.wallet_id,
       active: s.active,
       dependents: num(s.dependents),
@@ -80,6 +81,7 @@ export class SupabaseIncomeRepository implements IncomeRepository {
       advance_percent: f.advancePercent,
       advance_day: f.advanceDay,
       final_day: f.finalDay,
+      final_rule: f.finalRule,
       wallet_id: f.walletId,
       active: f.active,
       dependents: f.dependents,
