@@ -1,6 +1,6 @@
 # ADR 010 — Direção visual "Extrato aberto"
 
-Status: aceita (12/11/2026)
+Status: substituída pelo ADR 011 (16/11/2026); aceita em 12/11/2026
 
 ## Contexto
 
