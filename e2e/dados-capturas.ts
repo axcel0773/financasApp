@@ -106,5 +106,5 @@ export async function semearDadosDeExemplo(email: string, senha: string) {
       tx(diasAtras(70), 31000, 'Supermercado', 'Mercado', 'checking'),
     ]),
   );
-  await db.auth.signOut();
+  // Sem signOut: o padrão dele encerra TODAS as sessões do usuário, inclusive a do navegador e a dos outros testes.
 }
