@@ -34,6 +34,14 @@ const P = {
   receipt: 'M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6',
   cart: 'M3 4h3l2 12h10l2-8H7M10 20h.01M17 20h.01',
   backspace: 'M21 5H9l-6 7 6 7h12zM13 9l4 6M17 9l-4 6',
+  fork: 'M5 3v6a2 2 0 004 0V3M7 11v10M17 3c-2 2-3 5-3 8h3zM17 11v10',
+  car: 'M5 16l1.5-6h11L19 16M3 16h18v3H3zM7 19v2M17 19v2',
+  heart: 'M12 20s-7-4.5-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.5-7 10-7 10z',
+  star: 'M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z',
+  book: 'M4 5a2 2 0 012-2h13v16H6a2 2 0 00-2 2zM4 21V5M9 7h6',
+  bag: 'M5 8h14l-1 13H6zM9 8V6a3 3 0 016 0v2',
+  tag: 'M3 12V4h8l10 10-8 8zM7.5 8h.01',
+  plane: 'M3 13l18-8-6 16-3-7zM12 14l9-9',
   offline: 'M2 8.8a15 15 0 0120 0M5 12.5a10 10 0 0114 0M9 16a5 5 0 016 0M12 20h.01M3 3l18 18',
 } as const;
 export type IconName = keyof typeof P;

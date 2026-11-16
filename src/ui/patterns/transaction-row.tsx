@@ -3,6 +3,7 @@ import { Chip } from '../primitives/chip';
 import { Icon } from '../primitives/icon';
 import { LinkLinha } from './link-linha';
 import { AmountDisplay } from './amount-display';
+import { CategoryIcon } from './category-icon';
 
 export interface LinhaTransacao {
   id: string;
@@ -42,16 +43,7 @@ export function TransactionRow({
       )}
     >
       {tabela && <span className="hidden text-sm text-muted lg:block">{t.data}</span>}
-      <span
-        aria-hidden
-        className={cx(
-          'flex h-10 w-10 shrink-0 items-center justify-center rounded-md text-sm font-bold text-white',
-          tabela && 'lg:hidden',
-        )}
-        style={{ background: t.categoria?.cor ?? '#667085' }}
-      >
-        {(t.categoria?.nome ?? t.descricao).slice(0, 1).toUpperCase()}
-      </span>
+      <CategoryIcon nome={t.categoria?.nome} cor={t.categoria?.cor} className={tabela ? 'lg:hidden' : undefined} />
       <span className={cx('min-w-0 flex-1', tabela && 'lg:flex-none')}>
         <span className="block truncate font-semibold">{t.descricao}</span>
         <span className={cx('block truncate text-xs text-muted', tabela && 'lg:hidden')}>
@@ -70,8 +62,9 @@ export function TransactionRow({
       </span>
       {tabela && (
         <>
-          <span className="hidden truncate text-sm lg:block">
-            {t.categoria?.nome ?? 'Sem categoria'}
+          <span className="hidden min-w-0 items-center gap-2 text-sm lg:flex">
+            <CategoryIcon nome={t.categoria?.nome} cor={t.categoria?.cor} className="h-7 w-7 rounded-[9px]" />
+            <span className="truncate">{t.categoria?.nome ?? 'Sem categoria'}</span>
           </span>
           <span className="hidden truncate text-sm text-muted lg:block">{t.carteira}</span>
         </>

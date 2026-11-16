@@ -1,3 +1,4 @@
+import { CategoryIcon } from '@/ui/patterns/category-icon';
 import { excluirCategoriaAction, removerRegraCategoriaAction, salvarCategoriaAction, salvarRegraCategoriaAction } from '@/app/_actions/gestao';
 import { carregarBase } from '@/features/base';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
@@ -26,7 +27,7 @@ export default async function CategoriasPage() {
       <div className="space-y-3 lg:grid lg:grid-cols-3 lg:gap-4 lg:space-y-0">
         {categories.map((x) => (
           <Card key={x.id}>
-            <p className="flex items-center gap-2 font-semibold"><span aria-hidden className="h-3.5 w-3.5 rounded-full" style={{ background: x.color ?? '#667085' }} />{x.name}</p>
+            <p className="flex items-center gap-3 font-semibold"><CategoryIcon nome={x.name} cor={x.color} />{x.name}</p>
             <details>
               <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">Editar</summary>
               <ActionForm action={salvarCategoriaAction} submitLabel="Salvar" className="space-y-3 pb-1">
