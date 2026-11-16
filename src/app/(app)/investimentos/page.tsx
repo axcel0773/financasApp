@@ -82,16 +82,6 @@ export default async function InvestimentosPage() {
   const alocacao = aloc.length > 0 && total > 0 && (
     <Card>
       <Donut titulo="Alocação por tipo" fatias={fatias} />
-      <ul className="mt-3 divide-y divide-border text-sm">
-        {fatias.map((f) => (
-          <li key={f.label} className="flex items-center gap-2 py-2">
-            <span aria-hidden className="h-2.5 w-2.5 shrink-0 rounded-full" style={{ background: f.color }} />
-            <span className="flex-1">{f.label}</span>
-            <span className="amount text-muted">{Math.round((f.value / total) * 100)}%</span>
-            <span className="amount w-28 text-right font-semibold">{centavosParaCampo(f.value)}</span>
-          </li>
-        ))}
-      </ul>
     </Card>
   );
 
@@ -219,7 +209,7 @@ export default async function InvestimentosPage() {
               </p>
               <AcoesInvestimento
                 paineis={[
-                  { chave: 'mov', rotulo: 'Aporte/resgate', conteudo: (
+                  { chave: 'mov', rotulo: 'Movimentar', conteudo: (
 <ActionForm
                   action={registrarAporteAction}
                   submitLabel="Registrar"

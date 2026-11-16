@@ -55,7 +55,7 @@ export function Topbar() {
       >
         <Icon name="plus" size={18} />
         Novo lançamento
-        <kbd className="rounded bg-white/20 px-1.5 text-xs font-medium">N</kbd>
+        <kbd className="rounded border border-current px-1.5 text-xs font-medium opacity-60">N</kbd>
       </Link>
     </header>
   );

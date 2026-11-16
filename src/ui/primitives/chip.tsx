@@ -46,7 +46,7 @@ export function FilterChip({
       href={href}
       aria-current={ativo ? 'true' : undefined}
       className={cx(
-        'inline-flex min-h-11 items-center rounded-full border px-4 text-sm font-semibold',
+        'inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full border px-4 text-sm font-semibold',
         ativo ? 'border-primary bg-primary text-primary-fg' : 'border-transparent bg-soft text-ink',
       )}
     >
