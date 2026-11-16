@@ -124,7 +124,7 @@ export default async function FixosPage() {
         <div>
           <SectionTitle>Gastos fixos</SectionTitle>
           {regras.length === 0 ? (
-            <EmptyState icone="repeat" title="Nenhum gasto fixo">Use “Novo gasto fixo” para cadastrar aluguel, internet ou assinaturas.</EmptyState>
+            <EmptyState icone="repeat" title="Nenhum gasto fixo">Cadastre aluguel, internet ou assinaturas no formulário logo abaixo.</EmptyState>
           ) : (
             <Card className="py-1">
               {regras.map((r) => {

@@ -136,7 +136,7 @@ export default async function MetasPage() {
       <div>
       <SectionTitle>Suas metas</SectionTitle>
       {metas.length === 0 ? (
-        <EmptyState icone="target" title="Nenhuma meta">Use “Nova meta”, mais abaixo, para criar a primeira, com valor e prazo.</EmptyState>
+        <EmptyState icone="target" title="Nenhuma meta">Crie a primeira no formulário mais abaixo, com valor e prazo.</EmptyState>
       ) : (
         <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
           {metas.map((m) => {
