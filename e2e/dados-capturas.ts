@@ -12,9 +12,9 @@ export async function semearDadosDeExemplo(email: string, senha: string) {
   const db = createClient(url, anon, { auth: { persistSession: false } });
   const { error: e0 } = await db.auth.signInWithPassword({ email, password: senha });
   if (e0) throw e0;
-  const ok = <T>(r: { data: T; error: unknown }) => {
+  const ok = <T>(r: { data: T | null; error: unknown }): T => {
     if (r.error) throw r.error;
-    return r.data;
+    return r.data as T;
   };
   const ja = ok(await db.from('goals').select('id').eq('name', 'Reserva de emergência').limit(1));
   if (ja.length) return;
