@@ -31,6 +31,10 @@ jobs:
       - run: npm run build
       - run: npx playwright install --with-deps chromium
       - run: npm run test:e2e
+      # Capturas das telas principais, para conferir o visual sem precisar rodar o app
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: capturas, path: capturas/, if-no-files-found: ignore, retention-days: 7 }
       - run: npx lhci autorun
   rls:
     runs-on: ubuntu-latest
