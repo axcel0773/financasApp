@@ -23,8 +23,9 @@ export function ShellEffects({
 
   useEffect(() => {
     const el = document.documentElement;
-    if (tema === 'system') el.removeAttribute('data-theme');
-    else el.setAttribute('data-theme', tema);
+    el.setAttribute('data-theme', tema);
+    // espelha em cookie para o servidor já renderizar no tema escolhido (sem piscar na próxima visita)
+    document.cookie = `tema=${tema}; path=/; max-age=31536000; samesite=lax`;
     let oculto = ocultar;
     try {
       const salvo = localStorage.getItem('ocultar-valores');

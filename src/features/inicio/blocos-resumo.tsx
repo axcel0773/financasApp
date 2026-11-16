@@ -31,7 +31,7 @@ export async function BlocoHero() {
     .map((d) => ({ walletKind: d.walletKind, cents: d.cents }));
   const sobra = calcularSobraDoMes(recebido, gastos);
   const gasto = gastos.filter((g) => !ehBeneficio(g.walletKind)).reduce((s, g) => s + g.cents, 0);
-  // Desktop: evolução diária da sobra no mês (recebido acumulado menos gasto acumulado, sem VR/VA).
+  // Evolução diária da sobra no mês (recebido acumulado menos gasto acumulado, sem VR/VA).
   const diaAtual = Number(hoje.slice(8, 10));
   const porDia = new Array<number>(diaAtual + 1).fill(0);
   const dia = (iso: string) => Math.min(diaAtual, Math.max(1, Number(iso.slice(8, 10))));
@@ -55,11 +55,11 @@ export async function BlocoHero() {
           viewBox="0 0 460 80"
           role="img"
           aria-label={`Evolução da sobra do mês, dia 1 a ${diaAtual}`}
-          className="mt-4 hidden h-20 w-full lg:block"
+          className="mt-4 block h-16 w-full lg:h-20"
           preserveAspectRatio="none"
         >
-          <polyline points={`${pts.join(' ')} 460,80 0,80`} fill="white" fillOpacity="0.12" stroke="none" />
-          <polyline points={pts.join(' ')} fill="none" stroke="white" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
+          <polyline points={`${pts.join(' ')} 460,80 0,80`} fill="var(--accent)" fillOpacity="0.14" stroke="none" />
+          <polyline points={pts.join(' ')} fill="none" stroke="var(--accent)" strokeWidth="2" strokeLinejoin="round" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
         </svg>
       )}
       <div className="mt-5 grid grid-cols-2 gap-2.5 text-sm">

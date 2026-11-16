@@ -11,6 +11,8 @@ const config: Config = {
         muted: 'var(--muted)',
         primary: { DEFAULT: 'var(--primary)', dark: 'var(--primary-dark)', fg: 'var(--primary-fg)' },
         soft: 'var(--soft)',
+        accent: { DEFAULT: 'var(--accent)', fg: 'var(--accent-fg)' },
+        chart: 'var(--chart)',
         link: 'var(--link)',
         income: 'var(--income)',
         brass: 'var(--brass)',

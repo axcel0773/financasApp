@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next';
 import { Onest } from 'next/font/google';
-import { headers } from 'next/headers';
+import { cookies, headers } from 'next/headers';
 import './globals.css';
 
 const body = Onest({ subsets: ['latin'], variable: '--font-body' });
@@ -29,13 +29,16 @@ export const metadata: Metadata = {
     ],
   },
 };
-export const viewport: Viewport = { themeColor: '#0d1b2a', viewportFit: 'cover' };
+export const viewport: Viewport = { themeColor: '#0a0a0b', viewportFit: 'cover' };
 
 /** Lê os headers para que toda página seja renderizada por requisição: só assim o Next aplica o nonce da CSP aos scripts. */
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   await headers();
+  // Escuro é o padrão. O cookie espelha a escolha salva em Ajustes para o servidor já entregar o tema certo.
+  const salvo = (await cookies()).get('tema')?.value;
+  const tema = salvo === 'light' || salvo === 'system' ? salvo : 'dark';
   return (
-    <html lang="pt-BR" className={body.variable}>
+    <html lang="pt-BR" className={body.variable} data-theme={tema}>
       <body className="antialiased">{children}</body>
     </html>
   );

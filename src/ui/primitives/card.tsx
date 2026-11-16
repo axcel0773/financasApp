@@ -4,10 +4,10 @@ import type { HTMLAttributes } from 'react';
 import { cx } from '../cx';
 
 export function Card({ className, ...p }: HTMLAttributes<HTMLDivElement>) {
-  return <div {...p} className={cx('rounded-lg border border-border bg-surface p-4', className)} />;
+  return <div {...p} className={cx('rounded-xl border border-border bg-surface p-4', className)} />;
 }
 export function Hero({ className, ...p }: HTMLAttributes<HTMLDivElement>) {
-  return <div {...p} className={cx('rounded-2xl bg-primary-dark p-6 text-white', className)} />;
+  return <div {...p} className={cx('rounded-2xl border border-border bg-primary-dark p-6 text-white', className)} />;
 }
 export function SectionTitle({
   children,

@@ -17,10 +17,10 @@ export function ProgressBar({
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={Math.round(v)}
-      className="h-2.5 w-full overflow-hidden rounded-full bg-border"
+      className="h-2.5 w-full overflow-hidden rounded-full bg-soft"
     >
       <div
-        className={cx('h-full rounded-full', tom === 'alert' ? 'bg-expense' : 'bg-trip')}
+        className={cx('h-full rounded-full', tom === 'alert' ? 'bg-expense' : 'bg-chart')}
         style={{ width: `${v}%` }}
       />
     </div>

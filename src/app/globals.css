@@ -2,72 +2,87 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * Tema: ESCURO é o padrão (preto neutro, um só destaque verde-limão). O claro é opção em Mais → Ajustes
+ * (data-theme='light'), e 'system' segue o aparelho. Pares texto/fundo ≥ 4,5:1 nos dois temas.
+ */
 :root {
-  --bg: #ffffff;
+  --bg: #0a0a0b;
+  --surface: #151517;
+  --soft: #1f1f23;
+  --border: #2b2b30;
+  --ink: #f4f4f5;
+  --muted: #a1a1aa;
+  --primary: #f4f4f5;
+  --primary-fg: #0a0a0b;
+  --primary-dark: #151517;
+  --accent: #c5f04a;
+  --accent-fg: #0a0a0b;
+  --chart: #c5f04a;
+  --focus: #c5f04a;
+  --link: #c5f04a;
+  --income: #b4e84e;
+  --brass: #c5f04a;
+  --trip: #8ab4ff;
+  --expense: #ff6b5e;
+  --expense-text: #ff8f85;
+  --voucher: #8ab4ff;
+  --danger-bg: #2a1513;
+  --ok-bg: #1b2610;
+  color-scheme: dark;
+  --font-display: var(--font-body);
+}
+:root[data-theme='light'] {
+  --bg: #f6f6f4;
   --surface: #ffffff;
-  --soft: #f1f4f9;
-  --border: #e3e8f0;
-  --ink: #0d1b2a;
-  --muted: #566274;
-  --primary: #0d1b2a;
+  --soft: #efefec;
+  --border: #e0e0db;
+  --ink: #0a0a0b;
+  --muted: #5b5b63;
+  --primary: #0a0a0b;
   --primary-fg: #ffffff;
-  --primary-dark: #0d1b2a;
-  --link: #1b45b8;
-  --income: #0b7a4f;
-  --brass: #a87a2e;
+  --primary-dark: #0a0a0b;
+  --accent: #c5f04a;
+  --accent-fg: #0a0a0b;
+  --chart: #0a0a0b;
+  --focus: #0a0a0b;
+  --link: #3f6212;
+  --income: #3f6212;
+  --brass: #65a30d;
   --trip: #2b5bd7;
   --expense: #b42318;
   --expense-text: #b42318;
   --voucher: #1b45b8;
   --danger-bg: #fef3f2;
-  --ok-bg: #ecfdf3;
-  --font-display: var(--font-body);
+  --ok-bg: #f0f7e2;
   color-scheme: light;
 }
-/* Modo escuro: automático pelo sistema, com opção manual em Mais (data-theme). Pares texto/fundo ≥ 4,5:1. */
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    --bg: #0c1424;
-    --surface: #142038;
-    --soft: #1a2a47;
-    --border: #25365a;
-    --ink: #e8ecf3;
-    --muted: #9aa7bd;
-    --primary: #e8ecf3;
-    --primary-fg: #0d1b2a;
-    --primary-dark: #1a2b47;
-    --link: #8fb0ff;
-    --income: #4fd6a4;
-    --brass: #d9ae5b;
-    --trip: #6c9bff;
-    --expense: #f08a7e;
-    --expense-text: #f5a79d;
-    --voucher: #8fb0ff;
-    --danger-bg: #2a1512;
-    --ok-bg: #10261c;
-    color-scheme: dark;
+@media (prefers-color-scheme: light) {
+  :root[data-theme='system'] {
+    --bg: #f6f6f4;
+    --surface: #ffffff;
+    --soft: #efefec;
+    --border: #e0e0db;
+    --ink: #0a0a0b;
+    --muted: #5b5b63;
+    --primary: #0a0a0b;
+    --primary-fg: #ffffff;
+    --primary-dark: #0a0a0b;
+    --accent: #c5f04a;
+    --accent-fg: #0a0a0b;
+    --chart: #0a0a0b;
+    --focus: #0a0a0b;
+    --link: #3f6212;
+    --income: #3f6212;
+    --brass: #65a30d;
+    --trip: #2b5bd7;
+    --expense: #b42318;
+    --expense-text: #b42318;
+    --voucher: #1b45b8;
+    --danger-bg: #fef3f2;
+    --ok-bg: #f0f7e2;
+    color-scheme: light;
   }
-}
-:root[data-theme='dark'] {
-  --bg: #0c1424;
-  --surface: #142038;
-  --soft: #1a2a47;
-  --border: #25365a;
-  --ink: #e8ecf3;
-  --muted: #9aa7bd;
-  --primary: #e8ecf3;
-  --primary-fg: #0d1b2a;
-  --primary-dark: #1a2b47;
-  --link: #8fb0ff;
-  --income: #4fd6a4;
-  --brass: #d9ae5b;
-  --trip: #6c9bff;
-  --expense: #f08a7e;
-  --expense-text: #f5a79d;
-  --voucher: #8fb0ff;
-  --danger-bg: #2a1512;
-  --ok-bg: #10261c;
-  color-scheme: dark;
 }
 
 html {
@@ -85,7 +100,7 @@ textarea {
   font-size: 16px;
 } /* evita zoom no iOS */
 :focus-visible {
-  outline: 2px solid var(--primary);
+  outline: 2px solid var(--focus);
   outline-offset: 2px;
 }
 .amount {
@@ -185,7 +200,7 @@ nav a:active {
   position: absolute;
   inset: 0;
   border-radius: 9999px;
-  background: var(--primary);
+  background: var(--accent);
   opacity: 0;
   pointer-events: none;
 }

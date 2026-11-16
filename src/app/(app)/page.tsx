@@ -3,6 +3,7 @@ import { getContainer } from '@/composition/container';
 import {
   BlocoAvisos,
   BlocoBeneficios,
+  BlocoCalor,
   BlocoGastosMes,
   BlocoViagens,
   BlocoContas,
@@ -11,10 +12,12 @@ import {
   BlocoRecebimentos,
   BlocoRecentes,
   BlocoTendencia,
+  BlocoWidgets,
 } from '@/features/inicio/blocos';
 import { HideToggle } from '@/features/shell/hide-toggle';
 import { dataLonga } from '@/ui/format';
 import { PageHeader } from '@/ui/primitives/card';
+import { FilterChip } from '@/ui/primitives/chip';
 import { Skeleton } from '@/ui/primitives/progress';
 
 export const metadata = { title: 'Início' };
@@ -26,10 +29,25 @@ export default async function InicioPage() {
   return (
     <>
       <PageHeader title="Início" subtitle={dataLonga(hoje)} action={<div className="lg:hidden"><HideToggle /></div>} />
+      <nav aria-label="Atalhos" className="no-scrollbar -mx-5 mb-4 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:px-0">
+        <FilterChip href="/" ativo>
+          Visão geral
+        </FilterChip>
+        <FilterChip href="/cartao" ativo={false}>Cartão</FilterChip>
+        <FilterChip href="/investimentos" ativo={false}>Investimentos</FilterChip>
+        <FilterChip href="/orcamento" ativo={false}>Orçamento</FilterChip>
+        <FilterChip href="/mais/viagens" ativo={false}>Viagens</FilterChip>
+      </nav>
       <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:gap-8">
         <div>
           <Suspense fallback={fallback('h-44')}>
             <BlocoHero />
+          </Suspense>
+          <Suspense fallback={fallback('mt-3 h-80')}>
+            <BlocoWidgets />
+          </Suspense>
+          <Suspense fallback={fallback('mt-6 h-48')}>
+            <BlocoCalor />
           </Suspense>
           <Suspense fallback={null}>
             <BlocoAvisos />

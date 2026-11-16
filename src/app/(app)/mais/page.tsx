@@ -83,9 +83,9 @@ export default async function MaisPage() {
                   name="theme"
                   defaultValue={a.theme}
                   options={[
-                    { value: 'system', label: 'Sistema' },
-                    { value: 'light', label: 'Claro' },
                     { value: 'dark', label: 'Escuro' },
+                    { value: 'light', label: 'Claro' },
+                    { value: 'system', label: 'Sistema' },
                   ]}
                 />
               </Field>

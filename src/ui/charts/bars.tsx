@@ -24,20 +24,22 @@ export function Bars({ barras, titulo }: { barras: Barra[]; titulo: string }) {
     >
       {barras.map((b, i) => {
         const bh = (b.value / max) * (base - 20);
+        // barra em pílula: com valor, nunca menor que a própria largura; sem valor, só um traço
+        const alt = b.value > 0 ? Math.max(bh, bw) : 3;
         const x = x0 + i * (bw + gap);
         return (
           <g key={b.label}>
             <rect
               x={x}
-              y={base - bh}
+              y={base - alt}
               width={bw}
-              height={Math.max(bh, 1)}
-              rx="4"
-              fill={b.destaque ? 'var(--primary)' : 'var(--border)'}
+              height={alt}
+              rx={Math.min(bw, alt) / 2}
+              fill={b.destaque ? 'var(--chart)' : 'var(--soft)'}
             />
             <text
               x={x + bw / 2}
-              y={base - bh - 4}
+              y={base - alt - 4}
               textAnchor="middle"
               fontSize="8"
               fill="var(--muted)"

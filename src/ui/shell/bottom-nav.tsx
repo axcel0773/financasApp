@@ -10,14 +10,14 @@ export function BottomNav() {
     <div className="pointer-events-none fixed inset-x-0 bottom-0 z-20 px-5 pb-[calc(env(safe-area-inset-bottom)+14px)] md:hidden">
       <nav
         aria-label="Navegação principal"
-        className="pointer-events-auto mx-auto flex h-16 max-w-md items-center gap-0.5 rounded-full border border-border bg-surface px-2 shadow-[0_6px_24px_rgba(13,27,42,0.16)]"
+        className="pointer-events-auto mx-auto flex h-16 max-w-md items-center gap-0.5 rounded-full border border-border bg-surface px-2 shadow-[0_8px_28px_rgba(0,0,0,0.35)]"
       >
         <NavLink item={a!} variante="bottom" />
         <NavLink item={b!} variante="bottom" />
         <Link
           href="/gastos/novo"
           aria-label="Novo lançamento"
-          className="fab mx-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-full border-2 border-brass bg-primary text-primary-fg"
+          className="fab mx-1 flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg"
         >
           <Icon name="plus" size={24} />
         </Link>

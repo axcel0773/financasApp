@@ -18,7 +18,7 @@ export function NavLink({ item, variante }: { item: ItemNav; variante: 'bottom' 
         aria-current={ativo ? 'page' : undefined}
         className={cx(
           'flex h-12 items-center justify-center gap-2 rounded-full text-sm font-semibold',
-          ativo ? 'flex-[1.5] bg-primary text-primary-fg' : 'flex-1 text-muted',
+          ativo ? 'flex-[1.5] bg-accent text-accent-fg' : 'flex-1 text-muted',
         )}
       >
         <Icon name={item.icon} size={ativo ? 20 : 22} />

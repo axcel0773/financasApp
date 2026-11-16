@@ -19,7 +19,7 @@ export function Donut({ fatias, titulo }: { fatias: Fatia[]; titulo: string }) {
         aria-label={`${titulo}: total ${formatBRL(total)}`}
         className="w-44 shrink-0"
       >
-        <circle cx="21" cy="21" r={R} fill="none" stroke="var(--border)" strokeWidth="6" />
+        <circle cx="21" cy="21" r={R} fill="none" stroke="var(--soft)" strokeWidth="4.5" />
         {total > 0 &&
           fatias.map((f) => {
             const pct = (f.value / total) * 100;
@@ -31,7 +31,7 @@ export function Donut({ fatias, titulo }: { fatias: Fatia[]; titulo: string }) {
                 r={R}
                 fill="none"
                 stroke={f.color}
-                strokeWidth="6"
+                strokeWidth="4.5"
                 strokeDasharray={`${pct} ${100 - pct}`}
                 strokeDashoffset={25 - acc}
               />

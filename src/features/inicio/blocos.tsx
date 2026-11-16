@@ -2,3 +2,4 @@
 export * from './blocos-resumo';
 export * from './blocos-planejamento';
 export * from './blocos-movimento';
+export * from './blocos-widgets';
