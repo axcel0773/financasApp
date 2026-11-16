@@ -5,27 +5,50 @@ import { carregarBase } from '@/features/base';
 import { centavosParaCampo } from '@/ui/format';
 import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
-import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
-import { Chip } from '@/ui/primitives/chip';
+import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
+import { Recolhivel } from '@/ui/patterns/collapsible';
+import { IconeRedondo } from '@/ui/patterns/round-icon';
+import type { IconName } from '@/ui/primitives/icon';
 import { Field, Input, MoneyInput, Select } from '@/ui/primitives/fields';
 
 export const metadata = { title: 'Carteiras' };
+
+const ICONE: Record<WalletKind, IconName> = {
+  checking: 'wallet',
+  cash: 'wallet',
+  credit_card: 'card',
+  meal_voucher: 'ticket',
+  food_voucher: 'ticket',
+};
 
 export default async function CarteirasPage() {
   const { c, wallets } = await carregarBase();
   const [saldos, arquivadas] = await Promise.all([c.wallets.balances(), c.wallets.arquivadas()]);
   const saldo = new Map(saldos.map((s) => [s.walletId, s.balanceCents]));
+  const totalContas = saldos.filter((s) => s.kind === 'checking' || s.kind === 'cash').reduce((t, s) => t + s.balanceCents, 0);
   return (
     <>
       <PageHeader voltar={{ href: '/mais' }} title="Carteiras" subtitle="Contas, cartões, VR/VA e dinheiro" />
+      <Hero className="mb-3">
+        <p className="text-sm text-white/75">Total em contas e dinheiro</p>
+        <AmountDisplay cents={totalContas} tom="onDark" size="xl" />
+        <p className="mt-1 text-sm text-white/75">
+          {wallets.length} {wallets.length === 1 ? 'carteira ativa' : 'carteiras ativas'}
+        </p>
+      </Hero>
       <div className="space-y-3 lg:grid lg:grid-cols-3 lg:gap-4 lg:space-y-0">
         {wallets.map((w) => (
           <Card key={w.id}>
-            <div className="flex items-start justify-between gap-2">
-              <div><p className="font-semibold">{w.name}</p><Chip>{ROTULO_CARTEIRA[w.kind]}</Chip></div>
+            <div className="flex items-center gap-3">
+              <IconeRedondo nome={ICONE[w.kind]} tom={w.kind === 'credit_card' ? 'neutro' : w.kind === 'checking' || w.kind === 'cash' ? 'destaque' : 'viagem'} />
+              <div className="min-w-0 flex-1">
+                <p className="truncate font-semibold">{w.name}</p>
+                <p className="text-xs text-muted">{ROTULO_CARTEIRA[w.kind]}</p>
+              </div>
               <AmountDisplay cents={saldo.get(w.id) ?? 0} size="md" />
             </div>
-            <details className="mt-1">
+            <div className="mt-2 flex flex-wrap gap-x-4">
+            <details className="group/ed min-w-0 basis-full">
               <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">Editar</summary>
               <ActionForm action={renomearCarteiraAction} submitLabel="Salvar" className="space-y-3 pb-1">
                 <input type="hidden" name="id" value={w.id} />
@@ -34,19 +57,20 @@ export default async function CarteirasPage() {
               </ActionForm>
               {w.kind === 'credit_card' && <Link href="/cartao" className="inline-flex min-h-11 items-center text-sm font-semibold text-link">Fechamento, vencimento e limite</Link>}
             </details>
-            <details>
+            <details className="min-w-0 basis-full">
               <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-expense-text">Arquivar</summary>
               <ActionForm action={arquivarCarteiraAction} submitLabel="Confirmar: arquivar" variante="danger" className="space-y-3 pb-1">
                 <input type="hidden" name="id" value={w.id} /><input type="hidden" name="arquivar" value="1" />
                 <p className="text-sm text-muted">A carteira some das listas, mas o histórico fica. Dá para restaurar abaixo.</p>
               </ActionForm>
             </details>
+            </div>
           </Card>
         ))}
       </div>
 
       <SectionTitle>Nova carteira</SectionTitle>
-      <Card>
+      <Recolhivel titulo="Criar carteira">
         <ActionForm action={criarCarteiraAction} submitLabel="Criar carteira">
           <Field label="Nome"><Input name="name" required maxLength={60} placeholder="Nubank, Poupança…" /></Field>
           <Field label="Tipo"><Select name="kind" defaultValue="checking">{(Object.keys(ROTULO_CARTEIRA) as WalletKind[]).map((k) => <option key={k} value={k}>{ROTULO_CARTEIRA[k]}</option>)}</Select></Field>
@@ -58,7 +82,7 @@ export default async function CarteirasPage() {
             <Field label="Limite"><MoneyInput name="limit" /></Field>
           </div>
         </ActionForm>
-      </Card>
+      </Recolhivel>
 
       {arquivadas.length > 0 && (<>
         <SectionTitle>Arquivadas</SectionTitle>

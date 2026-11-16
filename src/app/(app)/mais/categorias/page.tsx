@@ -1,4 +1,5 @@
 import { CategoryIcon } from '@/ui/patterns/category-icon';
+import { Recolhivel } from '@/ui/patterns/collapsible';
 import { excluirCategoriaAction, removerRegraCategoriaAction, salvarCategoriaAction, salvarRegraCategoriaAction } from '@/app/_actions/gestao';
 import { carregarBase } from '@/features/base';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
@@ -21,6 +22,7 @@ export default async function CategoriasPage() {
   const { c, categories } = await carregarBase();
   const regras = await c.categories.regras();
   const nome = new Map(categories.map((x) => [x.id, x.name]));
+  const cor = new Map(categories.map((x) => [x.id, x.color]));
   return (
     <>
       <PageHeader voltar={{ href: '/mais' }} title="Categorias" subtitle="Organize seus gastos" />
@@ -42,21 +44,22 @@ export default async function CategoriasPage() {
       </div>
 
       <SectionTitle>Nova categoria</SectionTitle>
-      <Card>
+      <Recolhivel titulo="Criar categoria">
         <ActionForm action={salvarCategoriaAction} submitLabel="Criar categoria">
           <input type="hidden" name="id" value="" />
           <Field label="Nome"><Input name="name" required maxLength={40} /></Field>
           <CampoCor valor={null} />
         </ActionForm>
-      </Card>
+      </Recolhivel>
 
       <SectionTitle>Categorização automática</SectionTitle>
       <p className="mb-2 text-sm text-muted">Na importação de extrato, descrições que contêm a palavra recebem a categoria sugerida.</p>
       <Card className="space-y-3">
         {regras.length === 0 && <p className="text-sm text-muted">Nenhuma regra ainda.</p>}
         {regras.map((r) => (
-          <div key={r.id} className="flex items-center justify-between gap-2 border-b border-border pb-2 last:border-0">
-            <p className="min-w-0 truncate text-sm"><span className="font-semibold">“{r.keyword}”</span> → {nome.get(r.categoryId) ?? '—'}</p>
+          <div key={r.id} className="flex items-center justify-between gap-3 border-b border-border pb-2 last:border-0">
+            <CategoryIcon nome={nome.get(r.categoryId)} cor={cor.get(r.categoryId)} />
+            <p className="min-w-0 flex-1 truncate text-sm"><span className="font-semibold">“{r.keyword}”</span><span className="block text-xs text-muted">vai para {nome.get(r.categoryId) ?? '—'}</span></p>
             <ExcluirConfirmado action={removerRegraCategoriaAction} id={r.id} rotulo="Remover" aviso="A regra deixa de sugerir esta categoria." />
           </div>
         ))}

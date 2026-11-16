@@ -11,6 +11,7 @@ test.describe('capturas', () => {
   test('telas principais', async ({ page }, info) => {
     test.skip(!['mobile-390', 'desktop-1280'].includes(info.project.name), 'só em dois tamanhos');
     test.setTimeout(600_000);
+    page.setDefaultTimeout(20_000); // uma tela que não carrega falha rápido, sem consumir o tempo das outras
     const salvar = async (nome: string) => {
       await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
       await page.waitForLoadState('networkidle');
@@ -26,19 +27,7 @@ test.describe('capturas', () => {
     await page.getByRole('button', { name: /entrar/i }).click();
     await page.waitForURL('/');
     await semearDadosDeExemplo(email!, senha!); // depois do 1º login: as carteiras e categorias padrão já existem
-    // alguns lançamentos em dias diferentes para o mapa de calor e os widgets terem o que mostrar
-    for (const [valor, nota, categoria] of [
-      ['182,40', 'Mercado', 'Mercado'],
-      ['64,90', 'Restaurante', 'Restaurantes'],
-      ['23,00', 'Transporte', 'Transporte'],
-    ] as const) {
-      await page.goto('/gastos/novo');
-      await page.getByRole('textbox', { name: /^valor/i }).first().fill(valor);
-      await page.getByLabel(/descrição/i).fill(nota);
-      await page.getByRole('button', { name: categoria, exact: true }).click();
-      await page.getByRole('button', { name: /salvar lançamento/i }).click();
-      await page.waitForURL(/\/gastos(\?|$)/, { timeout: 15_000 });
-    }
+    // os lançamentos de exemplo (com categorias e carteiras variadas) vêm de semearDadosDeExemplo
     const telas = [
       ['/', '01-inicio'],
       ['/gastos', '02-gastos'],

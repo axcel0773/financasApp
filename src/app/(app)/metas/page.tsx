@@ -9,14 +9,16 @@ import {
 import { addMeses, primeiroDia, ultimoDia } from '@/core/shared/competencia';
 import { ehBeneficio } from '@/core/wallets/domain';
 import { carregarBase } from '@/features/base';
-import { centavosParaCampo, dataLonga } from '@/ui/format';
+import { centavosParaCampo, dataCurta } from '@/ui/format';
 import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { excluirMetaAction } from '@/app/_actions/gestao';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
-import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
+import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
+import { Ring } from '@/ui/charts/ring';
+import { Recolhivel } from '@/ui/patterns/collapsible';
 import { Field, Input, MoneyInput, RadioChips } from '@/ui/primitives/fields';
-import { EmptyState, ProgressBar } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/primitives/progress';
 
 export const metadata = { title: 'Metas e reserva' };
 
@@ -91,31 +93,44 @@ export default async function MetasPage() {
   return (
     <>
       <PageHeader voltar={{ href: '/mais' }} title="Metas e reserva" />
-      <Card className="space-y-2">
-        <p className="text-sm text-muted">Reserva de emergência</p>
-        {reserva ? (
-          <>
-            <p className="text-3xl font-extrabold">
-              <span className="amount">{cobertura.toFixed(1).replace('.', ',')}</span>{' '}
-              <span className="text-base font-semibold">meses de cobertura</span>
-            </p>
-            <ProgressBar
+      <Hero>
+        <div className="flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-sm text-white/75">Reserva de emergência</p>
+            {reserva ? (
+              <>
+                <p className="mt-1 text-4xl font-semibold leading-tight">
+                  <span className="amount">{cobertura.toFixed(1).replace('.', ',')}</span>{' '}
+                  <span className="text-base font-medium text-white/75">meses</span>
+                </p>
+                <p className="mt-1 text-sm text-white/75">
+                  <span className="amount">{centavosParaCampo(reserva.currentCents)}</span> guardados
+                </p>
+              </>
+            ) : (
+              <p className="mt-2 text-sm text-white/75">
+                Cadastre uma meta do tipo “Reserva de emergência” para ver a cobertura em meses.
+              </p>
+            )}
+          </div>
+          {reserva && (
+            <Ring
               pct={Math.min(100, (cobertura / 6) * 100)}
-              tom={cobertura >= 3 ? 'ok' : 'alert'}
-              label="Cobertura da reserva (meta de 6 meses)"
+              size={88}
+              sobreEscuro
+              alerta={cobertura < 3}
+              rotulo={`${Math.min(100, Math.round((cobertura / 6) * 100))}%`}
+              descricao={`Cobertura de ${cobertura.toFixed(1).replace('.', ',')} meses, meta de 6 meses`}
             />
-            <p className="text-sm text-muted">
-              Reserva <span className="amount">{centavosParaCampo(reserva.currentCents)}</span> ÷
-              gasto médio de <span className="amount">{centavosParaCampo(media)}</span>/mês (últimos
-              3 meses, sem VR/VA).
-            </p>
-          </>
-        ) : (
-          <p className="text-sm text-muted">
-            Cadastre uma meta do tipo “Reserva de emergência” para ver a cobertura em meses.
+          )}
+        </div>
+        {reserva && (
+          <p className="mt-4 text-xs text-white/75">
+            Meta de 6 meses. Gasto médio de <span className="amount">{centavosParaCampo(media)}</span>/mês nos últimos
+            3 meses, sem VR/VA.
           </p>
         )}
-      </Card>
+      </Hero>
 
       <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start lg:gap-8">
       <div>
@@ -128,27 +143,26 @@ export default async function MetasPage() {
             const falta = mesesParaAtingir(m),
               nec = aporteNecessario(m, hoje);
             return (
-              <Card key={m.id} className="space-y-1">
-                <div className="flex items-baseline justify-between gap-2">
-                  <p className="font-semibold">{m.name}</p>
-                  <span className="text-sm font-semibold">{progressoPct(m)}%</span>
+              <Card key={m.id} className="space-y-2">
+                <div className="flex items-center gap-3">
+                  <Ring pct={progressoPct(m)} size={56} rotulo={`${progressoPct(m)}%`} descricao={`${m.name}: ${progressoPct(m)}% atingido`} />
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold">{m.name}</p>
+                    <p className="text-sm">
+                      <span className="amount font-semibold">{centavosParaCampo(m.currentCents)}</span>{' '}
+                      <span className="text-muted">
+                        de <span className="amount">{centavosParaCampo(m.targetCents)}</span>
+                      </span>
+                    </p>
+                  </div>
                 </div>
-                <ProgressBar pct={progressoPct(m)} tom="ok" label={`${m.name}: progresso`} />
-                <div className="flex justify-between text-sm">
-                  <AmountDisplay cents={m.currentCents} size="sm" />
-                  <span className="text-muted">
-                    de <span className="amount">{centavosParaCampo(m.targetCents)}</span>
-                  </span>
-                </div>
-                {m.deadline && (
+                <p className="text-sm text-muted">
+                  faltam <span className="amount font-semibold text-ink">{centavosParaCampo(Math.max(0, m.targetCents - m.currentCents))}</span>
+                  {m.deadline && <> · prazo {dataCurta(m.deadline)}</>}
+                </p>
+                {nec !== null && (
                   <p className="text-xs text-muted">
-                    Prazo {dataLonga(m.deadline)}
-                    {nec !== null ? (
-                      <>
-                        {' '}
-                        · precisa de <span className="amount">{centavosParaCampo(nec)}</span>/mês
-                      </>
-                    ) : null}
+                    Para chegar no prazo: <span className="amount">{centavosParaCampo(nec)}</span>/mês
                   </p>
                 )}
                 {falta !== null && falta > 0 && (
@@ -156,12 +170,9 @@ export default async function MetasPage() {
                     No ritmo planejado: {falta} {falta === 1 ? 'mês' : 'meses'}.
                   </p>
                 )}
-                <details>
-                  <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">
-                    Editar
-                  </summary>
+                <Recolhivel titulo="Editar" className="border-0 bg-transparent px-0">
                   <FormMeta m={m} hoje={hoje} />
-                </details>
+                </Recolhivel>
                 <ExcluirConfirmado action={excluirMetaAction} id={m.id} aviso="A meta e o progresso dela são apagados." />
               </Card>
             );
@@ -171,9 +182,9 @@ export default async function MetasPage() {
       </div>
       <div>
       <SectionTitle>Nova meta</SectionTitle>
-      <Card>
+      <Recolhivel titulo="Criar meta" aberto={metas.length === 0}>
         <FormMeta hoje={hoje} />
-      </Card>
+      </Recolhivel>
       </div>
       </div>
     </>

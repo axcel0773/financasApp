@@ -14,7 +14,10 @@ import { arquivarInvestimentoAction, editarInvestimentoAction } from '@/app/_act
 import { carregarBase } from '@/features/base';
 import { AcoesInvestimento } from '@/features/investir/acoes-investimento';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
-import { Donut } from '@/ui/charts/donut';
+import { CategoryBreakdown } from '@/ui/patterns/category-breakdown';
+import { IconeRedondo } from '@/ui/patterns/round-icon';
+import { Widget } from '@/ui/patterns/widget';
+import { GradeWidgets } from '@/ui/patterns/widget-grid';
 import { centavosParaCampo, dataCurta, dataLonga, rotuloCompetencia } from '@/ui/format';
 import { competenciaDe, primeiroDia, ultimoDia } from '@/core/shared/competencia';
 import { ActionForm } from '@/features/shared/action-form';
@@ -78,10 +81,18 @@ export default async function InvestimentosPage() {
   const proximoVenc = lista
     .filter((i) => i.maturityOn && i.maturityOn >= hoje)
     .sort((a, b) => (a.maturityOn! < b.maturityOn! ? -1 : 1))[0];
-  const fatias = aloc.map((a) => ({ label: ROTULO_TIPO[a.kind], value: a.valorCents, color: COR[a.kind] }));
   const alocacao = aloc.length > 0 && total > 0 && (
     <Card>
-      <Donut titulo="Alocação por tipo" fatias={fatias} />
+      <CategoryBreakdown
+        titulo="Alocação por tipo"
+        itens={aloc.map((a) => ({
+          id: a.kind,
+          nome: ROTULO_TIPO[a.kind],
+          cor: COR[a.kind],
+          cents: a.valorCents,
+          pct: (a.valorCents / total) * 100,
+        }))}
+      />
     </Card>
   );
 
@@ -100,44 +111,46 @@ export default async function InvestimentosPage() {
           </Link>
         }
       />
-      <div className="lg:hidden">
       <Hero>
-        <p className="text-sm opacity-80">Patrimônio investido</p>
+        <p className="text-sm text-white/75">Patrimônio investido</p>
         <AmountDisplay cents={total} size="xl" tom="onDark" />
-        <div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-          <div className="rounded-md bg-white/10 p-3">
-            <p className="opacity-80">Total aportado</p>
+        <div className="mt-5 grid grid-cols-2 gap-2.5 text-sm">
+          <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+            <p className="text-white/75">Total aportado</p>
             <AmountDisplay cents={investido} size="md" tom="onDark" />
           </div>
-          <div className="rounded-md bg-white/10 p-3">
-            <p className="opacity-80">Rendeu em {rotuloCompetencia(mes)}</p>
+          <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+            <p className="text-white/75">Rendeu em {rotuloCompetencia(mes).split(' ')[0]}</p>
             <AmountDisplay cents={rm.rendidoCents} size="md" tom="onDark" sinal />
           </div>
         </div>
       </Hero>
-      </div>
-      <div className="hidden gap-4 lg:grid lg:grid-cols-3">
-        <Card>
-          <p className="text-sm text-muted">Total investido</p>
-          <AmountDisplay cents={total} size="xl" />
-          <p className="mt-1 text-sm text-muted">
-            Aportado <span className="amount">{centavosParaCampo(investido)}</span> · {lista.length}{' '}
-            {lista.length === 1 ? 'investimento' : 'investimentos'}
-          </p>
-        </Card>
-        <Card>
-          <p className="text-sm text-muted">Rendeu em {rotuloCompetencia(mes)}</p>
-          <AmountDisplay cents={rm.rendidoCents} size="xl" tom={rm.rendidoCents >= 0 ? 'income' : 'expense'} sinal />
-          <p className="mt-1 text-sm text-muted">{notaRend}</p>
-        </Card>
-        <Card>
-          <p className="text-sm text-muted">Vencimento mais próximo</p>
-          <p className="font-display text-2xl font-semibold">
-            {proximoVenc ? dataLonga(proximoVenc.maturityOn!) : 'Nenhum'}
-          </p>
-          <p className="mt-1 text-sm text-muted">{proximoVenc ? proximoVenc.name : 'Informe o vencimento ao cadastrar'}</p>
-        </Card>
-      </div>
+      <GradeWidgets className="mt-3">
+        <Widget
+          rotulo={`Rendeu em ${rotuloCompetencia(mes).split(' ')[0]}`}
+          valor={<AmountDisplay cents={rm.rendidoCents} size="md" tom={rm.rendidoCents >= 0 ? 'income' : 'expense'} sinal />}
+          contexto={notaRend}
+          visual={<IconeRedondo nome="trend" tom={rm.rendidoCents >= 0 ? 'entrada' : 'saida'} />}
+        />
+        <Widget
+          rotulo="Aportes do mês"
+          valor={<AmountDisplay cents={rm.movimentoCents} size="md" sinal />}
+          contexto={`${aportesMes.length} ${aportesMes.length === 1 ? 'movimento' : 'movimentos'}`}
+          visual={<IconeRedondo nome="plus" />}
+        />
+        <Widget
+          rotulo="Vencimento mais próximo"
+          valor={<span className="text-lg font-semibold">{proximoVenc ? dataCurta(proximoVenc.maturityOn!) : '—'}</span>}
+          contexto={proximoVenc ? proximoVenc.name : 'Sem vencimento informado'}
+          visual={<IconeRedondo nome="calendar" />}
+        />
+        <Widget
+          rotulo="Investimentos"
+          valor={<span className="text-lg font-semibold">{lista.length}</span>}
+          contexto={`${aloc.length} ${aloc.length === 1 ? 'tipo' : 'tipos'}`}
+          visual={<IconeRedondo nome="list" />}
+        />
+      </GradeWidgets>
       <p className="mt-2 text-xs text-muted">
         Os saldos são informados por você; o app não consulta corretoras.
       </p>

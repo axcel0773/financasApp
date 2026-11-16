@@ -38,7 +38,7 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
       />
       <div className="lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start lg:gap-8">
         <div className="space-y-3">
-          <div className="rounded-xl bg-[#1f3f9c] p-5 text-white">
+          <div className="rounded-2xl border border-border bg-primary-dark p-6 text-white">
             <p className="text-sm opacity-85">Gasto na viagem</p>
             <p className="amount font-display text-3xl font-extrabold">{brl(r.totalCents)}</p>
             {r.usadoPct !== null && (

@@ -8,6 +8,10 @@ import Link from 'next/link';
 import { ButtonLink } from '@/ui/primitives/button';
 import { Chip } from '@/ui/primitives/chip';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
+import { AmountDisplay } from '@/ui/patterns/amount-display';
+import { CategoryIcon } from '@/ui/patterns/category-icon';
+import { Linha, ListaCartao } from '@/ui/patterns/row';
+import { IconeRedondo } from '@/ui/patterns/round-icon';
 import { Field, Input, MoneyInput, RadioChips, Select } from '@/ui/primitives/fields';
 import { Icon } from '@/ui/primitives/icon';
 import { centavosParaCampo, dataLonga } from '@/ui/format';
@@ -22,6 +26,8 @@ export default async function EditarPage({ params }: { params: Promise<{ id: str
   if (!t || t.deletedAt) notFound();
   const [historico, viagens] = await Promise.all([c.transactions.history(id), c.trips.list()]);
   const viagemAtual = viagens.find((v) => v.id === t.tripId);
+  const categoria = categories.find((x) => x.id === t.categoryId);
+  const carteira = wallets.find((w) => w.id === t.walletId);
   return (
     <>
       <PageHeader
@@ -33,6 +39,21 @@ export default async function EditarPage({ params }: { params: Promise<{ id: str
           </ButtonLink>
         }
       />
+      <Card className="mb-4 flex items-center gap-4">
+        <CategoryIcon nome={categoria?.name ?? t.note} cor={categoria?.color} className="h-14 w-14 rounded-[16px]" />
+        <div className="min-w-0 flex-1">
+          <p className="truncate font-semibold">{t.note ?? categoria?.name ?? 'Lançamento'}</p>
+          <p className="truncate text-xs text-muted">
+            {categoria?.name ?? 'Sem categoria'} · {carteira?.name ?? '—'} · {dataLonga(t.occurredOn)}
+          </p>
+        </div>
+        <AmountDisplay
+          cents={t.kind === 'expense' ? -t.amountCents : t.amountCents}
+          sinal
+          size="md"
+          tom={t.kind === 'expense' ? 'expense' : 'income'}
+        />
+      </Card>
       {viagemAtual && (
         <p className="mb-3">
           <Link href={`/mais/viagens/${viagemAtual.id}`}>
@@ -95,15 +116,21 @@ export default async function EditarPage({ params }: { params: Promise<{ id: str
       {historico.length === 0 ? (
         <p className="text-sm text-muted">Sem alterações até agora.</p>
       ) : (
-        <Card className="space-y-2">
+        <ListaCartao>
           {historico.map((h) => (
-            <p key={h.changedAt} className="text-sm">
-              <span className="text-muted">{dataLonga(h.changedAt.slice(0, 10))}</span> ·{' '}
-              <span className="amount">{formatBRL(h.oldAmountCents)}</span> →{' '}
-              <span className="amount font-semibold">{formatBRL(h.newAmountCents)}</span>
-            </p>
+            <Linha
+              key={h.changedAt}
+              icone={<IconeRedondo nome="edit" />}
+              titulo={
+                <>
+                  <span className="amount text-muted line-through">{formatBRL(h.oldAmountCents)}</span>{' '}
+                  <span className="amount">{formatBRL(h.newAmountCents)}</span>
+                </>
+              }
+              contexto={dataLonga(h.changedAt.slice(0, 10))}
+            />
           ))}
-        </Card>
+        </ListaCartao>
       )}
     </>
   );

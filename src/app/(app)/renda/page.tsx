@@ -11,13 +11,19 @@ import { desativarFonteAction } from '@/app/_actions/gestao';
 import { carregarBase } from '@/features/base';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { ReceiptRow } from '@/features/renda/receipt-row';
-import { centavosParaCampo, competenciaDoParam, dataLonga, rotuloCompetencia } from '@/ui/format';
+import { centavosParaCampo, competenciaDoParam, dataCurta, dataLonga, rotuloCompetencia } from '@/ui/format';
+import { rotuloRecebimento } from '@/features/renda/receipt-row';
+import { Recolhivel } from '@/ui/patterns/collapsible';
+import { MonthSwitch } from '@/ui/patterns/month-switch';
+import { Linha } from '@/ui/patterns/row';
+import { IconeRedondo } from '@/ui/patterns/round-icon';
+import { Widget } from '@/ui/patterns/widget';
+import { GradeWidgets } from '@/ui/patterns/widget-grid';
 import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { ButtonLink } from '@/ui/primitives/button';
 import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Field, Input, MoneyInput, Select } from '@/ui/primitives/fields';
-import { Icon } from '@/ui/primitives/icon';
 import { EmptyState } from '@/ui/primitives/progress';
 
 export const metadata = { title: 'Renda' };
@@ -53,6 +59,9 @@ export default async function RendaPage({
   const partes = holerite && fonte ? dividirSalario(holerite, fonte.advancePercent ?? 0) : null;
   const recebido = totalRecebido(recebimentos);
   const pendente = totalPrevistoPendente(recebimentos);
+  const proximo = recebimentos
+    .filter((r) => r.receivedOn === null && r.expectedOn && r.expectedOn >= hoje)
+    .sort((a, b) => (a.expectedOn! < b.expectedOn! ? -1 : 1))[0];
 
   return (
     <>
@@ -68,32 +77,50 @@ export default async function RendaPage({
           </Link>
         }
       />
-      <div className="mb-3 flex items-center justify-between text-sm">
-        <Link
-          href={`/renda?mes=${addMeses(mes, -1)}`}
-          className="inline-flex min-h-11 items-center gap-1 text-link"
-        >
-          <Icon name="back" size={18} />
-          Mês anterior
-        </Link>
-        <Link
-          href={`/renda?mes=${addMeses(mes, 1)}`}
-          className="inline-flex min-h-11 items-center gap-1 text-link"
-        >
-          Próximo mês
-          <Icon name="chevron" size={18} />
-        </Link>
-      </div>
+      <MonthSwitch anterior={`/renda?mes=${addMeses(mes, -1)}`} proximo={`/renda?mes=${addMeses(mes, 1)}`} rotulo={rotuloCompetencia(mes)} />
 
       <div className="lg:grid lg:grid-cols-2 lg:gap-6">
         <div>
           <Hero>
-            <p className="text-sm opacity-80">Recebido em {rotuloCompetencia(mes)}</p>
+            <p className="text-sm text-white/75">Recebido em {rotuloCompetencia(mes)}</p>
             <AmountDisplay cents={recebido} tom="onDark" size="xl" />
-            <p className="mt-1 text-sm opacity-80">
-              Ainda previsto: <span className="amount">{centavosParaCampo(pendente)}</span>
-            </p>
+            <div className="mt-5 grid grid-cols-2 gap-2.5 text-sm">
+              <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+                <p className="text-white/75">Ainda previsto</p>
+                <AmountDisplay cents={pendente} size="md" tom="onDark" />
+              </div>
+              <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+                <p className="text-white/75">Líquido estimado</p>
+                {holerite ? <AmountDisplay cents={holerite.netCents} size="md" tom="onDark" /> : <p className="text-lg font-semibold">—</p>}
+              </div>
+            </div>
           </Hero>
+          <GradeWidgets className="mt-3">
+            <Widget
+              rotulo="Salário bruto"
+              valor={fonte ? <AmountDisplay cents={fonte.grossCents} size="md" /> : <span className="text-lg font-semibold">—</span>}
+              contexto={fonte?.employer || fonte?.name || 'Nenhum salário cadastrado'}
+              visual={<IconeRedondo nome="wallet" tom="entrada" />}
+            />
+            <Widget
+              rotulo="Descontos (INSS + IRRF)"
+              valor={holerite ? <AmountDisplay cents={holerite.inssCents + holerite.irrfCents} size="md" /> : <span className="text-lg font-semibold">—</span>}
+              contexto={holerite && holerite.grossCents > 0 ? `${Math.round(((holerite.inssCents + holerite.irrfCents) / holerite.grossCents) * 100)}% do bruto` : 'Estimativa'}
+              visual={<IconeRedondo nome="calc" tom="saida" />}
+            />
+            <Widget
+              rotulo="Próximo recebimento"
+              valor={proximo ? <AmountDisplay cents={proximo.expectedNetCents ?? 0} size="md" /> : <span className="text-lg font-semibold">—</span>}
+              contexto={proximo?.expectedOn ? `${rotuloRecebimento(proximo.kind)} · ${dataCurta(proximo.expectedOn)}` : 'Nada previsto neste mês'}
+              visual={<IconeRedondo nome="calendar" />}
+            />
+            <Widget
+              rotulo="Fontes ativas"
+              valor={<span className="text-lg font-semibold">{fontes.filter((f) => f.active).length}</span>}
+              contexto="salário e outras rendas"
+              visual={<IconeRedondo nome="repeat" />}
+            />
+          </GradeWidgets>
 
           <SectionTitle>Recebimentos</SectionTitle>
           {recebimentos.length === 0 ? (
@@ -143,19 +170,11 @@ export default async function RendaPage({
             <>
               <SectionTitle>Estimativa do holerite</SectionTitle>
               <Card className="space-y-2">
-                {[
-                  ['Salário bruto', holerite.grossCents, 'default'],
-                  ['INSS', -holerite.inssCents, 'expense'],
-                  ['IRRF', -holerite.irrfCents, 'expense'],
-                ].map(([l, v, t]) => (
-                  <div key={String(l)} className="flex justify-between text-sm">
-                    <span>{l}</span>
-                    <AmountDisplay cents={Number(v)} size="sm" tom={t as 'default' | 'expense'} />
-                  </div>
-                ))}
-                <div className="flex justify-between border-t border-border pt-2">
-                  <span className="font-semibold">Líquido estimado</span>
-                  <AmountDisplay cents={holerite.netCents} tom="income" />
+                <div className="-my-1">
+                  <Linha icone={<IconeRedondo nome="wallet" />} titulo="Salário bruto" direita={<AmountDisplay cents={holerite.grossCents} size="sm" />} />
+                  <Linha icone={<IconeRedondo nome="calc" tom="saida" />} titulo="INSS" direita={<AmountDisplay cents={-holerite.inssCents} size="sm" tom="expense" />} />
+                  <Linha icone={<IconeRedondo nome="calc" tom="saida" />} titulo="IRRF" direita={<AmountDisplay cents={-holerite.irrfCents} size="sm" tom="expense" />} />
+                  <Linha icone={<IconeRedondo nome="check" tom="entrada" />} titulo="Líquido estimado" direita={<AmountDisplay cents={holerite.netCents} tom="income" />} />
                 </div>
                 {partes && fonte.advancePercent ? (
                   <div className="rounded-md bg-soft p-3 text-sm">
@@ -179,14 +198,11 @@ export default async function RendaPage({
           )}
 
           <SectionTitle>{fonte ? 'Editar salário' : 'Cadastrar salário'}</SectionTitle>
-          <details open={!fonte} className="rounded-lg border border-border bg-surface p-4">
-            <summary className="flex min-h-11 cursor-pointer items-center font-semibold">
-              {fonte ? 'Alterar valores e datas' : 'Informe seu salário CLT'}
-            </summary>
+          <Recolhivel aberto={!fonte} titulo={fonte ? 'Alterar valores e datas' : 'Informe seu salário CLT'}>
             <ActionForm
               action={salvarFonteAction}
               submitLabel="Salvar salário"
-              className="mt-3 space-y-3"
+              className="space-y-3"
             >
               <input type="hidden" name="id" value={fonte?.id ?? ''} />
               <Field label="Nome">
@@ -265,15 +281,12 @@ export default async function RendaPage({
               </Field>
             </ActionForm>
             {fonte && <ExcluirConfirmado action={desativarFonteAction} id={fonte.id} rotulo="Desativar fonte" aviso="Para de gerar novos recebimentos previstos. O histórico continua." />}
-          </details>
+          </Recolhivel>
 
           {fonte && (
             <>
               <SectionTitle>Registrar outro recebimento</SectionTitle>
-              <details className="rounded-lg border border-border bg-surface p-4">
-                <summary className="flex min-h-11 cursor-pointer items-center font-semibold">
-                  13º, PLR, férias ou extra
-                </summary>
+              <Recolhivel titulo="13º, PLR, férias ou extra">
                 <ActionForm
                   action={registrarExtraAction}
                   submitLabel="Registrar"
@@ -299,7 +312,7 @@ export default async function RendaPage({
                     </Select>
                   </Field>
                 </ActionForm>
-              </details>
+              </Recolhivel>
             </>
           )}
         </div>

@@ -8,12 +8,15 @@ export function Ring({
   alerta = false,
   rotulo,
   descricao,
+  sobreEscuro = false,
 }: {
   pct: number;
   size?: number;
   alerta?: boolean;
   rotulo?: string;
   descricao?: string;
+  /** Dentro de um cartão escuro (Hero): texto branco e trilho translúcido. */
+  sobreEscuro?: boolean;
 }) {
   const R = 15.9155;
   const p = Math.max(0, Math.min(100, pct));
@@ -25,14 +28,14 @@ export function Ring({
       className="shrink-0"
       {...(rotulo ? { role: 'img', 'aria-label': descricao ?? rotulo } : { 'aria-hidden': true })}
     >
-      <circle cx="21" cy="21" r={R} fill="none" stroke="var(--soft)" strokeWidth="5" />
+      <circle cx="21" cy="21" r={R} fill="none" stroke={sobreEscuro ? 'rgba(255,255,255,0.18)' : 'var(--soft)'} strokeWidth="5" />
       {p > 0 && (
         <circle
           cx="21"
           cy="21"
           r={R}
           fill="none"
-          stroke={alerta ? 'var(--expense)' : 'var(--chart)'}
+          stroke={alerta ? 'var(--expense)' : sobreEscuro ? 'var(--accent)' : 'var(--chart)'}
           strokeWidth="5"
           strokeLinecap="round"
           strokeDasharray={`${p} ${100 - p}`}
@@ -40,7 +43,7 @@ export function Ring({
         />
       )}
       {rotulo && (
-        <text x="21" y="21" textAnchor="middle" dominantBaseline="central" fontSize="9" fontWeight="600" fill="var(--ink)">
+        <text x="21" y="21" textAnchor="middle" dominantBaseline="central" fontSize="9" fontWeight="600" fill={sobreEscuro ? '#fff' : 'var(--ink)'}>
           {rotulo}
         </text>
       )}
