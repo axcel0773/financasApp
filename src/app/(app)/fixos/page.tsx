@@ -1,3 +1,4 @@
+import { proximoFixo, restanteDoParcelamento } from '@/core/recurring/domain';
 import {
   criarParcelamentoAction,
   gerarFixosAction,
@@ -49,14 +50,9 @@ export default async function FixosPage() {
   const totalFixos = regras.filter((r) => r.active).reduce((s, r) => s + r.amountCents, 0);
 
   const ativos = regras.filter((r) => r.active);
-  const diaHoje = Number(hoje.slice(8, 10));
-  const proximo = [...ativos].sort((a, b) => {
-    const da = a.dayOfMonth >= diaHoje ? a.dayOfMonth : a.dayOfMonth + 31;
-    const db = b.dayOfMonth >= diaHoje ? b.dayOfMonth : b.dayOfMonth + 31;
-    return da - db;
-  })[0];
-  const restante = (p: (typeof planos)[number]) =>
-    Math.round((p.totalCents / p.installments) * Math.max(0, p.installments - pagas(p.id)));
+  const prox = proximoFixo(regras, hoje);
+  const proximo = prox?.regra;
+  const restante = (p: (typeof planos)[number]) => restanteDoParcelamento(p.totalCents, p.installments, pagas(p.id));
   const emAberto = planos.reduce((t, p) => t + restante(p), 0);
   const cat = new Map(categories.map((x) => [x.id, x]));
   const formNovoFixo = (
@@ -113,7 +109,7 @@ export default async function FixosPage() {
           <Widget
             rotulo="Próximo fixo"
             valor={proximo ? <AmountDisplay cents={proximo.amountCents} size="md" /> : <span className="text-lg font-semibold">—</span>}
-            contexto={proximo ? `${proximo.name} · dia ${proximo.dayOfMonth}` : 'Nenhum ativo'}
+            contexto={prox ? `${prox.regra.name} · ${dataCurta(prox.date)}` : 'Nenhum ativo'}
             visual={<IconeRedondo nome="calendar" />}
           />
           <Widget rotulo="Parcelamentos" valor={<span className="text-lg font-semibold">{planos.length}</span>} contexto="em andamento" visual={<IconeRedondo nome="card" />} />

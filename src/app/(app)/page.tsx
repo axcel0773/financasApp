@@ -21,7 +21,7 @@ import { FilterChip } from '@/ui/primitives/chip';
 import { Skeleton } from '@/ui/primitives/progress';
 
 export const metadata = { title: 'Início' };
-const fallback = (h: string) => <Skeleton className={h} />;
+const fallback = (h: string) => <Skeleton className={`${h} rounded-xl`} />;
 
 /** RSC com streaming: cada bloco carrega sozinho, com skeleton enquanto espera. */
 export default async function InicioPage() {

@@ -6,7 +6,7 @@ import { formatBRL, parseBRL } from '@/core/shared/money';
 import { rotuloCompetencia } from '@/ui/format';
 import { StepLine } from '@/ui/charts/step-line';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
-import { Card } from '@/ui/primitives/card';
+import { Card, Hero } from '@/ui/primitives/card';
 import { Field, Input, MoneyInput } from '@/ui/primitives/fields';
 
 const num = (s: string, d = 0) => {
@@ -48,7 +48,7 @@ export function SimuladorForm({
   );
   const ultimo = pontos[pontos.length - 1];
   return (
-    <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-6 lg:space-y-0">
+    <div className="flex flex-col gap-4 lg:grid lg:grid-cols-2 lg:gap-6">
       <Card className="space-y-3">
         <Field label="Valor inicial">
           <MoneyInput value={inicial} onChange={(e) => setInicial(e.target.value)} />
@@ -69,29 +69,29 @@ export function SimuladorForm({
           <Input inputMode="decimal" value={ipcaS} onChange={(e) => setIpcaS(e.target.value)} />
         </Field>
       </Card>
-      <div className="space-y-4">
+      {/* No celular o resultado vem antes dos campos: é ele que a pessoa quer ver ao mexer nos valores */}
+      <div className="order-first space-y-4 lg:order-none">
         {ultimo && (
-          <Card className="space-y-3" aria-live="polite">
-            <div>
-              <p className="text-sm text-muted">Em {rotuloCompetencia(ultimo.competencia)}</p>
-              <AmountDisplay cents={ultimo.saldoCents} size="xl" />
-            </div>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <div>
-                <p className="text-muted">Aportado</p>
-                <span className="amount font-semibold">{formatBRL(ultimo.aportadoCents)}</span>
+          <>
+          <Hero aria-live="polite">
+            <p className="text-sm text-white/75">Em {rotuloCompetencia(ultimo.competencia)}</p>
+            <AmountDisplay cents={ultimo.saldoCents} size="xl" tom="onDark" />
+            <div className="mt-5 grid grid-cols-2 gap-2.5 text-sm">
+              <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+                <p className="text-white/75">Aportado</p>
+                <AmountDisplay cents={ultimo.aportadoCents} size="md" tom="onDark" />
               </div>
-              <div>
-                <p className="text-muted">Rendimento</p>
-                <span className="amount font-semibold">
-                  {formatBRL(ultimo.saldoCents - ultimo.aportadoCents)}
-                </span>
-              </div>
-              <div className="col-span-2">
-                <p className="text-muted">Valor de hoje (descontado o IPCA)</p>
-                <span className="amount font-semibold">{formatBRL(ultimo.saldoRealCents)}</span>
+              <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+                <p className="text-white/75">Rendimento</p>
+                <AmountDisplay cents={ultimo.saldoCents - ultimo.aportadoCents} size="md" tom="onDark" />
               </div>
             </div>
+            <p className="mt-3 text-sm text-white/75">
+              Em valores de hoje (descontado o IPCA): <span className="amount font-semibold text-white">{formatBRL(ultimo.saldoRealCents)}</span>
+            </p>
+          </Hero>
+          <Card>
+            <h2 className="mb-2 font-display text-base font-semibold">Evolução do saldo</h2>
             <StepLine
               pontos={pontos
                 .filter(
@@ -103,6 +103,7 @@ export function SimuladorForm({
               titulo="Evolução do saldo"
             />
           </Card>
+          </>
         )}
         <p className="text-xs text-muted">
           Simulação ilustrativa, sem impostos nem taxas. Não é recomendação de investimento.

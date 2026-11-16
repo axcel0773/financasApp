@@ -58,7 +58,8 @@ Dependências só apontam para dentro (ADR 001), validadas em `npm run arch`.
 - Nomes: domínio e telas em português; banco, repositórios e infraestrutura em inglês (ADR 007).
 - Offline: lançar, editar e excluir entram em fila (IndexedDB) e sincronizam depois (ADR 004).
 - CSP com nonce por requisição: toda página é dinâmica (ADR 005).
-- Visual: tokens em `src/app/globals.css` e `tailwind.config.ts`; claro e escuro (ADR 010).
+- Visual: escuro por padrão e claro como opção, um só destaque, telas em cartões-widget (ADR 011). Tokens em `src/app/globals.css` e `tailwind.config.ts`; componentes de tela em `src/ui/patterns`.
+- Capturas: o CI gera as telas em celular e desktop, escuro e claro, no ramo `ci-capturas` (`e2e/zz-capturas.spec.ts`, dados de exemplo em `e2e/dados-capturas.ts`).
 
 ## Deploy e operação
 

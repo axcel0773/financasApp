@@ -1,5 +1,5 @@
 import { getContainer } from '@/composition/container';
-import { agruparFaturas, competenciaDaFatura } from '@/core/card-invoices/domain';
+import { agruparFaturas, competenciaDaFatura, usoDoLimite } from '@/core/card-invoices/domain';
 import { addMeses, competenciaDe, primeiroDia, ultimoDia } from '@/core/shared/competencia';
 import { ehBeneficio, type WalletKind } from '@/core/wallets/domain';
 import { Heatmap } from '@/ui/charts/heatmap';
@@ -67,7 +67,7 @@ export async function BlocoWidgets() {
     );
     const atual = competenciaDaFatura(hoje, fecha);
     faturaAtual = faturas.find((f) => f.competencia === atual)?.totalCents ?? 0;
-    emAberto = faturas.filter((f) => f.venceEm >= hoje).reduce((t, f) => t + f.totalCents, 0);
+    emAberto = usoDoLimite(faturas, hoje, null).emAbertoCents;
   }
   const limite = cartao?.limitCents ?? null;
   const pctLimite = limite && limite > 0 ? Math.round((emAberto / limite) * 100) : null;

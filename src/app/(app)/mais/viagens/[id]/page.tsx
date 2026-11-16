@@ -9,8 +9,14 @@ import { FormViagem } from '@/features/viagens/form-viagem';
 import { centavosParaCampo, dataCurta } from '@/ui/format';
 import { ActionForm } from '@/features/shared/action-form';
 import { TransactionRow } from '@/ui/patterns/transaction-row';
-import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
-import { Chip } from '@/ui/primitives/chip';
+import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
+import { Ring } from '@/ui/charts/ring';
+import { Recolhivel } from '@/ui/patterns/collapsible';
+import { AmountDisplay } from '@/ui/patterns/amount-display';
+import { CategoryBreakdown } from '@/ui/patterns/category-breakdown';
+import { IconeRedondo } from '@/ui/patterns/round-icon';
+import { Widget } from '@/ui/patterns/widget';
+import { GradeWidgets } from '@/ui/patterns/widget-grid';
 import { Field, Input, MoneyInput, Select } from '@/ui/primitives/fields';
 
 export const metadata = { title: 'Viagem' };
@@ -38,38 +44,69 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
       />
       <div className="lg:grid lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] lg:items-start lg:gap-8">
         <div className="space-y-3">
-          <div className="rounded-2xl border border-border bg-primary-dark p-6 text-white">
-            <p className="text-sm opacity-85">Gasto na viagem</p>
-            <p className="amount font-display text-3xl font-extrabold">{brl(r.totalCents)}</p>
-            {r.usadoPct !== null && (
-              <>
-                <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-white/25" aria-hidden><div className="h-full bg-white" style={{ width: `${Math.min(100, r.usadoPct)}%` }} /></div>
-                <div className="mt-2 flex justify-between text-sm">
-                  <span>{r.usadoPct}% de {brl(viagem.budgetCents)}</span>
-                  <span>{r.estourou ? `estourou ${brl(-(r.restanteCents ?? 0))}` : `restam ${brl(r.restanteCents ?? 0)}`}</span>
-                </div>
-              </>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <Card><p className="text-xs text-muted">Média por dia</p><p className="amount font-bold">{brl(r.mediaPorDiaCents)}</p></Card>
-            <Card>
-              <p className="text-xs text-muted">{r.podeGastarPorDiaCents !== null ? 'Pode gastar por dia' : viagem.people > 1 ? 'Por pessoa' : r.diasTotal === null ? 'Dias até agora' : 'Dias da viagem'}</p>
-              <p className="amount font-bold">{r.podeGastarPorDiaCents !== null ? brl(r.podeGastarPorDiaCents) : viagem.people > 1 ? brl(r.porPessoaCents) : r.diasTotal === null ? `${r.diaAtual}` : `${r.diasTotal}`}</p>
-            </Card>
-          </div>
-          {viagem.people > 1 && r.podeGastarPorDiaCents !== null && <p className="text-xs text-muted">Por pessoa ({viagem.people}): {brl(r.porPessoaCents)}</p>}
+          <Hero>
+            <div className="flex items-center justify-between gap-4">
+              <div className="min-w-0">
+                <p className="text-sm text-white/75">Gasto na viagem</p>
+                <AmountDisplay cents={r.totalCents} tom="onDark" size="xl" />
+                <p className="mt-1 text-sm text-white/75">
+                  {r.usadoPct === null
+                    ? 'sem orçamento definido'
+                    : r.estourou
+                      ? `passou ${brl(-(r.restanteCents ?? 0))} de ${brl(viagem.budgetCents)}`
+                      : `restam ${brl(r.restanteCents ?? 0)} de ${brl(viagem.budgetCents)}`}
+                </p>
+              </div>
+              {r.usadoPct !== null && (
+                <Ring
+                  pct={r.usadoPct}
+                  size={84}
+                  sobreEscuro
+                  alerta={r.estourou}
+                  rotulo={`${r.usadoPct}%`}
+                  descricao={`${r.usadoPct}% do orçamento da viagem usado`}
+                />
+              )}
+            </div>
+          </Hero>
+          <GradeWidgets colunas={3}>
+            <Widget
+              rotulo="Média por dia"
+              valor={<AmountDisplay cents={r.mediaPorDiaCents} size="md" />}
+              contexto={r.diasTotal === null ? `em ${r.diaAtual} ${r.diaAtual === 1 ? 'dia' : 'dias'}` : `dia ${r.diaAtual} de ${r.diasTotal}`}
+              visual={<IconeRedondo nome="calendar" />}
+            />
+            <Widget
+              rotulo="Pode gastar por dia"
+              valor={r.podeGastarPorDiaCents !== null ? <AmountDisplay cents={r.podeGastarPorDiaCents} size="md" /> : <span className="text-lg font-semibold">—</span>}
+              contexto={r.diasRestantes !== null ? `${r.diasRestantes} ${r.diasRestantes === 1 ? 'dia restante' : 'dias restantes'}` : 'volta em aberto'}
+              visual={<IconeRedondo nome="wallet" tom={r.estourou ? 'saida' : 'entrada'} />}
+            />
+            <Widget
+              rotulo={viagem.people > 1 ? `Por pessoa (${viagem.people})` : 'Pessoas'}
+              valor={viagem.people > 1 ? <AmountDisplay cents={r.porPessoaCents} size="md" /> : <span className="text-lg font-semibold">1</span>}
+              contexto={viagem.people > 1 ? 'divisão igual' : 'só você'}
+              visual={<IconeRedondo nome="plane" tom="viagem" />}
+            />
+          </GradeWidgets>
           {estado === 'andamento' && r.podeGastarPorDiaCents !== null && <p className="text-xs text-muted">Se uma reserva grande (hospedagem, passagem) foi paga antes, ela puxa a média do dia para cima.</p>}
 
           <SectionTitle>Por categoria</SectionTitle>
-          <Card className="space-y-3">
-            {r.porCategoria.length === 0 && <p className="text-sm text-muted">Nenhum gasto ainda.</p>}
-            {r.porCategoria.map((f) => (
-              <div key={f.categoryId ?? 'sem'}>
-                <div className="flex justify-between text-sm"><span>{f.categoryId ? (cats[f.categoryId]?.nome ?? '—') : 'Sem categoria'}</span><span className="amount font-semibold">{brl(f.cents)} · {f.pct.toFixed(0)}%</span></div>
-                <div className="mt-1 h-2 overflow-hidden rounded-full bg-border" aria-hidden><div className="h-full bg-trip" style={{ width: `${f.pct}%` }} /></div>
-              </div>
-            ))}
+          <Card>
+            {r.porCategoria.length === 0 ? (
+              <p className="text-sm text-muted">Nenhum gasto ainda.</p>
+            ) : (
+              <CategoryBreakdown
+                titulo="Gastos da viagem por categoria"
+                itens={r.porCategoria.map((f) => ({
+                  id: f.categoryId,
+                  nome: f.categoryId ? (cats[f.categoryId]?.nome ?? '—') : 'Sem categoria',
+                  cor: f.categoryId ? (cats[f.categoryId]?.cor ?? null) : null,
+                  cents: f.cents,
+                  pct: f.pct,
+                }))}
+              />
+            )}
           </Card>
 
           <SectionTitle>Lançamentos</SectionTitle>
@@ -119,14 +156,12 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
               <Field label="Data"><Input type="date" name="occurredOn" defaultValue={dataPadrao} required /></Field>
             </ActionForm>
           </Card>
-          <details className="rounded-lg border border-border bg-surface p-4">
-            <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-link">Editar viagem</summary>
-            <div className="mt-3"><FormViagem viagem={viagem} hoje={hoje} /></div>
-          </details>
+          <Recolhivel titulo="Editar viagem">
+            <FormViagem viagem={viagem} hoje={hoje} />
+          </Recolhivel>
           <Card>
             <ExcluirConfirmado action={excluirViagemAction} id={viagem.id} rotulo="Excluir viagem" aviso="A viagem é apagada, mas os lançamentos dela continuam e voltam a contar como gastos normais do dia a dia." />
           </Card>
-          <Chip>{viagem.people} {viagem.people === 1 ? 'pessoa' : 'pessoas'}</Chip>
         </div>
       </div>
     </>

@@ -1,6 +1,6 @@
 import { ButtonLink } from '@/ui/primitives/button';
 import { salvarCartaoAction } from '@/app/_actions/planejamento';
-import { agruparFaturas, competenciaDaFatura } from '@/core/card-invoices/domain';
+import { agruparFaturas, competenciaDaFatura, maiorCompra, usoDoLimite } from '@/core/card-invoices/domain';
 import { addMeses } from '@/core/shared/competencia';
 import { carregarBase } from '@/features/base';
 import { centavosParaCampo, competenciaDoParam, dataCurta, rotuloCompetencia } from '@/ui/format';
@@ -53,17 +53,15 @@ export default async function CartaoPage({
   const atual = competenciaDaFatura(hoje, fecha);
   const sel = competenciaDoParam(sp.fatura, atual);
   const fatura = faturas.find((f) => f.competencia === sel);
-  const abertas = faturas.filter((f) => f.venceEm >= hoje).reduce((s, f) => s + f.totalCents, 0);
   const cats = new Map(categories.map((x) => [x.id, x]));
   const porId = new Map(compras.map((t) => [t.id, t]));
 
   const limite = cartao.limitCents ?? null;
-  const pctLimite = limite ? (abertas / limite) * 100 : null;
+  const uso = usoDoLimite(faturas, hoje, limite);
+  const abertas = uso.emAbertoCents;
+  const pctLimite = uso.usadoPct;
   const comprasFatura = fatura?.compras ?? [];
-  const maior = comprasFatura.reduce<(typeof comprasFatura)[number] | null>(
-    (m, cp) => (!m || cp.amountCents > m.amountCents ? cp : m),
-    null,
-  );
+  const maior = maiorCompra(comprasFatura);
   const porCategoria = totaisPorCategoria(
     comprasFatura.map((cp) => ({ categoryId: porId.get(cp.id)?.categoryId ?? null, cents: cp.amountCents })),
     categories.map((x) => ({ id: x.id, name: x.name, color: x.color })),
@@ -104,7 +102,7 @@ export default async function CartaoPage({
             />
             <Widget
               rotulo="Disponível"
-              valor={limite ? <AmountDisplay cents={Math.max(0, limite - abertas)} size="md" /> : <span className="text-lg font-semibold">—</span>}
+              valor={uso.disponivelCents !== null ? <AmountDisplay cents={uso.disponivelCents} size="md" /> : <span className="text-lg font-semibold">—</span>}
               contexto="Faturas não vencidas contam como usado"
               visual={<IconeRedondo nome="card" />}
             />

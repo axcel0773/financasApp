@@ -47,8 +47,8 @@ export default async function CarteirasPage() {
               </div>
               <AmountDisplay cents={saldo.get(w.id) ?? 0} size="md" />
             </div>
-            <div className="mt-2 flex flex-wrap gap-x-4">
-            <details className="group/ed min-w-0 basis-full">
+            <div className="mt-2 flex flex-wrap items-start gap-x-5 [&>details[open]]:basis-full">
+            <details className="min-w-0">
               <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">Editar</summary>
               <ActionForm action={renomearCarteiraAction} submitLabel="Salvar" className="space-y-3 pb-1">
                 <input type="hidden" name="id" value={w.id} />
@@ -57,7 +57,7 @@ export default async function CarteirasPage() {
               </ActionForm>
               {w.kind === 'credit_card' && <Link href="/cartao" className="inline-flex min-h-11 items-center text-sm font-semibold text-link">Fechamento, vencimento e limite</Link>}
             </details>
-            <details className="min-w-0 basis-full">
+            <details className="min-w-0">
               <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-expense-text">Arquivar</summary>
               <ActionForm action={arquivarCarteiraAction} submitLabel="Confirmar: arquivar" variante="danger" className="space-y-3 pb-1">
                 <input type="hidden" name="id" value={w.id} /><input type="hidden" name="arquivar" value="1" />

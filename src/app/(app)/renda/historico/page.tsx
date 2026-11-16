@@ -35,7 +35,7 @@ export default async function HistoricoPage() {
           {[...porMes.entries()].map(([mes, rs]) => (
             <Card key={mes}>
               <div className="mb-1 flex items-center justify-between">
-                <h2 className="font-display text-lg font-bold capitalize">
+                <h2 className="font-display text-lg font-bold first-letter:uppercase">
                   {rotuloCompetencia(mes)}
                 </h2>
                 <AmountDisplay cents={totalRecebido(rs)} tom="income" />

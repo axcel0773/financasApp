@@ -74,3 +74,12 @@ export const totalPrevistoPendente = (rs: Recebimento[]): Cents =>
   rs.filter((r) => r.receivedOn === null).reduce((s, r) => s + (r.expectedNetCents ?? 0), 0);
 export const diferencaPrevistoRecebido = (r: Recebimento): Cents | null =>
   r.netCents === null || r.expectedNetCents === null ? null : r.netCents - r.expectedNetCents;
+
+/** Próximo recebimento previsto e ainda não recebido, de hoje em diante; null se não houver. */
+export function proximoRecebimento(recebimentos: Recebimento[], hoje: IsoDate): Recebimento | null {
+  return (
+    recebimentos
+      .filter((r) => r.receivedOn === null && r.expectedOn !== null && r.expectedOn >= hoje)
+      .sort((a, b) => (a.expectedOn! < b.expectedOn! ? -1 : a.expectedOn! > b.expectedOn! ? 1 : 0))[0] ?? null
+  );
+}

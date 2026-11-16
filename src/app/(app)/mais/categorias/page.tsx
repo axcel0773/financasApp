@@ -30,6 +30,7 @@ export default async function CategoriasPage() {
         {categories.map((x) => (
           <Card key={x.id}>
             <p className="flex items-center gap-3 font-semibold"><CategoryIcon nome={x.name} cor={x.color} />{x.name}</p>
+            <div className="mt-2 flex flex-wrap items-start gap-x-5 [&>details[open]]:basis-full">
             <details>
               <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">Editar</summary>
               <ActionForm action={salvarCategoriaAction} submitLabel="Salvar" className="space-y-3 pb-1">
@@ -39,6 +40,7 @@ export default async function CategoriasPage() {
               </ActionForm>
             </details>
             <ExcluirConfirmado action={excluirCategoriaAction} id={x.id} aviso="Os lançamentos desta categoria ficam sem categoria. O limite de orçamento é apagado." />
+            </div>
           </Card>
         ))}
       </div>

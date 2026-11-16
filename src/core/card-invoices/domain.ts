@@ -59,3 +59,27 @@ export function agruparFaturas(
   }
   return [...mapa.values()].sort((a, b) => a.competencia.localeCompare(b.competencia));
 }
+
+export interface UsoDoLimite {
+  /** Soma das faturas que ainda não venceram (contam como limite usado). */
+  emAbertoCents: Cents;
+  /** null quando o cartão não tem limite informado. */
+  disponivelCents: Cents | null;
+  usadoPct: number | null;
+}
+
+/** Quanto do limite está tomado: toda fatura com vencimento de hoje em diante ainda ocupa o limite. */
+export function usoDoLimite(faturas: Fatura[], hoje: IsoDate, limiteCents: Cents | null): UsoDoLimite {
+  const emAbertoCents = faturas.filter((f) => f.venceEm >= hoje).reduce((s, f) => s + f.totalCents, 0);
+  if (!limiteCents || limiteCents <= 0) return { emAbertoCents, disponivelCents: null, usadoPct: null };
+  return {
+    emAbertoCents,
+    disponivelCents: Math.max(0, limiteCents - emAbertoCents),
+    usadoPct: (emAbertoCents / limiteCents) * 100,
+  };
+}
+
+/** Maior compra de uma lista (a primeira, em caso de empate); null se vazia. */
+export function maiorCompra(compras: CompraCartao[]): CompraCartao | null {
+  return compras.reduce<CompraCartao | null>((m, c) => (!m || c.amountCents > m.amountCents ? c : m), null);
+}

@@ -15,7 +15,6 @@ const config: Config = {
         chart: 'var(--chart)',
         link: 'var(--link)',
         income: 'var(--income)',
-        brass: 'var(--brass)',
         trip: 'var(--trip)',
         expense: { DEFAULT: 'var(--expense)', text: 'var(--expense-text)' },
         voucher: 'var(--voucher)',

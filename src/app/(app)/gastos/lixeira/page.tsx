@@ -2,6 +2,7 @@ import { esvaziarLixeiraAction } from '@/app/_actions/gastos';
 import { DIAS_LIXEIRA } from '@/core/shared/constants';
 import { carregarBase } from '@/features/base';
 import { RestaurarButton } from '@/features/gastos/acoes-gasto';
+import { IconeRedondo } from '@/ui/patterns/round-icon';
 import { dataCurta } from '@/ui/format';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { ActionForm } from '@/features/shared/action-form';
@@ -33,12 +34,15 @@ export default async function LixeiraPage() {
       ) : (
         <Card className="divide-y divide-border p-0">
           {itens.map((t) => (
-            <div key={t.id} className="flex items-center justify-between gap-3 p-4">
-              <div className="min-w-0">
-                <p className="truncate font-semibold">{t.note ?? 'Lançamento'}</p>
-                <p className="text-xs text-muted">{dataCurta(t.occurredOn)}</p>
+            <div key={t.id} className="space-y-2 p-4">
+              <div className="flex items-center gap-3">
+                <IconeRedondo nome="trash" />
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold">{t.note ?? 'Lançamento'}</p>
+                  <p className="text-xs text-muted">{dataCurta(t.occurredOn)}</p>
+                </div>
+                <AmountDisplay cents={t.amountCents} size="sm" />
               </div>
-              <AmountDisplay cents={t.amountCents} size="sm" />
               <RestaurarButton id={t.id} />
             </div>
           ))}

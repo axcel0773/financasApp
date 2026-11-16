@@ -4,7 +4,7 @@ import {
   registrarExtraAction,
   salvarFonteAction,
 } from '@/app/_actions/renda';
-import { totalPrevistoPendente, totalRecebido } from '@/core/income/domain';
+import { proximoRecebimento, totalPrevistoPendente, totalRecebido } from '@/core/income/domain';
 import { dividirSalario, estimarHolerite } from '@/core/income/holerite';
 import { addMeses } from '@/core/shared/competencia';
 import { desativarFonteAction } from '@/app/_actions/gestao';
@@ -59,9 +59,7 @@ export default async function RendaPage({
   const partes = holerite && fonte ? dividirSalario(holerite, fonte.advancePercent ?? 0) : null;
   const recebido = totalRecebido(recebimentos);
   const pendente = totalPrevistoPendente(recebimentos);
-  const proximo = recebimentos
-    .filter((r) => r.receivedOn === null && r.expectedOn && r.expectedOn >= hoje)
-    .sort((a, b) => (a.expectedOn! < b.expectedOn! ? -1 : 1))[0];
+  const proximo = proximoRecebimento(recebimentos, hoje);
 
   return (
     <>
