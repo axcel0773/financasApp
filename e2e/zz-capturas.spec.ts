@@ -64,6 +64,7 @@ test.describe('capturas', () => {
       await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
       await page.waitForLoadState('networkidle');
       await page.evaluate(() => document.documentElement.setAttribute('data-theme', 'light'));
+      await page.waitForTimeout(600); // deixa as transições de cor terminarem antes da captura
       await salvar(nome);
       // contraste e demais regras de acessibilidade também no claro
       const violacoes = (await new AxeBuilder({ page }).analyze()).violations;

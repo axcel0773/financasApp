@@ -31,7 +31,7 @@ export function AmountDisplay({
 }) {
   const prefixo = sinal ? (cents < 0 ? '− ' : '+ ') : '';
   return (
-    <span className={cx('amount', TOM[tom], TAM[size], className)}>
+    <span className={cx('amount whitespace-nowrap', TOM[tom], TAM[size], className)}>
       {prefixo}
       {formatBRL(sinal ? Math.abs(cents) : cents)}
     </span>
