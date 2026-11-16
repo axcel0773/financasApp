@@ -60,13 +60,15 @@ test.describe('capturas', () => {
     }
     // detalhe de um lançamento e de uma viagem (o primeiro de cada lista)
     await page.goto('/gastos');
-    const primeiro = await page.locator('a[href^="/gastos/"][href*="-"]').first().getAttribute('href');
+    const linkLanc = page.locator('a[href^="/gastos/"][href*="-"]');
+    const primeiro = (await linkLanc.count()) ? await linkLanc.first().getAttribute('href') : null;
     if (primeiro) {
       await page.goto(primeiro);
       await salvar('24-lancamento');
     }
     await page.goto('/mais/viagens');
-    const viagem = await page.locator('a[href^="/mais/viagens/"]').first().getAttribute('href');
+    const linkViagem = page.locator('a[href^="/mais/viagens/"]:not([href$="/nova"])');
+    const viagem = (await linkViagem.count()) ? await linkViagem.first().getAttribute('href') : null;
     if (viagem) {
       await page.goto(viagem);
       await salvar('25-viagem');

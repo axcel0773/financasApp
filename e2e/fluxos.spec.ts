@@ -133,7 +133,7 @@ test.describe('autenticado', () => {
     if (!confirmou)
       info.annotations.push({ type: 'aviso', description: 'tela não confirmou o salvamento (toast ausente); dado verificado após recarregar' });
     await page.reload();
-    await expect(page.getByText(nome)).toBeVisible();
+    await expect(page.getByText(nome).first()).toBeVisible();
   });
   test('estresse: envio repetido do gasto fixo não deixa a tela em "Salvando…"', async ({ page }, info) => {
     test.setTimeout(120_000);
@@ -155,15 +155,18 @@ test.describe('autenticado', () => {
       const enviado = page.waitForResponse((r) => r.request().method() === 'POST' && r.url().includes('/fixos'));
       await botao.click();
       await enviado;
-      const livre = await page.getByRole('button', { name: /^cadastrar fixo$/i }).waitFor({ timeout: 6_000 }).then(() => true, () => false);
+      // "livre" = nenhum botão preso em "Salvando…" (o formulário recolhido fecha sozinho ao salvar)
+      const livre = await page.getByRole('button', { name: /salvando/i }).waitFor({ state: 'detached', timeout: 6_000 }).then(() => true, () => false);
       if (!livre) botaoPreso++;
-      const naLista = await page.getByText(nomeFixo).waitFor({ timeout: 6_000 }).then(() => true, () => false);
+      const naLista = await page.getByText(nomeFixo).first().waitFor({ timeout: 6_000 }).then(() => true, () => false);
       if (livre && !naLista) listaSemItem++;
       if (!livre || !naLista) {
         travou++;
         await page.reload();
         await page.waitForLoadState('networkidle');
         await page.getByText('Novo gasto fixo').click();
+      } else if (!(await form.getByLabel('Nome').isVisible())) {
+        await page.getByText('Novo gasto fixo').click(); // reabre o formulário que fechou ao salvar
       }
     }
     expect(travou, `travou ${travou} de ${N} envios (botão preso: ${botaoPreso}; item fora da lista: ${listaSemItem})`).toBe(0);
@@ -269,6 +272,7 @@ test.describe('formulários', () => {
       for (let i = 0; i < total; i++) {
         await page.goto(rota);
         await page.evaluate(() => document.querySelectorAll('details').forEach((d) => (d.open = true)));
+        if ((await page.locator(seletor).count()) <= i) continue; // a lista mudou (outro teste pode ter criado ou apagado itens)
         const form = page.locator(seletor).nth(i);
         const botao = form.locator('button[type="submit"]').first();
         const rotulo = ((await botao.textContent()) ?? '').trim();
