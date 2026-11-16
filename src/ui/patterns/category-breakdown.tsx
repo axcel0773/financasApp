@@ -22,7 +22,7 @@ export function CategoryBreakdown({ itens, titulo }: { itens: ItemCategoria[]; t
       <div
         role="img"
         aria-label={`${titulo}: ${itens.map((i) => `${i.nome} ${Math.round(i.pct)}%`).join(', ')}`}
-        className="flex h-3 gap-1"
+        className="crescer-x flex h-3 gap-1"
       >
         {itens.map((i) => (
           <span

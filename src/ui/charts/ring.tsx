@@ -40,6 +40,7 @@ export function Ring({
           strokeLinecap="round"
           strokeDasharray={`${p} ${100 - p}`}
           strokeDashoffset="25"
+          className="encher-anel"
         />
       )}
       {rotulo && (

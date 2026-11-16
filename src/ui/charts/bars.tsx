@@ -36,6 +36,8 @@ export function Bars({ barras, titulo }: { barras: Barra[]; titulo: string }) {
               height={alt}
               rx={Math.min(bw, alt) / 2}
               fill={b.destaque ? 'var(--chart)' : 'var(--soft)'}
+              className="crescer-y"
+              style={{ animationDelay: `${i * 40}ms` }}
             />
             <text
               x={x + bw / 2}

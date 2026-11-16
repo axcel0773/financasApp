@@ -16,7 +16,7 @@ test.describe('capturas', () => {
     const salvar = async (nome: string) => {
       await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
       await page.waitForLoadState('networkidle');
-      await page.screenshot({ path: `capturas/${info.project.name}-${nome}.png`, fullPage: true });
+      await page.screenshot({ path: `capturas/${info.project.name}-${nome}.png`, fullPage: true, animations: 'disabled' });
     };
     await page.goto('/login');
     await salvar('00-login');

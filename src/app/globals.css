@@ -204,3 +204,32 @@ nav a:active {
 .fab:active::after {
   animation: fab-ring 500ms ease-out;
 }
+
+/* Gráficos crescem uma vez ao aparecer: mostra de onde o valor parte. Desligado com prefers-reduced-motion (regra acima). */
+@keyframes crescer-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+@keyframes crescer-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+@keyframes encher-anel {
+  from {
+    stroke-dasharray: 0 100;
+  }
+}
+.crescer-x {
+  transform-origin: left center;
+  animation: crescer-x 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.crescer-y {
+  transform-box: fill-box;
+  transform-origin: center bottom;
+  animation: crescer-y 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.encher-anel {
+  animation: encher-anel 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
