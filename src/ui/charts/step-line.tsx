@@ -47,7 +47,7 @@ export function StepLine({
         stroke="var(--border)"
         strokeDasharray="3 3"
       />
-      <path d={d} fill="none" stroke="var(--primary)" strokeWidth="2" strokeLinejoin="round" />
+      <path d={d} fill="none" stroke="var(--chart)" strokeWidth="2" strokeLinejoin="round" />
       <circle cx={x(menor.i)} cy={y(menor.v)} r="4" fill="var(--expense)" />
       <text
         x={Math.min(Math.max(x(menor.i), 40), w - 40)}

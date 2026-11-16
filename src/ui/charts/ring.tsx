@@ -1,9 +1,30 @@
-/** Anel de progresso pequeno (0–100%). O número ao lado é quem informa; o anel só reforça. */
-export function Ring({ pct, size = 44, alerta = false }: { pct: number; size?: number; alerta?: boolean }) {
+/**
+ * Anel de progresso (0–100%). Sem `rotulo`, é decorativo (o número ao lado é quem informa);
+ * com `rotulo`, mostra o texto no centro e é lido por leitores de tela.
+ */
+export function Ring({
+  pct,
+  size = 44,
+  alerta = false,
+  rotulo,
+  descricao,
+}: {
+  pct: number;
+  size?: number;
+  alerta?: boolean;
+  rotulo?: string;
+  descricao?: string;
+}) {
   const R = 15.9155;
   const p = Math.max(0, Math.min(100, pct));
   return (
-    <svg viewBox="0 0 42 42" width={size} height={size} aria-hidden="true" className="shrink-0">
+    <svg
+      viewBox="0 0 42 42"
+      width={size}
+      height={size}
+      className="shrink-0"
+      {...(rotulo ? { role: 'img', 'aria-label': descricao ?? rotulo } : { 'aria-hidden': true })}
+    >
       <circle cx="21" cy="21" r={R} fill="none" stroke="var(--soft)" strokeWidth="5" />
       {p > 0 && (
         <circle
@@ -17,6 +38,11 @@ export function Ring({ pct, size = 44, alerta = false }: { pct: number; size?: n
           strokeDasharray={`${p} ${100 - p}`}
           strokeDashoffset="25"
         />
+      )}
+      {rotulo && (
+        <text x="21" y="21" textAnchor="middle" dominantBaseline="central" fontSize="9" fontWeight="600" fill="var(--ink)">
+          {rotulo}
+        </text>
       )}
     </svg>
   );

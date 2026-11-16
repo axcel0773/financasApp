@@ -17,6 +17,7 @@ const P = {
   pie: 'M21 12A9 9 0 1112 3v9zM15 3.5A9 9 0 0120.5 9H15z',
   back: 'M15 18l-6-6 6-6',
   check: 'M5 12l5 5 9-10',
+  calendar: 'M4 6h16v15H4zM4 10h16M8 3v4M16 3v4',
   trash: 'M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3',
   edit: 'M4 20h4L19 9l-4-4L4 16zM13 7l4 4',
   undo: 'M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3',

@@ -8,9 +8,16 @@ import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { TransactionRow } from '@/ui/patterns/transaction-row';
 import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
-import { FilterChip } from '@/ui/primitives/chip';
 import { Field, Input, MoneyInput } from '@/ui/primitives/fields';
-import { EmptyState, ProgressBar } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/primitives/progress';
+import { totaisPorCategoria } from '@/core/reports/domain';
+import { Ring } from '@/ui/charts/ring';
+import { CategoryBreakdown } from '@/ui/patterns/category-breakdown';
+import { Recolhivel } from '@/ui/patterns/collapsible';
+import { MonthSwitch } from '@/ui/patterns/month-switch';
+import { IconeRedondo } from '@/ui/patterns/round-icon';
+import { Widget } from '@/ui/patterns/widget';
+import { GradeWidgets } from '@/ui/patterns/widget-grid';
 
 export const metadata = { title: 'Fatura do cartão' };
 
@@ -49,69 +56,77 @@ export default async function CartaoPage({
   const abertas = faturas.filter((f) => f.venceEm >= hoje).reduce((s, f) => s + f.totalCents, 0);
   const cats = new Map(categories.map((x) => [x.id, x]));
   const porId = new Map(compras.map((t) => [t.id, t]));
-  const nav = [
-    ...new Set([addMeses(atual, -2), addMeses(atual, -1), atual, addMeses(atual, 1), sel]),
-  ].sort();
+
+  const limite = cartao.limitCents ?? null;
+  const pctLimite = limite ? (abertas / limite) * 100 : null;
+  const comprasFatura = fatura?.compras ?? [];
+  const maior = comprasFatura.reduce<(typeof comprasFatura)[number] | null>(
+    (m, cp) => (!m || cp.amountCents > m.amountCents ? cp : m),
+    null,
+  );
+  const porCategoria = totaisPorCategoria(
+    comprasFatura.map((cp) => ({ categoryId: porId.get(cp.id)?.categoryId ?? null, cents: cp.amountCents })),
+    categories.map((x) => ({ id: x.id, name: x.name, color: x.color })),
+  ).map((f) => ({ id: f.categoryId, nome: f.name, cor: f.categoryId ? f.color : null, cents: f.cents, pct: f.pct }));
+  const fechaEm = fatura?.fechaEm ?? `${sel}-${String(fecha).padStart(2, '0')}`;
+  const venceEm = fatura?.venceEm ?? `${addMeses(sel, 1)}-${String(vence).padStart(2, '0')}`;
 
   return (
     <>
       <PageHeader voltar={{ href: '/mais' }} title="Fatura do cartão" subtitle={cartao.name} />
-      <div className="-mx-5 mb-3 flex gap-2 overflow-x-auto px-5 pb-1 no-scrollbar">
-        {nav.map((m) => (
-          <FilterChip key={m} href={`/cartao?fatura=${m}`} ativo={m === sel}>
-            {rotuloCompetencia(m).split(' de ')[0]}
-            {m === atual ? ' (atual)' : ''}
-          </FilterChip>
-        ))}
-      </div>
-      <div className="lg:grid lg:grid-cols-2 lg:gap-6">
-        <div>
+      <MonthSwitch
+        anterior={`/cartao?fatura=${addMeses(sel, -1)}`}
+        proximo={`/cartao?fatura=${addMeses(sel, 1)}`}
+        rotulo={`Fatura de ${rotuloCompetencia(sel)}${sel === atual ? ' · atual' : ''}`}
+      />
+      <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start lg:gap-6">
+        <div className="space-y-3">
           <Hero>
-            <p className="text-sm opacity-80">Fatura de {rotuloCompetencia(sel)}</p>
+            <p className="text-sm text-white/75">Total da fatura</p>
             <AmountDisplay cents={fatura?.totalCents ?? 0} tom="onDark" size="xl" />
-            <p className="mt-1 text-sm opacity-80">
-              Fecha em {dataCurta(fatura?.fechaEm ?? `${sel}-${String(fecha).padStart(2, '0')}`)} ·
-              vence em {dataCurta(fatura?.venceEm ?? `${sel}-${String(vence).padStart(2, '0')}`)}
-            </p>
+            <div className="mt-5 grid grid-cols-2 gap-2.5 text-sm">
+              <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+                <p className="text-white/75">Fecha em</p>
+                <p className="text-lg font-semibold">{dataCurta(fechaEm)}</p>
+              </div>
+              <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+                <p className="text-white/75">Vence em</p>
+                <p className="text-lg font-semibold">{dataCurta(venceEm)}</p>
+              </div>
+            </div>
           </Hero>
-          {cartao.limitCents ? (
-            <Card className="mt-3 space-y-2">
-              <div className="flex justify-between text-sm">
-                <span>Limite usado (faturas em aberto)</span>
-                <span className="amount">
-                  {centavosParaCampo(abertas)} de {centavosParaCampo(cartao.limitCents)}
-                </span>
-              </div>
-              <ProgressBar
-                pct={(abertas / cartao.limitCents) * 100}
-                tom={abertas / cartao.limitCents >= 0.9 ? 'alert' : 'ok'}
-                label="Limite do cartão usado"
-              />
+          <GradeWidgets>
+            <Widget
+              rotulo="Limite usado"
+              valor={<AmountDisplay cents={abertas} size="md" />}
+              contexto={limite ? `${Math.round(pctLimite!)}% de ${centavosParaCampo(limite)}` : 'Sem limite informado'}
+              visual={<Ring pct={pctLimite ?? 0} alerta={(pctLimite ?? 0) >= 90} />}
+            />
+            <Widget
+              rotulo="Disponível"
+              valor={limite ? <AmountDisplay cents={Math.max(0, limite - abertas)} size="md" /> : <span className="text-lg font-semibold">—</span>}
+              contexto="Faturas não vencidas contam como usado"
+              visual={<IconeRedondo nome="card" />}
+            />
+            <Widget
+              rotulo="Compras nesta fatura"
+              valor={<span className="text-lg font-semibold">{comprasFatura.length}</span>}
+              contexto={comprasFatura.length ? `média ${centavosParaCampo(Math.round((fatura?.totalCents ?? 0) / comprasFatura.length))}` : 'Nenhuma ainda'}
+              visual={<IconeRedondo nome="list" />}
+            />
+            <Widget
+              rotulo="Maior compra"
+              valor={maior ? <AmountDisplay cents={maior.amountCents} size="md" /> : <span className="text-lg font-semibold">—</span>}
+              contexto={maior ? (porId.get(maior.id)?.note ?? 'Compra') : 'Nenhuma ainda'}
+              visual={<IconeRedondo nome="trend" />}
+            />
+          </GradeWidgets>
+          {porCategoria.length > 0 && (
+            <Card>
+              <h2 className="mb-3 font-display text-base font-semibold">Para onde foi</h2>
+              <CategoryBreakdown titulo="Compras da fatura por categoria" itens={porCategoria.slice(0, 6)} />
             </Card>
-          ) : null}
-          <SectionTitle>Configurar cartão</SectionTitle>
-          <details className="rounded-lg border border-border bg-surface p-4">
-            <summary className="flex min-h-11 cursor-pointer items-center font-semibold text-link">
-              Fechamento, vencimento e limite
-            </summary>
-            <ActionForm action={salvarCartaoAction} submitLabel="Salvar" className="mt-3 space-y-3">
-              <input type="hidden" name="id" value={cartao.id} />
-              <div className="grid grid-cols-2 gap-3">
-                <Field label="Dia de fechamento">
-                  <Input name="closingDay" inputMode="numeric" defaultValue={fecha} required />
-                </Field>
-                <Field label="Dia de vencimento">
-                  <Input name="dueDay" inputMode="numeric" defaultValue={vence} required />
-                </Field>
-              </div>
-              <Field label="Limite (opcional)">
-                <MoneyInput
-                  name="limit"
-                  defaultValue={cartao.limitCents ? centavosParaCampo(cartao.limitCents) : ''}
-                />
-              </Field>
-            </ActionForm>
-          </details>
+          )}
         </div>
         <div>
           <SectionTitle>Compras da fatura</SectionTitle>
@@ -149,6 +164,22 @@ export default async function CartaoPage({
           <ButtonLink href={`/gastos?carteira=${cartao.id}`} variant="secondary" block className="mt-3">
             Ver todas as compras do cartão
           </ButtonLink>
+          <Recolhivel titulo="Fechamento, vencimento e limite" className="mt-3">
+            <ActionForm action={salvarCartaoAction} submitLabel="Salvar" className="space-y-3">
+              <input type="hidden" name="id" value={cartao.id} />
+              <div className="grid grid-cols-2 gap-3">
+                <Field label="Dia de fechamento">
+                  <Input name="closingDay" inputMode="numeric" defaultValue={fecha} required />
+                </Field>
+                <Field label="Dia de vencimento">
+                  <Input name="dueDay" inputMode="numeric" defaultValue={vence} required />
+                </Field>
+              </div>
+              <Field label="Limite (opcional)">
+                <MoneyInput name="limit" defaultValue={cartao.limitCents ? centavosParaCampo(cartao.limitCents) : ''} />
+              </Field>
+            </ActionForm>
+          </Recolhivel>
         </div>
       </div>
     </>

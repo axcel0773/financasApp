@@ -13,7 +13,7 @@ export function Sparkline({ values, titulo }: { values: number[]; titulo: string
       <polyline
         points={pts}
         fill="none"
-        stroke="var(--primary)"
+        stroke="var(--chart)"
         strokeWidth="2"
         strokeLinecap="round"
         strokeLinejoin="round"

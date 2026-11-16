@@ -4,12 +4,16 @@ import { projetarSaldo, type EventoCaixa } from '@/core/cashflow/domain';
 import { ocorrenciasPendentes } from '@/core/recurring/domain';
 import { addDias, addMeses, competenciaDe, type Competencia } from '@/core/shared/competencia';
 import { carregarBase } from '@/features/base';
-import { dataCurta } from '@/ui/format';
+import { centavosParaCampo, dataCurta, diaDaSemana } from '@/ui/format';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { StepLine } from '@/ui/charts/step-line';
-import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
-import { Chip, FilterChip } from '@/ui/primitives/chip';
-import { Icon } from '@/ui/primitives/icon';
+import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
+import { Linha } from '@/ui/patterns/row';
+import { IconeRedondo } from '@/ui/patterns/round-icon';
+import { LinhaDoTempo } from '@/ui/patterns/timeline';
+import { Widget } from '@/ui/patterns/widget';
+import { GradeWidgets } from '@/ui/patterns/widget-grid';
+import { FilterChip } from '@/ui/primitives/chip';
 import { EmptyState } from '@/ui/primitives/progress';
 
 export const metadata = { title: 'Fluxo de caixa' };
@@ -77,12 +81,30 @@ export default async function FluxoPage({
     .filter((e) => e.date >= hoje && e.date <= ate)
     .sort((a, b) => a.date.localeCompare(b.date));
 
+  const final = proj.pontos[proj.pontos.length - 1]?.saldoCents ?? saldoAtual;
+  const entradas = lista.filter((e) => e.cents > 0).reduce((t, e) => t + e.cents, 0);
+  const saidas = lista.filter((e) => e.cents < 0).reduce((t, e) => t - e.cents, 0);
+  const proxima = lista.find((e) => e.cents < 0);
+  const saldoNoDia = new Map(proj.pontos.map((p) => [p.date, p.saldoCents]));
+  const porDia = new Map<string, typeof lista>();
+  for (const e of lista) porDia.set(e.date, [...(porDia.get(e.date) ?? []), e]);
+  const icone = (e: EventoCaixa) =>
+    e.cents > 0 ? (
+      <IconeRedondo nome="wallet" tom="entrada" />
+    ) : e.label.startsWith('Fatura') ? (
+      <IconeRedondo nome="card" />
+    ) : e.label.startsWith('Gasto agendado') ? (
+      <IconeRedondo nome="list" />
+    ) : (
+      <IconeRedondo nome="repeat" />
+    );
+
   return (
     <>
       <PageHeader
         voltar={{ href: '/mais' }}
         title="Fluxo de caixa"
-        subtitle={`Próximos ${dias} dias · conta e dinheiro`}
+        subtitle="Conta corrente e dinheiro"
       />
       <div className="mb-4 flex gap-2">
         {[30, 60, 90].map((d) => (
@@ -91,84 +113,86 @@ export default async function FluxoPage({
           </FilterChip>
         ))}
       </div>
-      <div className="lg:grid lg:grid-cols-2 lg:gap-6">
-        <div>
+      <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start lg:gap-6">
+        <div className="space-y-3">
+          <Hero>
+            <p className="text-sm text-white/75">Saldo previsto em {dias} dias</p>
+            <AmountDisplay cents={final} tom="onDark" size="xl" />
+            <div className="mt-5 grid grid-cols-2 gap-2.5 text-sm">
+              <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+                <p className="text-white/75">Saldo hoje</p>
+                <AmountDisplay cents={saldoAtual} size="md" tom="onDark" />
+              </div>
+              <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+                <p className="text-white/75">Variação</p>
+                <AmountDisplay cents={final - saldoAtual} size="md" tom="onDark" sinal />
+              </div>
+            </div>
+          </Hero>
           <Card>
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm text-muted">Saldo hoje</p>
-                <AmountDisplay cents={saldoAtual} size="lg" />
-              </div>
-              <div className="text-right">
-                <p className="text-sm text-muted">Em {dias} dias</p>
-                <AmountDisplay
-                  cents={proj.pontos[proj.pontos.length - 1]?.saldoCents ?? saldoAtual}
-                  size="lg"
-                />
-              </div>
-            </div>
-            <div className="mt-3">
-              <StepLine
-                titulo="Saldo projetado"
-                minimo={ajustes.minBalanceCents}
-                pontos={proj.pontos.map((p) => ({ label: dataCurta(p.date), value: p.saldoCents }))}
-              />
-            </div>
+            <h2 className="mb-2 font-display text-base font-semibold">Saldo dia a dia</h2>
+            <StepLine
+              titulo="Saldo projetado"
+              minimo={ajustes.minBalanceCents}
+              pontos={proj.pontos.map((p) => ({ label: dataCurta(p.date), value: p.saldoCents }))}
+            />
           </Card>
-          <Card className={`mt-3 ${proj.alerta ? 'bg-danger-bg' : ''}`}>
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm text-muted">Menor saldo do período</p>
-                <AmountDisplay
-                  cents={proj.menorSaldo.saldoCents}
-                  size="md"
-                  tom={proj.alerta ? 'expense' : 'default'}
-                />
-                <p className="text-xs text-muted">em {dataCurta(proj.menorSaldo.date)}</p>
-              </div>
-              {proj.alerta ? (
-                <Chip tom="alert">
-                  <Icon name="alert" size={12} />
-                  Abaixo do mínimo
-                </Chip>
-              ) : (
-                <Chip tom="ok">
-                  <Icon name="check" size={12} />
-                  Dentro do mínimo
-                </Chip>
-              )}
-            </div>
-            <p className="mt-2 text-xs text-muted">
-              Mínimo configurado em Mais. Faturas já vencidas são consideradas pagas.
-            </p>
-          </Card>
+          <GradeWidgets>
+            <Widget
+              rotulo="Menor saldo"
+              valor={<AmountDisplay cents={proj.menorSaldo.saldoCents} size="md" tom={proj.alerta ? 'expense' : 'default'} />}
+              contexto={`${dataCurta(proj.menorSaldo.date)} · ${proj.alerta ? 'abaixo do mínimo' : 'dentro do mínimo'}`}
+              visual={<IconeRedondo nome={proj.alerta ? 'alert' : 'check'} tom={proj.alerta ? 'saida' : 'entrada'} />}
+            />
+            <Widget
+              rotulo="Próxima saída"
+              valor={proxima ? <AmountDisplay cents={-proxima.cents} size="md" /> : <span className="text-lg font-semibold">—</span>}
+              contexto={proxima ? `${proxima.label} · ${dataCurta(proxima.date)}` : 'Nada previsto'}
+              visual={<IconeRedondo nome="calendar" />}
+            />
+            <Widget
+              rotulo="Entradas previstas"
+              valor={<AmountDisplay cents={entradas} size="md" tom="income" />}
+              contexto={`${lista.filter((e) => e.cents > 0).length} no período`}
+              visual={<IconeRedondo nome="wallet" tom="entrada" />}
+            />
+            <Widget
+              rotulo="Saídas previstas"
+              valor={<AmountDisplay cents={saidas} size="md" />}
+              contexto={`${lista.filter((e) => e.cents < 0).length} no período`}
+              visual={<IconeRedondo nome="repeat" tom="saida" />}
+            />
+          </GradeWidgets>
+          <p className="text-xs text-muted">
+            Mínimo configurado em Mais → Ajustes. Faturas já vencidas são consideradas pagas.
+          </p>
         </div>
         <div>
-          <SectionTitle>Entradas e saídas previstas</SectionTitle>
+          <SectionTitle>Dia a dia</SectionTitle>
           {lista.length === 0 ? (
             <EmptyState title="Nada previsto neste período">
               Cadastre fixos, parcelas e recebimentos para projetar o saldo.
             </EmptyState>
           ) : (
-            <Card className="py-1">
-              {lista.map((e, i) => (
-                <div
-                  key={`${e.date}-${i}`}
-                  className="flex min-h-12 items-center justify-between gap-3 border-b border-border last:border-0"
-                >
-                  <div className="min-w-0">
-                    <p className="truncate font-semibold">{e.label}</p>
-                    <p className="text-xs text-muted">{dataCurta(e.date)}</p>
-                  </div>
-                  <AmountDisplay
-                    cents={e.cents}
-                    sinal
-                    size="sm"
-                    tom={e.cents < 0 ? 'expense' : 'income'}
+            <LinhaDoTempo
+              grupos={[...porDia.entries()].map(([d, evs]) => ({
+                chave: d,
+                titulo: d === hoje ? 'Hoje' : diaDaSemana(d),
+                direita: saldoNoDia.has(d) ? (
+                  <>
+                    saldo <span className="amount font-semibold text-ink">{centavosParaCampo(saldoNoDia.get(d)!)}</span>
+                  </>
+                ) : undefined,
+                itens: evs.map((e, i) => (
+                  <Linha
+                    key={`${d}-${i}`}
+                    icone={icone(e)}
+                    titulo={e.label}
+                    direita={<AmountDisplay cents={e.cents} sinal size="sm" tom={e.cents < 0 ? 'expense' : 'income'} />}
                   />
-                </div>
-              ))}
-            </Card>
+                )),
+              }))}
+            />
           )}
         </div>
       </div>

@@ -21,6 +21,12 @@ export const rotuloMesCurto = (c: Competencia): string =>
   (MESES[Number(c.slice(5, 7)) - 1] ?? '').slice(0, 3);
 export const dataCurta = (d: IsoDate): string =>
   `${Number(d.slice(8, 10))} ${rotuloMesCurto(d.slice(0, 7))}`;
+const SEMANA = ['domingo', 'segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado'];
+/** "segunda, 20 nov" — para cabeçalhos de dia em listas. */
+export const diaDaSemana = (d: IsoDate): string => {
+  const dt = new Date(Number(d.slice(0, 4)), Number(d.slice(5, 7)) - 1, Number(d.slice(8, 10)));
+  return `${SEMANA[dt.getDay()]}, ${dataCurta(d)}`;
+};
 export const dataLonga = (d: IsoDate): string =>
   `${d.slice(8, 10)}/${d.slice(5, 7)}/${d.slice(0, 4)}`;
 export const competenciaDoParam = (
