@@ -24,6 +24,10 @@ export function iconeDaCategoria(nome: string | null | undefined): IconName {
   return REGRAS.find(([re]) => re.test(n))?.[1] ?? 'tag';
 }
 
+/** Cor da categoria ajustada ao tema: misturada com a tinta para aparecer no escuro e no claro. */
+export const tomDaCategoria = (cor: string | null | undefined) =>
+  `color-mix(in srgb, ${cor ?? 'var(--muted)'} 55%, var(--ink))`;
+
 /**
  * Ícone da categoria num quadrado arredondado, tingido com a cor dela.
  * A cor é misturada com a tinta do tema para ter contraste no escuro e no claro; o nome vem sempre ao lado.

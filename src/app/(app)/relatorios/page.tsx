@@ -1,4 +1,3 @@
-import Link from 'next/link';
 import { compararMeses, totaisPorCategoria } from '@/core/reports/domain';
 import { gerarInsights } from '@/core/reports/insights';
 import { addMeses, primeiroDia, ultimoDia } from '@/core/shared/competencia';
@@ -7,8 +6,12 @@ import { carregarBase } from '@/features/base';
 import { competenciaDe } from '@/core/shared/competencia';
 import { centavosParaCampo, competenciaDoParam, rotuloCompetencia, rotuloMesCurto } from '@/ui/format';
 import { Bars } from '@/ui/charts/bars';
-import { Donut } from '@/ui/charts/donut';
+import { Ring } from '@/ui/charts/ring';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
+import { CategoryBreakdown } from '@/ui/patterns/category-breakdown';
+import { CategoryIcon } from '@/ui/patterns/category-icon';
+import { MonthSwitch } from '@/ui/patterns/month-switch';
+import { Widget } from '@/ui/patterns/widget';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Chip } from '@/ui/primitives/chip';
 import { Icon } from '@/ui/primitives/icon';
@@ -61,82 +64,74 @@ export default async function RelatoriosPage({
     destaque: r.competencia === mes,
   }));
 
+  const maior = fatias[0];
+  const delta =
+    cmp.deltaPct === null ? (
+      <Chip>Sem mês anterior</Chip>
+    ) : cmp.deltaCents > 0 ? (
+      <Chip tom="alert">
+        <Icon name="alert" size={12} />+{cmp.deltaPct.toFixed(0)}% vs. anterior
+      </Chip>
+    ) : (
+      <Chip tom="ok">
+        <Icon name="check" size={12} />
+        {cmp.deltaPct.toFixed(0)}% vs. anterior
+      </Chip>
+    );
+
   return (
     <>
-      <PageHeader voltar={{ href: '/mais' }} title="Relatórios" subtitle={rotuloCompetencia(mes)} />
-      <div className="mb-3 flex items-center justify-between text-sm">
-        <Link
-          href={`/relatorios?mes=${addMeses(mes, -1)}`}
-          className="inline-flex min-h-11 items-center gap-1 text-link"
-        >
-          <Icon name="back" size={18} />
-          Mês anterior
-        </Link>
-        <Link
-          href={`/relatorios?mes=${addMeses(mes, 1)}`}
-          className="inline-flex min-h-11 items-center gap-1 text-link"
-        >
-          Próximo mês
-          <Icon name="chevron" size={18} />
-        </Link>
+      <PageHeader voltar={{ href: '/mais' }} title="Relatórios" subtitle="Entenda para onde foi o dinheiro" />
+      <MonthSwitch
+        anterior={`/relatorios?mes=${addMeses(mes, -1)}`}
+        proximo={`/relatorios?mes=${addMeses(mes, 1)}`}
+        rotulo={rotuloCompetencia(mes)}
+      />
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+        <Widget
+          rotulo="Gasto do mês (sem VR/VA)"
+          valor={<AmountDisplay cents={gastoMes} size="md" />}
+          contexto={cmp.deltaPct === null ? 'Sem mês anterior' : `${cmp.deltaCents > 0 ? '+' : ''}${cmp.deltaPct.toFixed(0)}% vs. mês anterior`}
+          visual={delta}
+        />
+        <Widget
+          rotulo="Projeção de fechamento"
+          valor={
+            insights.projecao ? (
+              <AmountDisplay cents={insights.projecao.projecaoCents} size="md" />
+            ) : (
+              <span className="text-lg font-semibold">—</span>
+            )
+          }
+          contexto={
+            insights.projecao
+              ? `no ritmo de ${insights.projecao.diasDecorridos} ${insights.projecao.diasDecorridos === 1 ? 'dia' : 'dias'}`
+              : 'Só no mês corrente'
+          }
+          visual={
+            <Ring
+              pct={insights.projecao ? (insights.projecao.diasDecorridos / insights.projecao.diasNoMes) * 100 : 0}
+            />
+          }
+        />
+        <Widget
+          rotulo="Maior categoria"
+          valor={<span className="text-lg font-semibold">{maior ? maior.name : '—'}</span>}
+          contexto={maior ? `${brl(maior.cents)} · ${maior.pct.toFixed(0)}% do gasto` : 'Sem gastos neste mês'}
+          visual={<CategoryIcon nome={maior?.name} cor={maior?.categoryId ? maior.color : null} />}
+        />
+        <Widget
+          rotulo="Fixos na renda do mês"
+          valor={
+            <span className="amount text-lg font-semibold">
+              {insights.fixosPctRenda === null ? '—' : `${insights.fixosPctRenda.toFixed(0)}%`}
+            </span>
+          }
+          contexto={insights.fixosPctRenda === null ? 'Sem renda registrada no mês' : insights.fixosPctRenda > 50 ? 'É bastante' : 'Dentro do razoável'}
+          visual={<Ring pct={insights.fixosPctRenda ?? 0} alerta={(insights.fixosPctRenda ?? 0) > 50} />}
+        />
       </div>
-      <SectionTitle>Diagnóstico do mês</SectionTitle>
-      <Card className="mb-3 space-y-3 text-sm">
-        {insights.projecao && (
-          <p>
-            <span className="font-semibold">Projeção:</span> no ritmo atual ({brl(insights.projecao.gastoAteHojeCents)} em{' '}
-            {insights.projecao.diasDecorridos} dias) você fecha o mês com cerca de{' '}
-            <span className="amount font-semibold">{brl(insights.projecao.projecaoCents)}</span> em gastos.
-          </p>
-        )}
-        {insights.emAlta.length > 0 && (
-          <div>
-            <p className="font-semibold">Em alta frente à média dos meses anteriores</p>
-            <ul className="mt-1 space-y-1">
-              {insights.emAlta.map((a) => (
-                <li key={a.nome} className="text-muted">
-                  {a.nome}: {brl(a.atualCents)} (média {brl(a.mediaCents)}, <span className="font-semibold text-expense-text">+{a.deltaPct.toFixed(0)}%</span>)
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {insights.maiores.length > 0 && (
-          <div>
-            <p className="font-semibold">Onde mais pesa</p>
-            <ul className="mt-1 space-y-1 text-muted">
-              {insights.maiores.map((m) => (
-                <li key={m.nome}>{m.nome}: {brl(m.cents)} ({m.pct.toFixed(0)}% dos gastos)</li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {insights.economias.length > 0 && (
-          <div>
-            <p className="font-semibold">Quanto cortar economizaria</p>
-            <ul className="mt-1 space-y-1 text-muted">
-              {insights.economias.map((e) => (
-                <li key={e.nome}>
-                  {e.nome}: −10% poupa {brl(e.mensal10Cents)}/mês; −20% poupa {brl(e.mensal20Cents)}/mês ({brl(e.anual20Cents)} por ano).
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
-        {insights.fixosPctRenda !== null && (
-          <p>
-            <span className="font-semibold">Fixos:</span> consomem {insights.fixosPctRenda.toFixed(0)}% da renda do mês.
-            {insights.fixosPctRenda > 50 && ' É bastante; rever assinaturas e contratos costuma render mais que cortar gastos pequenos.'}
-          </p>
-        )}
-        {!insights.projecao && insights.maiores.length === 0 && (
-          <p className="text-muted">Registre gastos neste mês para ver o diagnóstico.</p>
-        )}
-        {insights.mesesDeHistorico === 0 && insights.maiores.length > 0 && (
-          <p className="text-xs text-muted">Sem meses anteriores com gastos, ainda não dá para comparar com a sua média.</p>
-        )}
-        <p className="text-xs text-muted">Cálculo simples com os seus dados, feito no próprio app. A projeção assume gasto constante ao longo do mês. Gastos de viagem ficam de fora.</p>
-      </Card>
+
       <div className="lg:grid lg:grid-cols-2 lg:gap-6">
         <div>
           <SectionTitle>Gasto por categoria</SectionTitle>
@@ -144,9 +139,16 @@ export default async function RelatoriosPage({
             {fatias.length === 0 ? (
               <EmptyState title="Sem gastos neste mês" />
             ) : (
-              <Donut
+              <CategoryBreakdown
                 titulo="Gasto por categoria"
-                fatias={fatias.map((f) => ({ label: f.name, value: f.cents, color: f.color }))}
+                itens={fatias.map((f) => ({
+                  id: f.categoryId,
+                  nome: f.name,
+                  cor: f.categoryId ? f.color : null,
+                  cents: f.cents,
+                  pct: f.pct,
+                  href: f.categoryId ? `/gastos?mes=${mes}&categoria=${f.categoryId}` : undefined,
+                }))}
               />
             )}
           </Card>
@@ -154,31 +156,68 @@ export default async function RelatoriosPage({
         <div>
           <SectionTitle>Comparação mensal</SectionTitle>
           <Card className="space-y-3">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm text-muted">Gasto do mês (sem VR/VA)</p>
-                <AmountDisplay cents={gastoMes} size="lg" tom="expense" />
+                <AmountDisplay cents={gastoMes} size="lg" />
               </div>
-              {cmp.deltaPct === null ? (
-                <Chip>Sem mês anterior</Chip>
-              ) : cmp.deltaCents > 0 ? (
-                <Chip tom="alert">
-                  <Icon name="alert" size={12} />+{cmp.deltaPct.toFixed(0)}% vs. anterior
-                </Chip>
-              ) : (
-                <Chip tom="ok">
-                  <Icon name="check" size={12} />
-                  {cmp.deltaPct.toFixed(0)}% vs. anterior
-                </Chip>
-              )}
+              {delta}
             </div>
             <Bars titulo="Gasto nos últimos meses" barras={bars} />
-            <p className="text-xs text-muted">
-              Valores em reais por mês. O mês selecionado fica destacado.
-            </p>
+            <p className="text-xs text-muted">Valores em reais por mês. O mês selecionado fica destacado.</p>
           </Card>
         </div>
       </div>
+
+      {insights.emAlta.length > 0 && (
+        <>
+          <SectionTitle>Em alta frente à sua média</SectionTitle>
+          <Card className="py-1">
+            {insights.emAlta.map((a) => (
+              <div key={a.nome} className="flex min-h-14 items-center gap-3 border-b border-border py-1.5 last:border-0">
+                <CategoryIcon nome={a.nome} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-semibold">{a.nome}</span>
+                  <span className="block text-xs text-muted">média {brl(a.mediaCents)}</span>
+                </span>
+                <span className="text-right">
+                  <span className="amount block font-semibold">{brl(a.atualCents)}</span>
+                  <span className="block text-xs font-semibold text-expense-text">+{a.deltaPct.toFixed(0)}%</span>
+                </span>
+              </div>
+            ))}
+          </Card>
+        </>
+      )}
+
+      {insights.economias.length > 0 && (
+        <>
+          <SectionTitle>Quanto cortar economizaria</SectionTitle>
+          <Card className="py-1">
+            {insights.economias.map((e) => (
+              <div key={e.nome} className="flex min-h-14 items-center gap-3 border-b border-border py-2 last:border-0">
+                <CategoryIcon nome={e.nome} />
+                <span className="min-w-0 flex-1">
+                  <span className="block truncate font-semibold">{e.nome}</span>
+                  <span className="block text-xs text-muted">cortando 20%: {brl(e.anual20Cents)} por ano</span>
+                </span>
+                <span className="grid shrink-0 grid-cols-2 gap-x-4 text-right text-xs text-muted">
+                  <span>−10%</span>
+                  <span>−20%</span>
+                  <span className="amount text-sm font-semibold text-income">{brl(e.mensal10Cents)}</span>
+                  <span className="amount text-sm font-semibold text-income">{brl(e.mensal20Cents)}</span>
+                </span>
+              </div>
+            ))}
+            <p className="py-2 text-xs text-muted">Economia por mês em cada cenário.</p>
+          </Card>
+        </>
+      )}
+
+      <p className="mt-6 text-xs text-muted">
+        {insights.mesesDeHistorico === 0 && insights.maiores.length > 0 && 'Sem meses anteriores com gastos, ainda não dá para comparar com a sua média. '}
+        Cálculo simples com os seus dados, feito no próprio app. A projeção assume gasto constante ao longo do mês. Gastos de viagem ficam de fora do diagnóstico.
+      </p>
     </>
   );
 }

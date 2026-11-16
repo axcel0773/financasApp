@@ -1,16 +1,19 @@
 import Link from 'next/link';
 import { addMeses, isIsoDate, primeiroDia, ultimoDia } from '@/core/shared/competencia';
+import { totaisPorCategoria } from '@/core/reports/domain';
 import { ROTULO_CARTEIRA } from '@/core/wallets/domain';
 import { carregarBase, opcoesLancamento } from '@/features/base';
 import { ExcluirButton } from '@/features/gastos/acoes-gasto';
 import { NovoLancamentoForm } from '@/features/gastos/novo-lancamento-form';
 import { PainelNovo } from '@/features/gastos/painel-novo';
 import { PendingQueue } from '@/features/gastos/pending-queue';
-import { centavosParaCampo, competenciaDoParam, dataCurta, dataLonga, rotuloCompetencia } from '@/ui/format';
+import { competenciaDoParam, dataCurta, dataLonga, rotuloCompetencia } from '@/ui/format';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
+import { CategoryBreakdown } from '@/ui/patterns/category-breakdown';
+import { MonthSwitch } from '@/ui/patterns/month-switch';
 import { TransactionHeader, TransactionRow } from '@/ui/patterns/transaction-row';
 import { ButtonLink } from '@/ui/primitives/button';
-import { Card, PageHeader } from '@/ui/primitives/card';
+import { Card, Hero, PageHeader } from '@/ui/primitives/card';
 import { FilterChip } from '@/ui/primitives/chip';
 import { Input } from '@/ui/primitives/fields';
 import { Icon } from '@/ui/primitives/icon';
@@ -75,6 +78,24 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
     for (const [k, v] of Object.entries(base)) if (v) params.set(k, v);
     return `/gastos?${params.toString()}`;
   };
+  // "Para onde foi": gastos do período por categoria, respeitando tipo e carteira (cada linha filtra a lista)
+  const porCategoria = totaisPorCategoria(
+    despesasPeriodo
+      .filter((g) => (tipo === 'dia' ? !g.tripId : tipo === 'viagens' ? !!g.tripId : true))
+      .filter((g) => !carteira || g.walletId === carteira)
+      .map((g) => ({ categoryId: g.categoryId, cents: g.cents })),
+    categories.map((x) => ({ id: x.id, name: x.name, color: x.color })),
+  )
+    .slice(0, 6)
+    .map((f) => ({
+      id: f.categoryId,
+      nome: f.name,
+      cor: f.categoryId ? f.color : null,
+      cents: f.cents,
+      pct: f.pct,
+      href: f.categoryId ? url({ categoria: categoria === f.categoryId ? undefined : f.categoryId, cursor: undefined, sel: undefined }) : undefined,
+      ativo: !!f.categoryId && categoria === f.categoryId,
+    }));
   const ultimo = itens[itens.length - 1];
 
   return (
@@ -95,93 +116,90 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
           </ButtonLink>
         }
       />
-      <form action="/gastos" method="get" className="mb-3 space-y-2">
-        <input type="hidden" name="mes" value={mes} />
-        {carteira && <input type="hidden" name="carteira" value={carteira} />}
-        {categoria && <input type="hidden" name="categoria" value={categoria} />}
-        {tipo && <input type="hidden" name="tipo" value={tipo} />}
-        {buscaGlobal && <input type="hidden" name="tudo" value="1" />}
-        {/* No desktop a busca fica na barra superior (procura em todo o histórico). */}
-        <div className="lg:hidden">
-          <Input type="search" name="q" defaultValue={q} placeholder="Buscar na descrição" aria-label="Buscar lançamentos" maxLength={80} />
-        </div>
-        <details open={periodoLivre}>
-          <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold text-link">Período livre</summary>
-          <div className="grid grid-cols-2 gap-2">
-            <Input type="date" name="de" defaultValue={deP ?? ''} aria-label="De" />
-            <Input type="date" name="ate" defaultValue={ateP ?? ''} aria-label="Até" />
-          </div>
-        </details>
-        <div className="flex flex-wrap gap-2">
-          <button type="submit" className="min-h-11 rounded-full bg-primary px-5 text-sm font-semibold text-primary-fg">Filtrar</button>
-          {(q || periodoLivre) && <Link href={`/gastos?mes=${mes}`} className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-link">Limpar busca</Link>}
-          <Link href="/gastos/transferir" className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-link">Transferir</Link>
-          <Link href="/gastos/importar" className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-link">Importar extrato</Link>
-        </div>
-      </form>
-      {!buscaGlobal && (
-      <div className="mb-3 flex items-center justify-between">
-        <Link
-          href={url({ mes: addMeses(mes, -1), cursor: undefined })}
-          aria-label="Mês anterior"
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-soft"
-        >
-          <Icon name="back" />
-        </Link>
-        <Card className="mx-3 flex-1 border-0 bg-soft py-3 text-center">
-          <p className="text-xs text-muted">{tipo === 'dia' ? 'Dia a dia' : tipo === 'viagens' ? 'Viagens' : 'Gastos no mês'}</p>
-          <AmountDisplay cents={totalGasto} size="lg" tom="expense" />
-          {!tipo && gastoViagens > 0 && (
-            <p className="mt-0.5 text-xs text-muted">
-              Dia a dia <span className="amount">{centavosParaCampo(gastoDia)}</span> · Viagens <span className="amount">{centavosParaCampo(gastoViagens)}</span>
-            </p>
-          )}
-        </Card>
-        <Link
-          href={url({ mes: addMeses(mes, 1), cursor: undefined })}
-          aria-label="Próximo mês"
-          className="flex h-11 w-11 items-center justify-center rounded-full bg-soft"
-        >
-          <Icon name="chevron" />
-        </Link>
-      </div>
+      {!buscaGlobal && !periodoLivre && (
+        <MonthSwitch
+          anterior={url({ mes: addMeses(mes, -1), cursor: undefined, sel: undefined })}
+          proximo={url({ mes: addMeses(mes, 1), cursor: undefined, sel: undefined })}
+          rotulo={rotuloCompetencia(mes)}
+        />
       )}
-      <div className="mb-3 flex gap-2" aria-label="Filtrar por tipo de gasto">
+      {!buscaGlobal && (
+        <div className="mb-4 space-y-3 lg:grid lg:grid-cols-[minmax(0,5fr)_minmax(0,7fr)] lg:items-start lg:gap-6 lg:space-y-0">
+          <Hero>
+            <p className="text-sm text-white/75">
+              {tipo === 'dia' ? 'Dia a dia' : tipo === 'viagens' ? 'Viagens' : periodoLivre ? 'Gastos no período' : 'Gastos no mês'}
+            </p>
+            <AmountDisplay cents={totalGasto} size="xl" tom="onDark" />
+            {!tipo && gastoViagens > 0 && (
+              <div className="mt-5 grid grid-cols-2 gap-2.5 text-sm">
+                <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+                  <p className="text-white/75">Dia a dia</p>
+                  <AmountDisplay cents={gastoDia} size="md" tom="onDark" />
+                </div>
+                <div className="rounded-[18px] bg-white/10 px-3.5 py-3">
+                  <p className="text-white/75">Viagens</p>
+                  <AmountDisplay cents={gastoViagens} size="md" tom="onDark" />
+                </div>
+              </div>
+            )}
+          </Hero>
+          <Card>
+            <h2 className="mb-3 font-display text-base font-semibold">Para onde foi</h2>
+            {porCategoria.length === 0 ? (
+              <p className="py-4 text-sm text-muted">Nenhum gasto neste período.</p>
+            ) : (
+              <>
+                <CategoryBreakdown titulo="Gastos por categoria" itens={porCategoria} />
+                {categoria && (
+                  <Link href={url({ categoria: undefined, cursor: undefined })} className="mt-2 inline-flex min-h-11 items-center text-sm font-semibold text-link">
+                    Mostrar todas as categorias
+                  </Link>
+                )}
+              </>
+            )}
+          </Card>
+        </div>
+      )}
+      <div className="no-scrollbar -mx-5 mb-3 flex gap-2 overflow-x-auto px-5 lg:mx-0 lg:px-0" aria-label="Filtrar por tipo e carteira">
         <FilterChip href={url({ tipo: undefined, cursor: undefined })} ativo={!tipo}>Tudo</FilterChip>
         <FilterChip href={url({ tipo: 'dia', cursor: undefined })} ativo={tipo === 'dia'}>Dia a dia</FilterChip>
         <FilterChip href={url({ tipo: 'viagens', cursor: undefined })} ativo={tipo === 'viagens'}>Viagens</FilterChip>
-      </div>
-      <div
-        className="-mx-5 mb-3 flex gap-2 overflow-x-auto px-5 pb-1 no-scrollbar"
-        aria-label="Filtrar por carteira"
-      >
-        <FilterChip href={url({ carteira: undefined, cursor: undefined })} ativo={!carteira}>
-          Todas
-        </FilterChip>
+        <span aria-hidden className="mx-1 w-px shrink-0 self-stretch bg-border" />
         {wallets.map((w) => (
           <FilterChip
             key={w.id}
-            href={url({ carteira: w.id, cursor: undefined })}
+            href={url({ carteira: carteira === w.id ? undefined : w.id, cursor: undefined })}
             ativo={carteira === w.id}
           >
-            {ROTULO_CARTEIRA[w.kind]}
-            {w.kind === 'checking' || w.kind === 'cash' ? '' : ''}
+            {w.kind === 'checking' || w.kind === 'cash' ? w.name : ROTULO_CARTEIRA[w.kind]}
           </FilterChip>
         ))}
       </div>
-      <div
-        className="-mx-5 mb-4 flex gap-2 overflow-x-auto px-5 pb-1 no-scrollbar"
-        aria-label="Filtrar por categoria"
-      >
-        {categories.map((x) => (
-          <FilterChip
-            key={x.id}
-            href={url({ categoria: categoria === x.id ? undefined : x.id, cursor: undefined })}
-            ativo={categoria === x.id}
-          >
-            {x.name}
-          </FilterChip>
-        ))}
+      <div className="mb-4 flex flex-wrap items-start gap-2">
+        <details open={!!q || periodoLivre} className="min-w-0 flex-1 basis-full rounded-xl border border-border bg-surface px-4 lg:basis-auto">
+          <summary className="flex min-h-11 cursor-pointer items-center text-sm font-semibold">Buscar e escolher período</summary>
+          <form action="/gastos" method="get" className="space-y-2 pb-4">
+            <input type="hidden" name="mes" value={mes} />
+            {carteira && <input type="hidden" name="carteira" value={carteira} />}
+            {categoria && <input type="hidden" name="categoria" value={categoria} />}
+            {tipo && <input type="hidden" name="tipo" value={tipo} />}
+            {buscaGlobal && <input type="hidden" name="tudo" value="1" />}
+            {/* No desktop a busca fica na barra superior (procura em todo o histórico). */}
+            <div className="lg:hidden">
+              <Input type="search" name="q" defaultValue={q} placeholder="Buscar na descrição" aria-label="Buscar lançamentos" maxLength={80} />
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <Input type="date" name="de" defaultValue={deP ?? ''} aria-label="De" />
+              <Input type="date" name="ate" defaultValue={ateP ?? ''} aria-label="Até" />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <button type="submit" className="min-h-11 rounded-full bg-primary px-5 text-sm font-semibold text-primary-fg">Filtrar</button>
+              {(q || periodoLivre) && <Link href={`/gastos?mes=${mes}`} className="inline-flex min-h-11 items-center px-2 text-sm font-semibold text-link">Limpar busca</Link>}
+            </div>
+          </form>
+        </details>
+        <ButtonLink href="/gastos/transferir" variant="secondary">Transferir</ButtonLink>
+        <ButtonLink href="/gastos/importar" variant="secondary">Importar extrato</ButtonLink>
       </div>
       <PendingQueue carteiras={carteiras} categorias={cats} />
       <div className={sel ? 'lg:grid lg:grid-cols-[minmax(0,1fr)_380px] lg:items-start lg:gap-6' : undefined}>
