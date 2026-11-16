@@ -2,8 +2,7 @@
 
 import { z } from 'zod';
 import { getContainer } from '@/composition/container';
-import { gerarPrevistos } from '@/core/income/domain';
-import { estimarHolerite } from '@/core/income/holerite';
+import { gerarPrevistos, holeriteDaFonte } from '@/core/income/domain';
 import { err, ok } from '@/core/shared/result';
 import { executar } from '../_lib/action';
 import type { ActionState } from '../_lib/action-state';
@@ -31,7 +30,10 @@ const fonte = z.object({
   finalDay: inteiroOpcional(1, 31),
   finalRule: z.enum(['dia', 'quinto_dia_util', 'ultimo_dia_util']).default('dia'),
   walletId: uuidOpcional,
-  dependents: inteiroOpcional(0, 20),
+  vrDiscountPercent: z
+    .preprocess((v) => v ?? '', z.string())
+    .transform((s) => (s.trim() === '' ? 0 : Number(s.trim().replace(',', '.'))))
+    .refine((n) => Number.isFinite(n) && n >= 0 && n <= 100, 'Desconto do VR: informe um percentual entre 0 e 100.'),
   alimony: dinheiroOpcional,
 });
 export async function salvarFonteAction(_: ActionState, fd: FormData): Promise<ActionState> {
@@ -51,7 +53,8 @@ export async function salvarFonteAction(_: ActionState, fd: FormData): Promise<A
       finalRule: p.value.finalRule,
       walletId: p.value.walletId,
       active: true,
-      dependents: p.value.dependents ?? 0,
+      dependents: 0,
+      vrDiscountPercent: Math.round(p.value.vrDiscountPercent * 100) / 100,
       alimonyCents: Math.max(0, p.value.alimony ?? 0),
     });
     return ok(undefined);
@@ -70,14 +73,7 @@ export async function gerarPrevistosAction(_: ActionState, fd: FormData): Promis
       gerarPrevistos(
         f,
         p.value.competencia,
-        estimarHolerite({
-          grossCents: f.grossCents,
-          dependentes: f.dependents,
-          pensaoCents: f.alimonyCents,
-          inss: tabelas.inss,
-          irrf: tabelas.irrf,
-          paramsIrrf: tabelas.paramsIrrf,
-        }),
+        holeriteDaFonte(f, tabelas),
       ),
     );
     if (previstos.length === 0)

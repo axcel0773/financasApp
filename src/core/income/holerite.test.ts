@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  calcularDescontoVr,
   calcularInss,
   calcularIrrf,
   dividirSalario,
@@ -132,5 +133,31 @@ describe('13º, férias e pensão', () => {
   it('dependentes reduzem o IRRF', () => {
     const sem = estimarHolerite({ ...base, grossCents: 800_000 });
     expect(estimarHolerite({ ...base, grossCents: 800_000, dependentes: 2 }).irrfCents).toBeLessThanOrEqual(sem.irrfCents);
+  });
+});
+
+describe('desconto do VR em folha', () => {
+  it('é % do bruto e sai só do líquido', () => {
+    const sem = estimarHolerite({ grossCents: 1_000_000, inss, irrf, paramsIrrf: params });
+    const com = estimarHolerite({ grossCents: 1_000_000, descontoVrCents: calcularDescontoVr(1_000_000, 1.5), inss, irrf, paramsIrrf: params });
+    expect(com.vrCents).toBe(15_000);
+    expect(com.inssCents).toBe(sem.inssCents);
+    expect(com.irrfCents).toBe(sem.irrfCents);
+    expect(com.netCents).toBe(sem.netCents - 15_000);
+  });
+  it('limita o percentual entre 0 e 100', () => {
+    expect(calcularDescontoVr(100_000, -5)).toBe(0);
+    expect(calcularDescontoVr(100_000, 150)).toBe(100_000);
+  });
+  it('fica no pagamento final, não no adiantamento', () => {
+    const h = estimarHolerite({ grossCents: 1_000_000, descontoVrCents: 10_000, inss, irrf, paramsIrrf: params });
+    const d = dividirSalario(h, 40);
+    expect(d.adiantamentoCents).toBe(400_000);
+    expect(d.finalCents).toBe(h.netCents - 400_000);
+  });
+  it('13º e férias não têm desconto de VR', () => {
+    const base = { inss, irrf, paramsIrrf: params };
+    expect(estimar13o({ ...base, grossCents: 1_000_000 }).holerite.vrCents).toBe(0);
+    expect(estimarFerias({ ...base, grossMensalCents: 1_000_000, dias: 30 }).vrCents).toBe(0);
   });
 });

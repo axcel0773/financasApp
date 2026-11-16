@@ -1,7 +1,14 @@
 import { addMeses, dataNoMes, type Competencia, type IsoDate } from '../shared/competencia';
 import { enesimoDiaUtil, ultimoDiaUtil } from '../shared/dias-uteis';
 import type { Cents } from '../shared/money';
-import { dividirSalario, type Holerite } from './holerite';
+import {
+  calcularDescontoVr,
+  dividirSalario,
+  estimarHolerite,
+  type Faixa,
+  type Holerite,
+  type ParamsIrrf,
+} from './holerite';
 
 /**
  * Quando cai o pagamento final: num dia fixo do mês seguinte à referência (`finalDay`), no 5º dia útil
@@ -25,6 +32,8 @@ export interface FonteRenda {
   walletId: string | null;
   active: boolean;
   dependents: number;
+  /** Desconto do VR em folha, em % do salário bruto (0 a 100). */
+  vrDiscountPercent: number;
   alimonyCents: Cents;
 }
 export interface Recebimento {
@@ -106,4 +115,20 @@ export function proximoRecebimento(recebimentos: Recebimento[], hoje: IsoDate): 
       .filter((r) => r.receivedOn === null && r.expectedOn !== null && r.expectedOn >= hoje)
       .sort((a, b) => (a.expectedOn! < b.expectedOn! ? -1 : a.expectedOn! > b.expectedOn! ? 1 : 0))[0] ?? null
   );
+}
+
+/** Holerite mensal estimado de uma fonte de salário, com o desconto de VR em folha. */
+export function holeriteDaFonte(
+  f: Pick<FonteRenda, 'grossCents' | 'dependents' | 'alimonyCents' | 'vrDiscountPercent'>,
+  t: { inss: Faixa[]; irrf: Faixa[]; paramsIrrf: ParamsIrrf },
+): Holerite {
+  return estimarHolerite({
+    grossCents: f.grossCents,
+    dependentes: f.dependents,
+    pensaoCents: f.alimonyCents,
+    descontoVrCents: calcularDescontoVr(f.grossCents, f.vrDiscountPercent),
+    inss: t.inss,
+    irrf: t.irrf,
+    paramsIrrf: t.paramsIrrf,
+  });
 }

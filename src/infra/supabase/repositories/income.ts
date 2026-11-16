@@ -52,7 +52,7 @@ export class SupabaseIncomeRepository implements IncomeRepository {
     const { data, error } = await this.db
       .from('income_sources')
       .select(
-        'id,kind,name,employer,gross_cents,advance_percent,advance_day,final_day,final_rule,wallet_id,active,dependents,alimony_cents',
+        'id,kind,name,employer,gross_cents,advance_percent,advance_day,final_day,final_rule,wallet_id,active,dependents,alimony_cents,vr_discount_percent',
       )
       .order('created_at');
     check(error, 'listar fontes de renda');
@@ -70,6 +70,7 @@ export class SupabaseIncomeRepository implements IncomeRepository {
       active: s.active,
       dependents: num(s.dependents),
       alimonyCents: num(s.alimony_cents),
+      vrDiscountPercent: num(s.vr_discount_percent),
     }));
   }
   async salvarFonte(f: Parameters<IncomeRepository['salvarFonte']>[0]): Promise<void> {
@@ -86,6 +87,7 @@ export class SupabaseIncomeRepository implements IncomeRepository {
       active: f.active,
       dependents: f.dependents,
       alimony_cents: f.alimonyCents,
+      vr_discount_percent: f.vrDiscountPercent,
     };
     const { error } = f.id
       ? await this.db.from('income_sources').update(row).eq('id', f.id)

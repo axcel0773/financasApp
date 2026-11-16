@@ -14,8 +14,14 @@ export interface Holerite {
   grossCents: Cents;
   inssCents: Cents;
   irrfCents: Cents;
+  /** Desconto do vale-refeição em folha (0 quando não há). */
+  vrCents: Cents;
   netCents: Cents;
 }
+
+/** Desconto do VR em folha: % do salário bruto base, arredondado ao centavo. */
+export const calcularDescontoVr = (grossCents: Cents, percent: number): Cents =>
+  Math.max(0, Math.round((grossCents * Math.min(100, Math.max(0, percent))) / 100));
 
 /** INSS progressivo: cada alíquota incide só na parte do salário dentro da faixa; arredonda por faixa. */
 export function calcularInss(grossCents: Cents, faixas: Faixa[]): Cents {
@@ -62,6 +68,8 @@ export function estimarHolerite(p: {
   dependentes?: number;
   /** Pensão alimentícia paga: abate a base do IRRF. */
   pensaoCents?: Cents;
+  /** Desconto do VR em folha (já calculado): sai do líquido, não muda INSS nem IRRF. */
+  descontoVrCents?: Cents;
   inss: Faixa[];
   irrf: Faixa[];
   paramsIrrf: ParamsIrrf;
@@ -79,7 +87,8 @@ export function estimarHolerite(p: {
     grossCents: p.grossCents,
     inssCents,
     irrfCents,
-    netCents: p.grossCents - inssCents - irrfCents,
+    vrCents: p.descontoVrCents ?? 0,
+    netCents: p.grossCents - inssCents - irrfCents - (p.descontoVrCents ?? 0),
   };
 }
 
@@ -109,7 +118,7 @@ export function estimar13o(p: EntradaFiscal & { grossCents: Cents }): {
   segundaCents: Cents;
   holerite: Holerite;
 } {
-  const holerite = estimarHolerite({ ...p, paramsIrrf: { ...p.paramsIrrf, reducer: undefined } });
+  const holerite = estimarHolerite({ ...p, descontoVrCents: 0, paramsIrrf: { ...p.paramsIrrf, reducer: undefined } });
   const primeiraCents = Math.round(p.grossCents / 2);
   return { primeiraCents, segundaCents: holerite.netCents - primeiraCents, holerite };
 }
@@ -122,5 +131,5 @@ export function estimarFerias(p: EntradaFiscal & { grossMensalCents: Cents; dias
   const dias = Math.min(30, Math.max(1, Math.round(p.dias)));
   const remuneracao = Math.round((p.grossMensalCents * dias) / 30);
   const bruto = remuneracao + Math.round(remuneracao / 3);
-  return estimarHolerite({ ...p, grossCents: bruto, paramsIrrf: { ...p.paramsIrrf, reducer: undefined } });
+  return estimarHolerite({ ...p, grossCents: bruto, descontoVrCents: 0, paramsIrrf: { ...p.paramsIrrf, reducer: undefined } });
 }

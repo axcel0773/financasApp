@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
-import { estimar13o, estimarFerias, estimarHolerite, type Faixa, type ParamsIrrf } from '@/core/income/holerite';
+import { calcularDescontoVr, estimar13o, estimarFerias, estimarHolerite, type Faixa, type ParamsIrrf } from '@/core/income/holerite';
 import { formatBRL, parseBRL } from '@/core/shared/money';
 import { Card, SectionTitle } from '@/ui/primitives/card';
 import { Field, Input, MoneyInput } from '@/ui/primitives/fields';
@@ -24,22 +24,37 @@ function Linha({ rotulo, valor, forte }: { rotulo: string; valor: number; forte?
 }
 
 /** Simulação local (nada é salvo): holerite mensal, 13º e férias com as tabelas cadastradas. PLR não é calculada. */
-export function SimuladorHolerite({ tabelas, brutoInicial }: { tabelas: Tabelas; brutoInicial: string }) {
+const percentual = (s: string) => {
+  const n = Number(s.trim().replace(',', '.'));
+  return Number.isFinite(n) ? Math.min(100, Math.max(0, n)) : 0;
+};
+
+export function SimuladorHolerite({
+  tabelas,
+  brutoInicial,
+  vrInicial = '',
+}: {
+  tabelas: Tabelas;
+  brutoInicial: string;
+  /** % de desconto do VR já cadastrado no salário. */
+  vrInicial?: string;
+}) {
   const [bruto, setBruto] = useState(brutoInicial);
   const [extras, setExtras] = useState('');
-  const [dep, setDep] = useState('0');
+  const [vr, setVr] = useState(vrInicial);
   const [pensao, setPensao] = useState('');
   const [dias, setDias] = useState('30');
 
   const r = useMemo(() => {
-    const base = { dependentes: inteiro(dep, 10), pensaoCents: cents(pensao) || undefined, ...tabelas };
+    const base = { pensaoCents: cents(pensao) || undefined, ...tabelas };
     const g = cents(bruto);
     return {
-      mensal: estimarHolerite({ ...base, grossCents: g + cents(extras), paramsIrrf: tabelas.paramsIrrf }),
+      // o desconto do VR incide sobre o salário base, não sobre os extras do mês
+      mensal: estimarHolerite({ ...base, grossCents: g + cents(extras), descontoVrCents: calcularDescontoVr(g, percentual(vr)), paramsIrrf: tabelas.paramsIrrf }),
       decimo: estimar13o({ ...base, grossCents: g }),
       ferias: estimarFerias({ ...base, grossMensalCents: g, dias: inteiro(dias, 30) || 30 }),
     };
-  }, [bruto, extras, dep, pensao, dias, tabelas]);
+  }, [bruto, extras, vr, pensao, dias, tabelas]);
 
   return (
     <div className="space-y-3">
@@ -47,7 +62,7 @@ export function SimuladorHolerite({ tabelas, brutoInicial }: { tabelas: Tabelas;
         <Field label="Salário bruto"><MoneyInput value={bruto} onChange={(e) => setBruto(e.target.value)} /></Field>
         <Field label="Extras do mês (horas extras, adicionais)" hint="Somam ao bruto só na simulação mensal."><MoneyInput value={extras} onChange={(e) => setExtras(e.target.value)} /></Field>
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Dependentes"><Input inputMode="numeric" value={dep} onChange={(e) => setDep(e.target.value)} /></Field>
+          <Field label="Desconto VR (% do bruto)"><Input inputMode="decimal" value={vr} placeholder="0" onChange={(e) => setVr(e.target.value)} /></Field>
           <Field label="Pensão paga"><MoneyInput value={pensao} onChange={(e) => setPensao(e.target.value)} /></Field>
         </div>
       </Card>
@@ -57,6 +72,7 @@ export function SimuladorHolerite({ tabelas, brutoInicial }: { tabelas: Tabelas;
         <Linha rotulo="Bruto" valor={r.mensal.grossCents} />
         <Linha rotulo="INSS" valor={-r.mensal.inssCents} />
         <Linha rotulo="IRRF" valor={-r.mensal.irrfCents} />
+        {r.mensal.vrCents > 0 && <Linha rotulo="Desconto VR" valor={-r.mensal.vrCents} />}
         <Linha rotulo="Líquido estimado" valor={r.mensal.netCents} forte />
       </Card>
 

@@ -16,6 +16,7 @@ export default async function SimuladorPage() {
         <SimuladorHolerite
           tabelas={{ inss: tabelas.inss, irrf: tabelas.irrf, paramsIrrf: tabelas.paramsIrrf }}
           brutoInicial={fonte ? centavosParaCampo(fonte.grossCents) : ''}
+          vrInicial={fonte?.vrDiscountPercent ? String(fonte.vrDiscountPercent).replace('.', ',') : ''}
         />
       ) : (
         <Card>Cadastre as tabelas de INSS e IRRF primeiro.</Card>

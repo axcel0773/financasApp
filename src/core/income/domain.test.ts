@@ -11,6 +11,7 @@ const fonte = (o: Partial<FonteRenda> = {}): FonteRenda => ({
   advanceDay: 20,
   finalDay: 5,
   finalRule: 'dia',
+  vrDiscountPercent: 0,
   walletId: null,
   active: true,
   dependents: 0,
@@ -21,6 +22,7 @@ const holerite = {
   grossCents: 1_000_000,
   inssCents: 98_810,
   irrfCents: 156_954,
+  vrCents: 0,
   netCents: 744_236,
 };
 

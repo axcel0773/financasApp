@@ -4,8 +4,8 @@ import {
   registrarExtraAction,
   salvarFonteAction,
 } from '@/app/_actions/renda';
-import { proximoRecebimento, temDatas, totalPrevistoPendente, totalRecebido } from '@/core/income/domain';
-import { dividirSalario, estimarHolerite } from '@/core/income/holerite';
+import { holeriteDaFonte, proximoRecebimento, temDatas, totalPrevistoPendente, totalRecebido } from '@/core/income/domain';
+import { dividirSalario } from '@/core/income/holerite';
 import { addMeses } from '@/core/shared/competencia';
 import { desativarFonteAction } from '@/app/_actions/gestao';
 import { carregarBase } from '@/features/base';
@@ -45,17 +45,8 @@ export default async function RendaPage({
   const carteiras = wallets
     .filter((w) => w.kind === 'checking' || w.kind === 'cash')
     .map((w) => ({ id: w.id, nome: w.name }));
-  const holerite =
-    fonte && tabelas
-      ? estimarHolerite({
-          grossCents: fonte.grossCents,
-          dependentes: fonte.dependents,
-          pensaoCents: fonte.alimonyCents,
-          inss: tabelas.inss,
-          irrf: tabelas.irrf,
-          paramsIrrf: tabelas.paramsIrrf,
-        })
-      : null;
+  const holerite = fonte && tabelas ? holeriteDaFonte(fonte, tabelas) : null;
+  const descontosCents = holerite ? holerite.inssCents + holerite.irrfCents + holerite.vrCents : 0;
   const partes = holerite && fonte ? dividirSalario(holerite, fonte.advancePercent ?? 0) : null;
   const recebido = totalRecebido(recebimentos);
   const pendente = totalPrevistoPendente(recebimentos);
@@ -101,9 +92,9 @@ export default async function RendaPage({
               visual={<IconeRedondo nome="wallet" tom="entrada" />}
             />
             <Widget
-              rotulo="Descontos (INSS + IRRF)"
-              valor={holerite ? <AmountDisplay cents={holerite.inssCents + holerite.irrfCents} size="md" /> : <span className="text-lg font-semibold">—</span>}
-              contexto={holerite && holerite.grossCents > 0 ? `${Math.round(((holerite.inssCents + holerite.irrfCents) / holerite.grossCents) * 100)}% do bruto` : 'Estimativa'}
+              rotulo={holerite && holerite.vrCents > 0 ? 'Descontos (INSS, IRRF e VR)' : 'Descontos (INSS + IRRF)'}
+              valor={holerite ? <AmountDisplay cents={descontosCents} size="md" /> : <span className="text-lg font-semibold">—</span>}
+              contexto={holerite && holerite.grossCents > 0 ? `${Math.round((descontosCents / holerite.grossCents) * 100)}% do bruto` : 'Estimativa'}
               visual={<IconeRedondo nome="calc" tom="saida" />}
             />
             <Widget
@@ -139,8 +130,8 @@ export default async function RendaPage({
                     r.kind === 'final' && holerite && partes
                       ? {
                           grossCents:
-                            (r.expectedNetCents ?? 0) + holerite.inssCents + holerite.irrfCents,
-                          deductionsCents: holerite.inssCents + holerite.irrfCents,
+                            (r.expectedNetCents ?? 0) + descontosCents,
+                          deductionsCents: descontosCents,
                         }
                       : undefined
                   }
@@ -172,6 +163,9 @@ export default async function RendaPage({
                   <Linha icone={<IconeRedondo nome="wallet" />} titulo="Salário bruto" direita={<AmountDisplay cents={holerite.grossCents} size="sm" />} />
                   <Linha icone={<IconeRedondo nome="calc" tom="saida" />} titulo="INSS" direita={<AmountDisplay cents={-holerite.inssCents} size="sm" tom="expense" />} />
                   <Linha icone={<IconeRedondo nome="calc" tom="saida" />} titulo="IRRF" direita={<AmountDisplay cents={-holerite.irrfCents} size="sm" tom="expense" />} />
+                  {holerite.vrCents > 0 && (
+                    <Linha icone={<IconeRedondo nome="fork" tom="saida" />} titulo={`Desconto VR (${String(fonte.vrDiscountPercent).replace('.', ',')}%)`} direita={<AmountDisplay cents={-holerite.vrCents} size="sm" tom="expense" />} />
+                  )}
                   <Linha icone={<IconeRedondo nome="check" tom="entrada" />} titulo="Líquido estimado" direita={<AmountDisplay cents={holerite.netCents} tom="income" />} />
                 </div>
                 {partes && fonte.advancePercent ? (
@@ -257,11 +251,12 @@ export default async function RendaPage({
                 </Field>
               </div>
               <div className="grid grid-cols-2 gap-3">
-                <Field label="Dependentes">
+                <Field label="Desconto VR (% do bruto)">
                   <Input
-                    name="dependents"
-                    inputMode="numeric"
-                    defaultValue={fonte?.dependents ?? 0}
+                    name="vrDiscountPercent"
+                    inputMode="decimal"
+                    defaultValue={fonte?.vrDiscountPercent ? String(fonte.vrDiscountPercent).replace('.', ',') : ''}
+                    placeholder="0"
                   />
                 </Field>
                 <Field label="Pensão alimentícia">
@@ -274,7 +269,7 @@ export default async function RendaPage({
                 </Field>
               </div>
               <p className="text-xs text-muted">
-                Dependentes e pensão reduzem o IRRF estimado. Datas e percentual são opcionais. O dia fixo só vale para
+                O desconto do VR sai do pagamento final e não muda INSS nem IRRF; a pensão reduz o IRRF estimado. Datas e percentual são opcionais. O dia fixo só vale para
                 “Dia fixo do mês seguinte”; no último dia útil, o pagamento cai no próprio mês. Dias úteis descontam fins de
                 semana e feriados nacionais. Sem datas, o app não gera previstos e você registra manualmente.
               </p>
