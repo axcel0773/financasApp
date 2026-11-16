@@ -6,8 +6,8 @@ jobs:
   qualidade:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm }
       - run: npm ci
       - run: npm run lint
@@ -20,10 +20,10 @@ jobs:
     needs: qualidade
     permissions: { contents: write } # só para publicar as capturas no ramo ci-capturas
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with: { node-version: 22, cache: npm }
-      - uses: supabase/setup-cli@v1
+      - uses: supabase/setup-cli@v3
       - run: npm ci
       # Banco local e descartável: aplica supabase/migrations e cria o usuário de teste. Sem segredos.
       - run: supabase start
@@ -34,12 +34,12 @@ jobs:
       # Os testes de fluxo rodam sozinhos; as capturas (pesadas: ~50 telas com axe) vêm depois, para não disputar
       # o mesmo servidor e gerar lentidão que vira falha falsa nos testes de tempo.
       - run: npm run test:e2e -- --grep-invert capturas
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: failure()
         with: { name: falhas-e2e, path: test-results/, if-no-files-found: ignore, retention-days: 5 }
       - run: npx playwright test e2e/zz-capturas.spec.ts --project=mobile-390 --project=tablet-768 --project=desktop-1280
       # Capturas das telas principais, para conferir o visual sem precisar rodar o app
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()
         with: { name: capturas, path: capturas/, if-no-files-found: ignore, retention-days: 7 }
       # Nos ramos de trabalho, as capturas também vão para o ramo `ci-capturas` (sobrescrito a cada execução),
@@ -57,7 +57,7 @@ jobs:
   rls:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: supabase/setup-cli@v1
+      - uses: actions/checkout@v7
+      - uses: supabase/setup-cli@v3
       - run: supabase start
       - run: supabase test db
