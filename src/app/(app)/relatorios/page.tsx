@@ -89,13 +89,17 @@ export default async function RelatoriosPage({
       />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Widget
-          rotulo="Gasto do mês (sem VR/VA)"
+          rotulo="Gasto do mês"
           valor={<AmountDisplay cents={gastoMes} size="md" />}
           contexto={cmp.deltaPct === null ? 'Sem mês anterior' : `${cmp.deltaCents > 0 ? '+' : ''}${cmp.deltaPct.toFixed(0)}% vs. mês anterior`}
-          visual={delta}
+          visual={
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-soft text-link">
+              <Icon name="chart" size={18} />
+            </span>
+          }
         />
         <Widget
-          rotulo="Projeção de fechamento"
+          rotulo="Projeção do mês"
           valor={
             insights.projecao ? (
               <AmountDisplay cents={insights.projecao.projecaoCents} size="md" />
@@ -121,13 +125,13 @@ export default async function RelatoriosPage({
           visual={<CategoryIcon nome={maior?.name} cor={maior?.categoryId ? maior.color : null} />}
         />
         <Widget
-          rotulo="Fixos na renda do mês"
+          rotulo="Fixos na renda"
           valor={
             <span className="amount text-lg font-semibold">
               {insights.fixosPctRenda === null ? '—' : `${insights.fixosPctRenda.toFixed(0)}%`}
             </span>
           }
-          contexto={insights.fixosPctRenda === null ? 'Sem renda registrada no mês' : insights.fixosPctRenda > 50 ? 'É bastante' : 'Dentro do razoável'}
+          contexto={insights.fixosPctRenda === null ? 'Sem renda no mês' : insights.fixosPctRenda > 50 ? 'É bastante' : 'Dentro do razoável'}
           visual={<Ring pct={insights.fixosPctRenda ?? 0} alerta={(insights.fixosPctRenda ?? 0) > 50} />}
         />
       </div>
@@ -199,7 +203,7 @@ export default async function RelatoriosPage({
                 <CategoryIcon nome={e.nome} />
                 <span className="min-w-0 flex-1">
                   <span className="block truncate font-semibold">{e.nome}</span>
-                  <span className="block text-xs text-muted">cortando 20%: {brl(e.anual20Cents)} por ano</span>
+                  <span className="block truncate text-xs text-muted">até {brl(e.anual20Cents)} por ano</span>
                 </span>
                 <span className="grid shrink-0 grid-cols-2 gap-x-4 text-right text-xs text-muted">
                   <span>−10%</span>
