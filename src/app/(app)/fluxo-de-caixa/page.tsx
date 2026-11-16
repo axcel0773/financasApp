@@ -137,7 +137,7 @@ export default async function FluxoPage({
               pontos={proj.pontos.map((p) => ({ label: dataCurta(p.date), value: p.saldoCents }))}
             />
           </Card>
-          <GradeWidgets>
+          <GradeWidgets colunas={2}>
             <Widget
               rotulo="Menor saldo"
               valor={<AmountDisplay cents={proj.menorSaldo.saldoCents} size="md" tom={proj.alerta ? 'expense' : 'default'} />}

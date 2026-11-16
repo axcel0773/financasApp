@@ -95,7 +95,7 @@ export default async function CartaoPage({
               </div>
             </div>
           </Hero>
-          <GradeWidgets>
+          <GradeWidgets colunas={2}>
             <Widget
               rotulo="Limite usado"
               valor={<AmountDisplay cents={abertas} size="md" />}
