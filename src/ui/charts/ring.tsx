@@ -20,6 +20,9 @@ export function Ring({
 }) {
   const R = 15.9155;
   const p = Math.max(0, Math.min(100, pct));
+  // Percentuais absurdos (limite de centavos, por exemplo) não cabem no anel: o texto visível vira "+999%";
+  // o leitor de tela continua ouvindo o valor real.
+  const texto = rotulo && /^\d+%$/.test(rotulo) && parseInt(rotulo, 10) > 999 ? '+999%' : rotulo;
   return (
     <svg
       viewBox="0 0 42 42"
@@ -44,8 +47,8 @@ export function Ring({
         />
       )}
       {rotulo && (
-        <text x="21" y="21" textAnchor="middle" dominantBaseline="central" fontSize="9" fontWeight="600" fill={sobreEscuro ? '#fff' : 'var(--ink)'}>
-          {rotulo}
+        <text x="21" y="21" textAnchor="middle" dominantBaseline="central" fontSize={texto && texto.length > 4 ? 7.5 : 9} fontWeight="600" fill={sobreEscuro ? '#fff' : 'var(--ink)'}>
+          {texto}
         </text>
       )}
     </svg>
