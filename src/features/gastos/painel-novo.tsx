@@ -5,9 +5,8 @@ import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
 import { navegarComGarantia } from '@/ui/navegacao';
-import { Icon } from '@/ui/primitives/icon';
 
-/** Desktop (≥1024px): "Novo lançamento" abre em painel lateral sobre a lista. Esc fecha. */
+/** Desktop (≥1024px): "Novo lançamento" abre numa janela no centro, sobre a tela escurecida. Esc fecha. */
 export function PainelNovo({ fecharHref, children }: { fecharHref: string; children: React.ReactNode }) {
   const router = useRouter();
   const ref = useRef<HTMLElement>(null);
@@ -16,7 +15,8 @@ export function PainelNovo({ fecharHref, children }: { fecharHref: string; child
   useEffect(() => setMontado(true), []);
   useEffect(() => {
     if (!montado) return;
-    ref.current?.focus();
+    // foco no primeiro campo (o valor); sem campo, na própria janela
+    (ref.current?.querySelector<HTMLElement>('input') ?? ref.current)?.focus();
     const aoTeclar = (e: KeyboardEvent) => {
       if (e.key === 'Escape') navegarComGarantia(router, fecharHref, { scroll: false });
     };
@@ -25,30 +25,19 @@ export function PainelNovo({ fecharHref, children }: { fecharHref: string; child
   }, [router, fecharHref, montado]);
   if (!montado) return null;
   return createPortal(
-    <div className="fixed inset-0 z-30 hidden lg:block">
-      <Link href={fecharHref} scroll={false} aria-label="Fechar painel" tabIndex={-1} className="absolute inset-0 bg-ink/40" />
-      <aside
+    <div className="fixed inset-0 z-30 hidden items-center justify-center p-6 lg:flex">
+      {/* Preto translúcido nos dois temas: escurece a tela por trás (a cor do texto clarearia no tema escuro). */}
+      <Link href={fecharHref} scroll={false} aria-label="Fechar" tabIndex={-1} className="absolute inset-0 bg-black/65" />
+      <section
         ref={ref}
         tabIndex={-1}
         role="dialog"
         aria-modal="true"
-        aria-label="Novo lançamento"
-        className="absolute inset-y-0 right-0 flex w-[460px] flex-col gap-4 overflow-y-auto bg-surface p-7 shadow-xl outline-none"
+        aria-labelledby="titulo-novo"
+        className="relative w-full max-w-[940px] overflow-hidden rounded-[28px] border border-border bg-surface shadow-[0_30px_80px_rgba(0,0,0,0.55)] outline-none"
       >
-        <div className="flex items-center justify-between">
-          <h2 className="font-display text-xl font-semibold">Novo lançamento</h2>
-          <Link
-            href={fecharHref}
-            scroll={false}
-            aria-label="Fechar"
-            className="flex h-11 w-11 items-center justify-center rounded-md border border-border"
-          >
-            <Icon name="close" size={18} />
-          </Link>
-        </div>
         {children}
-        <p className="text-center text-xs text-muted">Esc fecha</p>
-      </aside>
+      </section>
     </div>,
     document.body,
   );

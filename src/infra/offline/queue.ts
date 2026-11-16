@@ -17,6 +17,8 @@ export interface ItemCriar extends Base {
   amountCents: number;
   occurredOn: string;
   note: string | null;
+  /** Viagem do gasto; ausente em itens gravados antes do campo existir. */
+  tripId?: string | null;
 }
 export interface ItemEditar extends Base {
   op: 'editar';

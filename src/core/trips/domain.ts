@@ -28,6 +28,21 @@ export function validarViagem(v: NovaViagem): Result<NovaViagem, DomainError> {
 export const estadoViagem = (v: Pick<Viagem, 'startOn' | 'endOn'>, hoje: IsoDate): EstadoViagem =>
   hoje < v.startOn ? 'planejada' : v.endOn !== null && hoje > v.endOn ? 'concluida' : 'andamento';
 
+/**
+ * Viagens oferecidas no novo lançamento: planejadas, em andamento e as que acabaram há até 60 dias
+ * (gasto lançado depois da volta), da mais recente para a mais antiga. `atual` = a que está em andamento hoje.
+ */
+export function viagensParaLancar(
+  viagens: Viagem[],
+  hoje: IsoDate,
+): { opcoes: { id: string; nome: string }[]; atual: string | null } {
+  const recentes = viagens
+    .filter((v) => v.endOn === null || diffDias(v.endOn, hoje) <= 60)
+    .sort((a, b) => b.startOn.localeCompare(a.startOn));
+  const atual = recentes.find((v) => estadoViagem(v, hoje) === 'andamento');
+  return { opcoes: recentes.map((v) => ({ id: v.id, nome: v.name })), atual: atual?.id ?? null };
+}
+
 export interface ResumoViagem {
   totalCents: Cents;
   /** Percentual do orçamento usado (null sem orçamento). */

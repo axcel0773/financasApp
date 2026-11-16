@@ -90,6 +90,7 @@ export function ShellEffects({
             amountCents: i.amountCents,
             occurredOn: i.occurredOn,
             note: i.note,
+            tripId: i.tripId ?? null,
           });
         });
         if (r.enviados > 0) {

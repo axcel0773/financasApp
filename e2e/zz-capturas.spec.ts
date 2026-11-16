@@ -46,6 +46,7 @@ test.describe('capturas', () => {
       ['/mais/categorias', '14-categorias'],
       ['/metas', '15-metas'],
       ['/gastos/novo', '16-novo'],
+      ['/gastos?novo=1', '16b-novo-janela'],
       ['/investimentos/simulador', '17-simulador'],
       ['/renda/simulador', '17b-holerite'],
       ['/mais/impostos', '18-impostos'],

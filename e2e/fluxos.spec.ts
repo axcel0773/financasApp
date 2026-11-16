@@ -200,18 +200,20 @@ test.describe('autenticado', () => {
     await expect(salvar).toHaveCount(0, { timeout: 15_000 });
   });
 
-  test('desktop: novo lançamento em painel lateral, detalhe ao lado e busca em todo o histórico', async ({ page }) => {
+  test('desktop: novo lançamento em janela, detalhe ao lado e busca em todo o histórico', async ({ page }) => {
     test.skip((page.viewportSize()?.width ?? 0) < 1024, 'recursos só do desktop');
     const nota = `E2E painel ${Date.now() % 100000}`;
     await entrar(page);
     await page.waitForLoadState('networkidle');
-    // atalho N abre o painel sobre a lista de gastos
+    // atalho N abre a janela sobre a lista de gastos
     await page.keyboard.press('n');
     const painel = page.getByRole('dialog', { name: 'Novo lançamento' });
     await expect(painel).toBeVisible();
     await painel.getByRole('textbox', { name: /^valor/i }).fill('7,77');
+    await expect(painel.getByRole('button', { name: /^Salvar gasto de R\$\s?7,77$/ })).toBeVisible();
     await painel.getByLabel(/descrição/i).fill(nota);
-    await painel.getByRole('button', { name: 'Salvar lançamento' }).click();
+    // Enter dentro da janela salva
+    await painel.getByLabel(/descrição/i).press('Enter');
     await expect(painel).toHaveCount(0, { timeout: 15_000 });
     // clicar na linha seleciona e mostra o detalhe ao lado (sem sair da lista)
     const linha = page.getByRole('link', { name: new RegExp(nota) }).first();

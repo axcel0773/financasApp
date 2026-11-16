@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { estadoViagem, resumirViagem, validarViagem, type Viagem } from './domain';
+import { estadoViagem, resumirViagem, validarViagem, viagensParaLancar, type Viagem } from './domain';
 
 const v: Viagem = { id: 'v1', name: 'Floripa', startOn: '2026-11-10', endOn: '2026-11-14', budgetCents: 300000, people: 2 };
 
@@ -62,5 +62,20 @@ describe('resumirViagem', () => {
   it('antes da ida o dia atual é 0 e sem orçamento não há percentual', () => {
     const r = resumirViagem({ ...v, budgetCents: 0 }, [], '2026-11-01');
     expect(r).toMatchObject({ diaAtual: 0, usadoPct: null, restanteCents: null, mediaPorDiaCents: 0 });
+  });
+});
+
+describe('viagens para lançar', () => {
+  const v = (id: string, startOn: string, endOn: string | null): Viagem => ({ id, name: id, startOn, endOn, budgetCents: 0, people: 1 });
+  it('esconde as que acabaram há mais de 60 dias e marca a em andamento', () => {
+    const r = viagensParaLancar(
+      [v('antiga', '2026-01-10', '2026-01-20'), v('sp', '2026-11-10', '2026-11-20'), v('rio', '2026-12-20', null), v('recente', '2026-10-01', '2026-10-05')],
+      '2026-11-16',
+    );
+    expect(r.opcoes.map((o) => o.id)).toEqual(['rio', 'sp', 'recente']);
+    expect(r.atual).toBe('sp');
+  });
+  it('sem viagem em andamento, nada vem marcado', () => {
+    expect(viagensParaLancar([v('rio', '2026-12-20', null)], '2026-11-16').atual).toBeNull();
   });
 });

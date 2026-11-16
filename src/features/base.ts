@@ -11,12 +11,15 @@ export async function carregarBase() {
 }
 export type Base = Awaited<ReturnType<typeof carregarBase>>;
 
-/** Opções do formulário de lançamento (página no celular, painel lateral no desktop). */
+/** Opções do formulário de lançamento (página no celular, janela no desktop). */
 export function opcoesLancamento({ wallets, categories }: Pick<Base, 'wallets' | 'categories'>) {
   return {
     carteiras: wallets.map((w) => ({
       id: w.id,
       nome: w.kind === 'checking' || w.kind === 'cash' ? w.name : `${ROTULO_CARTEIRA[w.kind]} · ${w.name}`,
+      tipo: w.kind,
+      curto: w.kind === 'checking' || w.kind === 'cash' ? w.name : ROTULO_CARTEIRA[w.kind],
+      detalhe: w.kind === 'checking' || w.kind === 'cash' ? null : w.name,
     })),
     categorias: categories.map((x) => ({ id: x.id, nome: x.name, cor: x.color })),
     carteiraInicial: (wallets.find((w) => w.kind === 'checking') ?? wallets[0])?.id ?? '',

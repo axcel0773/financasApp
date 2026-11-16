@@ -1,17 +1,13 @@
 'use client';
 
-import { useState } from 'react';
-import { criarLancamentoAction } from '@/app/_actions/gastos';
 import { parseBRL } from '@/core/shared/money';
 import { centavosParaCampo } from '@/ui/format';
 import { cx } from '@/ui/cx';
-import { enfileirar } from '@/infra/offline/queue';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { Keypad } from '@/ui/patterns/keypad';
 import { Button } from '@/ui/primitives/button';
 import { Field, Input, MoneyInput } from '@/ui/primitives/fields';
-import { useToast } from '@/ui/primitives/toast';
-import { useEnvio } from '@/features/shared/use-envio';
+import { useNovoLancamento } from './use-novo-lancamento';
 
 interface Op {
   id: string;
@@ -31,50 +27,9 @@ export function NovoLancamentoForm({
   hoje: string;
   carteiraInicial: string;
 }) {
-  const { show } = useToast();
-  const { pending, enviar, navegar } = useEnvio();
-  const [clientId] = useState(() => crypto.randomUUID());
-  const [cents, setCents] = useState(0);
-  const [kind, setKind] = useState<'expense' | 'income'>('expense');
-  const [walletId, setWalletId] = useState(carteiraInicial);
-  const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [data, setData] = useState(hoje);
-  const [note, setNote] = useState('');
-  const [erro, setErro] = useState<string | null>(null);
-
-  const irParaGastos = () => navegar('/gastos');
-
-  const salvar = async () => {
-    setErro(null);
-    if (cents <= 0) return setErro('Informe um valor maior que zero.');
-    const item = {
-      op: 'criar' as const,
-      clientId,
-      walletId,
-      categoryId,
-      kind,
-      amountCents: cents,
-      occurredOn: data,
-      note: note.trim() || null,
-    };
-    await enviar(async () => {
-      if (!navigator.onLine) {
-        await enfileirar(item);
-        show('Sem conexão: salvo no aparelho e será enviado quando voltar.');
-        return irParaGastos();
-      }
-      try {
-        const r = await criarLancamentoAction(item);
-        if (!r.ok) return setErro(r.message);
-        show('Lançamento salvo.');
-        irParaGastos();
-      } catch {
-        await enfileirar(item); // queda de rede no meio do envio: o reenvio é idempotente
-        show('Conexão instável: salvo no aparelho e será reenviado.');
-        irParaGastos();
-      }
-    });
-  };
+  const f = useNovoLancamento({ hoje, carteiraInicial });
+  const { cents, setCents, kind, setKind, walletId, setWalletId, categoryId, setCategoryId } = f;
+  const { data, setData, note, setNote, erro, pending, salvar } = f;
 
   const chip = (ativo: boolean) =>
     cx(
@@ -159,7 +114,7 @@ export function NovoLancamentoForm({
           {erro}
         </p>
       )}
-      <Button block onClick={salvar} disabled={pending}>
+      <Button block onClick={() => salvar()} disabled={pending}>
         {pending ? 'Salvando…' : 'Salvar lançamento'}
       </Button>
     </div>

@@ -2,9 +2,10 @@ import Link from 'next/link';
 import { addMeses, isIsoDate, primeiroDia, ultimoDia } from '@/core/shared/competencia';
 import { totaisPorCategoria } from '@/core/reports/domain';
 import { ROTULO_CARTEIRA } from '@/core/wallets/domain';
+import { viagensParaLancar } from '@/core/trips/domain';
 import { carregarBase, opcoesLancamento } from '@/features/base';
 import { ExcluirButton } from '@/features/gastos/acoes-gasto';
-import { NovoLancamentoForm } from '@/features/gastos/novo-lancamento-form';
+import { JanelaNovoLancamento } from '@/features/gastos/janela-novo-lancamento';
 import { PainelNovo } from '@/features/gastos/painel-novo';
 import { PendingQueue } from '@/features/gastos/pending-queue';
 import { competenciaDoParam, dataCurta, dataLonga, rotuloCompetencia } from '@/ui/format';
@@ -61,6 +62,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
   ]);
   const sel = selecionado && !selecionado.deletedAt ? selecionado : null;
   const nomeViagem = new Map(viagensTodas.map((v) => [v.id, v.name]));
+  const paraLancar = viagensParaLancar(viagensTodas, hoje);
   const temMais = lista.length > PAGINA;
   const itens = lista.slice(0, PAGINA);
   const despesasPeriodo = mensal.filter((g) => g.kind === 'expense');
@@ -318,7 +320,13 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
       </div>
       {novoAberto && (
         <PainelNovo fecharHref={url({ novo: undefined, sel: undefined, cursor: undefined })}>
-          <NovoLancamentoForm {...opcoesLancamento({ wallets, categories })} hoje={hoje} />
+          <JanelaNovoLancamento
+            {...opcoesLancamento({ wallets, categories })}
+            viagens={paraLancar.opcoes}
+            viagemAtual={paraLancar.atual}
+            hoje={hoje}
+            fecharHref={url({ novo: undefined, sel: undefined, cursor: undefined })}
+          />
         </PainelNovo>
       )}
     </>

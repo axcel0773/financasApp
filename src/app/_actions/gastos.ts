@@ -31,6 +31,7 @@ const novo = z.object({
   amountCents: z.number().int().positive('O valor deve ser maior que zero.'),
   occurredOn: data,
   note: z.string().max(200).nullable().optional(),
+  tripId: z.string().uuid().nullable().optional(),
 });
 
 /** Chamada pelo formulário e também pela fila offline (mesmo caminho, reenvio idempotente por clientId). */
