@@ -18,7 +18,7 @@ import { IconeRedondo } from '@/ui/patterns/round-icon';
 import { Widget } from '@/ui/patterns/widget';
 import { GradeWidgets } from '@/ui/patterns/widget-grid';
 import { Field, Input, MoneyInput, Select, Switch } from '@/ui/primitives/fields';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 
 export const metadata = { title: 'Fixos e parcelas' };
 
@@ -124,7 +124,7 @@ export default async function FixosPage() {
         <div>
           <SectionTitle>Gastos fixos</SectionTitle>
           {regras.length === 0 ? (
-            <EmptyState title="Nenhum gasto fixo">Cadastre aluguel, internet, assinaturas…</EmptyState>
+            <EmptyState icone="repeat" title="Nenhum gasto fixo">Use “Novo gasto fixo” para cadastrar aluguel, internet ou assinaturas.</EmptyState>
           ) : (
             <Card className="py-1">
               {regras.map((r) => {
@@ -186,7 +186,7 @@ export default async function FixosPage() {
         <div>
           <SectionTitle>Compras parceladas</SectionTitle>
           {planos.length === 0 ? (
-            <EmptyState title="Nenhuma compra parcelada" />
+            <EmptyState icone="card" title="Nenhuma compra parcelada">Compras parceladas no cartão aparecem aqui com o que falta pagar.</EmptyState>
           ) : (
             <div className="space-y-3">
               {planos.map((p) => {

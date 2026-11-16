@@ -9,7 +9,8 @@ const email = process.env.E2E_EMAIL,
 test.describe('capturas', () => {
   test.skip(!email || !senha, 'defina E2E_EMAIL e E2E_PASSWORD');
   test('telas principais', async ({ page }, info) => {
-    test.skip(!['mobile-390', 'desktop-1280'].includes(info.project.name), 'só em dois tamanhos');
+    test.skip(!['mobile-390', 'tablet-768', 'desktop-1280'].includes(info.project.name), 'só em três tamanhos');
+    const tablet = info.project.name === 'tablet-768'; // no tablet só o tema escuro: serve para conferir a largura
     test.setTimeout(600_000);
     page.setDefaultTimeout(20_000); // uma tela que não carrega falha rápido, sem consumir o tempo das outras
     const salvar = async (nome: string) => {
@@ -73,7 +74,7 @@ test.describe('capturas', () => {
       await page.goto(viagem);
       await salvar('25-viagem');
     }
-    // tema claro (opção): as três telas principais, com o tema forçado só nesta página
+    if (tablet) return;
     // tema claro (opção): todas as telas, com o tema forçado só na página
     for (const [rota, nome] of telas.map(([r, n]) => [r, `claro-${n}`] as const)) {
       await page.goto(rota);

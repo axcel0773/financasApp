@@ -20,7 +20,7 @@ import { Widget } from '@/ui/patterns/widget';
 import { GradeWidgets } from '@/ui/patterns/widget-grid';
 import { Field, Input, MoneyInput } from '@/ui/primitives/fields';
 import { Icon } from '@/ui/primitives/icon';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 
 export const metadata = { title: 'VR / VA' };
 
@@ -142,7 +142,7 @@ export default async function BeneficiosPage({
                 </Card>
               </div>
             ) : (
-              <EmptyState title="Registre o primeiro crédito">
+              <EmptyState icone="ticket" title="Registre o primeiro crédito">
                 Com o crédito do mês, calculamos quanto dá para gastar por dia.
               </EmptyState>
             )}

@@ -24,7 +24,7 @@ import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { ButtonLink } from '@/ui/primitives/button';
 import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Field, Input, MoneyInput, Select } from '@/ui/primitives/fields';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 
 export const metadata = { title: 'Renda' };
 
@@ -122,7 +122,7 @@ export default async function RendaPage({
 
           <SectionTitle>Recebimentos</SectionTitle>
           {recebimentos.length === 0 ? (
-            <EmptyState title="Nenhum recebimento neste mês">
+            <EmptyState icone="wallet" title="Nenhum recebimento neste mês">
               {fonte?.advanceDay || fonte?.finalDay
                 ? 'Gere os previstos abaixo ou registre um recebimento manual.'
                 : 'As datas do salário são opcionais: registre cada recebimento quando acontecer.'}

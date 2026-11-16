@@ -14,7 +14,7 @@ import { LinhaDoTempo } from '@/ui/patterns/timeline';
 import { Widget } from '@/ui/patterns/widget';
 import { GradeWidgets } from '@/ui/patterns/widget-grid';
 import { FilterChip } from '@/ui/primitives/chip';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 
 export const metadata = { title: 'Fluxo de caixa' };
 
@@ -170,7 +170,7 @@ export default async function FluxoPage({
         <div>
           <SectionTitle>Dia a dia</SectionTitle>
           {lista.length === 0 ? (
-            <EmptyState title="Nada previsto neste período">
+            <EmptyState icone="flow" title="Nada previsto neste período" acao={{ href: '/fixos', rotulo: 'Cadastrar gastos fixos' }}>
               Cadastre fixos, parcelas e recebimentos para projetar o saldo.
             </EmptyState>
           ) : (

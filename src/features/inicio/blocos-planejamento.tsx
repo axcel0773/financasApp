@@ -10,7 +10,8 @@ import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { Card, SectionTitle } from '@/ui/primitives/card';
 import { Chip } from '@/ui/primitives/chip';
 import { Icon } from '@/ui/primitives/icon';
-import { EmptyState, ProgressBar } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
+import { ProgressBar } from '@/ui/primitives/progress';
 import { linkVer } from './link-ver';
 
 export async function BlocoBeneficios() {
@@ -86,9 +87,7 @@ export async function BlocoOrcamento() {
     <>
       <SectionTitle action={linkVer('/orcamento')}>Orçamento</SectionTitle>
       {linhas.length === 0 ? (
-        <EmptyState title="Nenhum limite definido">
-          Defina limites por categoria em Orçamento.
-        </EmptyState>
+        <EmptyState icone="pie" title="Nenhum limite definido" acao={{ href: '/orcamento', rotulo: 'Definir limites' }} />
       ) : (
         <Card className="space-y-4">
           {linhas.map(({ x, s, gasto }) => (

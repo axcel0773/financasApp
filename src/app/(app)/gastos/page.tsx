@@ -17,7 +17,7 @@ import { Card, Hero, PageHeader } from '@/ui/primitives/card';
 import { FilterChip } from '@/ui/primitives/chip';
 import { Input } from '@/ui/primitives/fields';
 import { Icon } from '@/ui/primitives/icon';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 
 export const metadata = { title: 'Gastos' };
 const PAGINA = 30;
@@ -206,12 +206,16 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
       <div className="min-w-0">
       {itens.length === 0 ? (
         q ? (
-          <EmptyState title={`Nada encontrado para “${q}”`}>
+          <EmptyState
+            icone="list"
+            title={`Nada encontrado para “${q}”`}
+            acao={buscaGlobal || periodoLivre ? undefined : { href: url({ tudo: '1', cursor: undefined }), rotulo: 'Buscar em todo o histórico' }}
+          >
             {buscaGlobal ? 'A busca olhou todo o histórico.' : 'A busca olhou só este período.'}
           </EmptyState>
         ) : (
-          <EmptyState title="Nenhum lançamento neste período">
-            Toque em “+” para registrar o primeiro gasto.
+          <EmptyState icone="receipt" title="Nenhum lançamento neste período" acao={{ href: '/gastos/novo', rotulo: 'Registrar gasto' }}>
+            Os gastos e as entradas do período aparecem aqui.
           </EmptyState>
         )
       ) : (

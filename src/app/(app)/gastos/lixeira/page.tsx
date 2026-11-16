@@ -9,7 +9,7 @@ import { ActionForm } from '@/features/shared/action-form';
 import { ButtonLink } from '@/ui/primitives/button';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Input, Field } from '@/ui/primitives/fields';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 import { Icon } from '@/ui/primitives/icon';
 
 export const metadata = { title: 'Lixeira' };
@@ -30,7 +30,7 @@ export default async function LixeiraPage() {
         }
       />
       {itens.length === 0 ? (
-        <EmptyState title="A lixeira está vazia" />
+        <EmptyState icone="trash" title="A lixeira está vazia">Lançamentos excluídos ficam aqui para você restaurar.</EmptyState>
       ) : (
         <Card className="divide-y divide-border p-0">
           {itens.map((t) => (

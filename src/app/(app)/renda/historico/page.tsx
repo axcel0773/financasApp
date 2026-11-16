@@ -7,7 +7,7 @@ import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { ButtonLink } from '@/ui/primitives/button';
 import { Card, PageHeader } from '@/ui/primitives/card';
 import { Icon } from '@/ui/primitives/icon';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 
 export const metadata = { title: 'Histórico do salário' };
 
@@ -29,7 +29,7 @@ export default async function HistoricoPage() {
         }
       />
       {porMes.size === 0 ? (
-        <EmptyState title="Ainda não há recebimentos registrados" />
+        <EmptyState icone="calendar" title="Ainda não há recebimentos registrados" acao={{ href: '/renda', rotulo: 'Ir para Renda' }} />
       ) : (
         <div className="space-y-4 lg:grid lg:grid-cols-2 lg:gap-4 lg:space-y-0">
           {[...porMes.entries()].map(([mes, rs]) => (

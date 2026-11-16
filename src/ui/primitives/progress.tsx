@@ -30,14 +30,6 @@ export const Skeleton = ({ className }: { className?: string }) => (
   <div aria-hidden className={cx('skeleton', className)} />
 );
 
-export function EmptyState({ title, children }: { title: string; children?: React.ReactNode }) {
-  return (
-    <div className="rounded-lg border border-dashed border-border p-6 text-center">
-      <p className="font-semibold">{title}</p>
-      {children && <div className="mt-1 text-sm text-muted">{children}</div>}
-    </div>
-  );
-}
 export function ErrorState({
   message = 'Não foi possível carregar. Tente novamente.',
 }: {

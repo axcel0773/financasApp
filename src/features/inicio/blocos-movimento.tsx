@@ -6,7 +6,7 @@ import { dataCurta } from '@/ui/format';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { TransactionRow } from '@/ui/patterns/transaction-row';
 import { Card, SectionTitle } from '@/ui/primitives/card';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 import { linkVer } from './link-ver';
 
 export async function BlocoRecebimentos() {
@@ -21,7 +21,7 @@ export async function BlocoRecebimentos() {
     <>
       <SectionTitle action={linkVer('/renda')}>Próximos recebimentos</SectionTitle>
       {receb.length === 0 ? (
-        <EmptyState title="Nenhum recebimento previsto">Cadastre o salário em Renda.</EmptyState>
+        <EmptyState icone="wallet" title="Nenhum recebimento previsto" acao={{ href: '/renda', rotulo: 'Cadastrar salário' }} />
       ) : (
         <Card className="py-1">
           {receb.map((r) => (
@@ -59,7 +59,7 @@ export async function BlocoContas() {
     <>
       <SectionTitle action={linkVer('/fixos')}>Próximas contas</SectionTitle>
       {out.length === 0 ? (
-        <EmptyState title="Nenhuma conta nos próximos 14 dias" />
+        <EmptyState icone="check" title="Nenhuma conta nos próximos 14 dias" />
       ) : (
         <Card className="py-1">
           {out.slice(0, 4).map((o) => (
@@ -91,9 +91,7 @@ export async function BlocoRecentes() {
     <>
       <SectionTitle action={linkVer('/gastos')}>Últimos lançamentos</SectionTitle>
       {lista.length === 0 ? (
-        <EmptyState title="Nenhum lançamento ainda">
-          Toque em “+” para registrar o primeiro gasto.
-        </EmptyState>
+        <EmptyState icone="receipt" title="Nenhum lançamento ainda" acao={{ href: '/gastos/novo', rotulo: 'Registrar gasto' }} />
       ) : (
         <Card className="px-4 py-1">
           {lista.map((t) => {

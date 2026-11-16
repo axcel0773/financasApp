@@ -9,7 +9,7 @@ import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { TransactionRow } from '@/ui/patterns/transaction-row';
 import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Field, Input, MoneyInput } from '@/ui/primitives/fields';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 import { totaisPorCategoria } from '@/core/reports/domain';
 import { Ring } from '@/ui/charts/ring';
 import { CategoryBreakdown } from '@/ui/patterns/category-breakdown';
@@ -33,7 +33,9 @@ export default async function CartaoPage({
     return (
       <>
         <PageHeader voltar={{ href: '/mais' }} title="Fatura do cartão" />
-        <EmptyState title="Nenhum cartão cadastrado" />
+        <EmptyState icone="card" title="Nenhum cartão cadastrado" acao={{ href: '/mais/carteiras', rotulo: 'Cadastrar cartão' }}>
+          Cadastre o cartão de crédito com os dias de fechamento e vencimento para acompanhar a fatura.
+        </EmptyState>
       </>
     );
   const fecha = cartao.closingDay ?? 25,
@@ -129,7 +131,7 @@ export default async function CartaoPage({
         <div>
           <SectionTitle>Compras da fatura</SectionTitle>
           {!fatura ? (
-            <EmptyState title="Sem compras nesta fatura" />
+            <EmptyState icone="cart" title="Sem compras nesta fatura">Compras no cartão entram na fatura pela data de fechamento.</EmptyState>
           ) : (
             <Card className="px-4 py-1">
               {fatura.compras.map((cp) => {

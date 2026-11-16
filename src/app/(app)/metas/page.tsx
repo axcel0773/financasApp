@@ -18,7 +18,7 @@ import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Ring } from '@/ui/charts/ring';
 import { Recolhivel } from '@/ui/patterns/collapsible';
 import { Field, Input, MoneyInput, RadioChips } from '@/ui/primitives/fields';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 
 export const metadata = { title: 'Metas e reserva' };
 
@@ -136,7 +136,7 @@ export default async function MetasPage() {
       <div>
       <SectionTitle>Suas metas</SectionTitle>
       {metas.length === 0 ? (
-        <EmptyState title="Nenhuma meta">Crie a primeira abaixo.</EmptyState>
+        <EmptyState icone="target" title="Nenhuma meta">Use “Nova meta”, mais abaixo, para criar a primeira, com valor e prazo.</EmptyState>
       ) : (
         <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
           {metas.map((m) => {

@@ -7,7 +7,7 @@ import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Ring } from '@/ui/charts/ring';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { Icon } from '@/ui/primitives/icon';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 
 export const metadata = { title: 'Viagens' };
 const GRUPOS: { estado: EstadoViagem; titulo: string }[] = [
@@ -34,7 +34,7 @@ export default async function ViagensPage() {
     <>
       <PageHeader voltar={{ href: '/mais' }} title="Viagens" subtitle="Orçamento e gastos de cada viagem" action={<ButtonLink href="/mais/viagens/nova">Nova</ButtonLink>} />
       {viagens.length === 0 ? (
-        <EmptyState title="Nenhuma viagem">Crie uma viagem para acompanhar o orçamento e os gastos dela.</EmptyState>
+        <EmptyState icone="plane" title="Nenhuma viagem" acao={{ href: '/mais/viagens/nova', rotulo: 'Criar viagem' }}>Crie uma viagem para acompanhar o orçamento e os gastos dela.</EmptyState>
       ) : (
         <>
           <Hero className="mb-3">

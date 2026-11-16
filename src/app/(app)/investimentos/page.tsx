@@ -25,7 +25,7 @@ import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { Card, Hero, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Chip } from '@/ui/primitives/chip';
 import { Field, Input, MoneyInput, RadioChips, Select } from '@/ui/primitives/fields';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 
 export const metadata = { title: 'Investimentos' };
 const ROTULO_TIPO: Record<TipoInvestimento, string> = {
@@ -189,7 +189,7 @@ export default async function InvestimentosPage() {
       )}
       <SectionTitle>Seus investimentos</SectionTitle>
       {linhas.length === 0 ? (
-        <EmptyState title="Nenhum investimento">Cadastre o primeiro abaixo.</EmptyState>
+        <EmptyState icone="trend" title="Nenhum investimento">Use “Novo investimento”, mais abaixo, para cadastrar o primeiro, já com o saldo atual.</EmptyState>
       ) : (
         <div className="space-y-3 lg:grid lg:grid-cols-2 lg:gap-3 lg:space-y-0">
           {linhas.map(({ i, s, r, valor }) => (

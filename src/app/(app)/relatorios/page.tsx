@@ -15,7 +15,7 @@ import { Widget } from '@/ui/patterns/widget';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
 import { Chip } from '@/ui/primitives/chip';
 import { Icon } from '@/ui/primitives/icon';
-import { EmptyState } from '@/ui/primitives/progress';
+import { EmptyState } from '@/ui/patterns/empty-state';
 
 export const metadata = { title: 'Relatórios' };
 
@@ -141,7 +141,7 @@ export default async function RelatoriosPage({
           <SectionTitle>Gasto por categoria</SectionTitle>
           <Card>
             {fatias.length === 0 ? (
-              <EmptyState title="Sem gastos neste mês" />
+              <EmptyState icone="pie" title="Sem gastos neste mês" acao={{ href: '/gastos/novo', rotulo: 'Registrar gasto' }} />
             ) : (
               <CategoryBreakdown
                 titulo="Gasto por categoria"
