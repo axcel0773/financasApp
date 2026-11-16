@@ -12,7 +12,8 @@ const TAM = {
   sm: 'text-sm font-semibold',
   md: 'text-lg font-semibold',
   lg: 'text-2xl font-semibold',
-  xl: 'text-[44px] font-semibold leading-[1.1] tracking-tight',
+  // encolhe em telas estreitas: valores de seis dígitos cabem em 360 px sem estourar o cartão
+  xl: 'text-[clamp(2rem,9.5vw,2.75rem)] font-semibold leading-[1.1] tracking-tight',
 } as const;
 
 /** Valores em Manrope, tabulares; `.amount` permite ocultar tudo pelo botão do olho. */

@@ -77,7 +77,7 @@ export default async function CartaoPage({
       <MonthSwitch
         anterior={`/cartao?fatura=${addMeses(sel, -1)}`}
         proximo={`/cartao?fatura=${addMeses(sel, 1)}`}
-        rotulo={`Fatura de ${rotuloCompetencia(sel)}${sel === atual ? ' · atual' : ''}`}
+        rotulo={`${rotuloCompetencia(sel)}${sel === atual ? ' · atual' : ''}`}
       />
       <div className="lg:grid lg:grid-cols-[minmax(0,7fr)_minmax(0,5fr)] lg:items-start lg:gap-6">
         <div className="space-y-3">
