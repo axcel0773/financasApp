@@ -31,10 +31,10 @@ export function useEnvio() {
     }
   }, []);
 
-  /** Pede a tela de novo agora e mais duas vezes (medido no CI: uma só atualização falhava em ~50%). */
+  /** Pede a tela de novo agora e mais três vezes (medido no CI: uma só atualização falhava em ~50%; telas pesadas pedem mais folga). */
   const atualizarTela = useCallback(() => {
     router.refresh();
-    for (const ms of [1200, 3000]) timers.current.push(setTimeout(() => router.refresh(), ms));
+    for (const ms of [1200, 3000, 6000]) timers.current.push(setTimeout(() => router.refresh(), ms));
   }, [router]);
 
   /** Navega; se o router não concluir em 2,5 s, força a ida pelo navegador. */

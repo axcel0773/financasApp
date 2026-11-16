@@ -158,7 +158,7 @@ test.describe('autenticado', () => {
       // "livre" = nenhum botão preso em "Salvando…" (o formulário recolhido fecha sozinho ao salvar)
       const livre = await page.getByRole('button', { name: /salvando/i }).waitFor({ state: 'detached', timeout: 6_000 }).then(() => true, () => false);
       if (!livre) botaoPreso++;
-      const naLista = await page.getByText(nomeFixo).first().waitFor({ timeout: 6_000 }).then(() => true, () => false);
+      const naLista = await page.getByText(nomeFixo).first().waitFor({ timeout: 10_000 }).then(() => true, () => false);
       if (livre && !naLista) listaSemItem++;
       if (!livre || !naLista) {
         travou++;
