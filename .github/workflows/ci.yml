@@ -31,7 +31,10 @@ jobs:
         run: bash scripts/e2e-env.sh | sed "s/^export //; s/'//g" >> "$GITHUB_ENV"
       - run: npm run build
       - run: npx playwright install --with-deps chromium
-      - run: npm run test:e2e
+      # Os testes de fluxo rodam sozinhos; as capturas (pesadas: ~50 telas com axe) vêm depois, para não disputar
+      # o mesmo servidor e gerar lentidão que vira falha falsa nos testes de tempo.
+      - run: npm run test:e2e -- --grep-invert capturas
+      - run: npx playwright test e2e/zz-capturas.spec.ts --project=mobile-390 --project=desktop-1280
       # Capturas das telas principais, para conferir o visual sem precisar rodar o app
       - uses: actions/upload-artifact@v4
         if: always()
