@@ -61,7 +61,7 @@ export async function semearDadosDeExemplo(email: string, senha: string) {
   );
   ok(
     await db.from('income_receipts').insert({
-      source_id: fonte.id,
+      source_id: fonte!.id,
       kind: 'final',
       competencia: comp,
       expected_on: dia(5),
