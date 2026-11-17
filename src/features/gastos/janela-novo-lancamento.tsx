@@ -129,7 +129,7 @@ export function JanelaNovoLancamento({
                   const r = parseBRL(e.target.value || '0');
                   if (r.ok) f.setCents(Math.max(0, r.value));
                 }}
-                className="amount min-h-0 border-0 bg-transparent px-0 text-[40px] font-bold leading-tight tracking-tight focus:ring-0"
+                className="amount min-h-0 border-0 bg-transparent px-0 text-[40px] font-bold leading-tight tracking-tight shadow-none outline-none focus:ring-0 focus-visible:outline-none"
               />
             </div>
             <p className="mt-2 text-xs text-muted">Os centavos se ajustam enquanto você digita.</p>
@@ -137,7 +137,7 @@ export function JanelaNovoLancamento({
 
           <fieldset>
             <legend className={ROTULO}>Data</legend>
-            <div className="flex gap-2">
+            <div className="grid grid-cols-[auto_auto_minmax(0,1fr)] gap-2">
               {[
                 { rotulo: 'Hoje', valor: hoje },
                 { rotulo: 'Ontem', valor: ontem },
@@ -160,7 +160,7 @@ export function JanelaNovoLancamento({
                 aria-label="Outra data"
                 value={f.data}
                 onChange={(e) => e.target.value && f.setData(e.target.value)}
-                className="min-h-10 min-w-0 flex-1 rounded-full bg-bg px-3 text-sm"
+                className="min-h-10 w-full min-w-0 rounded-full bg-bg px-3 text-sm"
               />
             </div>
           </fieldset>
@@ -229,7 +229,7 @@ export function JanelaNovoLancamento({
                   type="button"
                   aria-pressed={f.categoryId === c.id}
                   onClick={() => f.setCategoryId(f.categoryId === c.id ? null : c.id)}
-                  className={cx(BLOCO, 'min-h-[84px] gap-2.5', ativo(f.categoryId === c.id))}
+                  className={cx(BLOCO, 'min-h-[76px] gap-2 p-2.5', ativo(f.categoryId === c.id))}
                 >
                   <CategoryIcon nome={c.nome} cor={c.cor} className="h-9 w-9 rounded-full" />
                   <span className="w-full truncate text-[13px] font-semibold">{c.nome}</span>
