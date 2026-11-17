@@ -50,7 +50,7 @@ export function CalculadoraRegimes({
       campos={
         <>
           <h2 className="font-display text-base font-semibold">Como CLT</h2>
-          <CamposPacote v={clt} mudar={setClt} prefixo="CLT" />
+          <CamposPacote v={clt} mudar={setClt} />
           <h2 className="pt-3 font-display text-base font-semibold">Como PJ ou MEI</h2>
           <Field label="Faturamento por mês">
             <MoneyInput value={fat} onChange={(e) => setFat(e.target.value)} />
@@ -76,8 +76,8 @@ export function CalculadoraRegimes({
             apoio={[
               { rotulo: 'Líquido no ano', cents: valores[r.melhor] ?? 0 },
               {
-                rotulo: 'PJ empata com CLT em',
-                texto: r.empatePjMensalCents === null ? 'fora do Simples' : `${formatBRL(r.empatePjMensalCents)}/mês`,
+                rotulo: 'PJ empata faturando',
+                texto: r.empatePjMensalCents === null ? 'fora do Simples' : formatBRL(r.empatePjMensalCents),
               },
             ]}
           />
