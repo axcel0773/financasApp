@@ -55,6 +55,15 @@ test.describe('capturas', () => {
       ['/gastos/lixeira', '21-lixeira'],
       ['/renda/historico', '22-renda-historico'],
       ['/pagina-que-nao-existe', '23-nao-encontrada'],
+      ['/calculadoras', '30-calculadoras'],
+      ['/calculadoras/pacote', '31-calc-pacote'],
+      ['/calculadoras/horas', '32-calc-horas'],
+      ['/calculadoras/e-se', '33-calc-e-se'],
+      ['/calculadoras/clt-pj-mei', '34-calc-regimes'],
+      ['/calculadoras/proposta', '35-calc-proposta'],
+      ['/calculadoras/fgts', '36-calc-fgts'],
+      ['/calculadoras/comprar-alugar-assinar', '37-calc-aquisicao'],
+      ['/calculadoras/ferias', '38-calc-ferias'],
     ] as const;
     for (const [rota, nome] of telas) {
       await page.goto(rota);

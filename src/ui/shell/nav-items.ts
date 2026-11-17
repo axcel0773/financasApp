@@ -21,6 +21,7 @@ export const NAV_PLANEJAMENTO: ItemNav[] = [
   { href: '/fixos', label: 'Fixos e parcelas', icon: 'repeat' },
   { href: '/mais/viagens', label: 'Viagens', icon: 'list' },
 ];
+export const NAV_FERRAMENTAS: ItemNav[] = [{ href: '/calculadoras', label: 'Calculadoras', icon: 'calc' }];
 export const NAV_INVESTIR: ItemNav[] = [
   { href: '/investimentos', label: 'Investimentos', icon: 'trend' },
   { href: '/investimentos/simulador', label: 'Simulador', icon: 'calc' },

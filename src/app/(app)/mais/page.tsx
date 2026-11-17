@@ -4,6 +4,7 @@ import { getContainer } from '@/composition/container';
 import { createSupabaseServer } from '@/infra/supabase/client.server';
 import { LogoutForm } from '@/features/shell/logout-form';
 import { NAV_INVESTIR, NAV_PLANEJAMENTO } from '@/ui/shell/nav-items';
+import { CALCULADORAS } from '@/features/calculadoras/lista';
 import { centavosParaCampo } from '@/ui/format';
 import { ActionForm } from '@/features/shared/action-form';
 import { Button } from '@/ui/primitives/button';
@@ -49,6 +50,10 @@ export default async function MaisPage() {
           <Links itens={NAV_PLANEJAMENTO} />
           <SectionTitle>Investir</SectionTitle>
           <Links itens={NAV_INVESTIR} />
+          <SectionTitle action={<Link href="/calculadoras" className="text-sm font-semibold text-link">Ver todas</Link>}>
+            Calculadoras
+          </SectionTitle>
+          <Links itens={CALCULADORAS.map((c) => ({ href: `/calculadoras/${c.slug}`, label: c.titulo, icon: c.icone }))} />
           <SectionTitle>Dados</SectionTitle>
           <Links
             itens={[

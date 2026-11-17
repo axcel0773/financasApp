@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { Icon } from '../primitives/icon';
 import { NavLink } from './nav-link';
-import { NAV_INVESTIR, NAV_PLANEJAMENTO, NAV_PRINCIPAL } from './nav-items';
+import { NAV_FERRAMENTAS, NAV_INVESTIR, NAV_PLANEJAMENTO, NAV_PRINCIPAL } from './nav-items';
 
 /** ≥ 768px: trilho lateral (ícone + rótulo). ≥ 1024px: sidebar fixa de 240px com todas as seções. */
 export function Sidebar({ sairIcone, sairBloco }: { sairIcone?: React.ReactNode; sairBloco?: React.ReactNode }) {
@@ -33,6 +33,12 @@ export function Sidebar({ sairIcone, sairBloco }: { sairIcone?: React.ReactNode;
           Investir
         </p>
         {NAV_INVESTIR.map((i) => (
+          <NavLink key={i.href} item={i} variante="side" />
+        ))}
+        <p className="mt-3 px-3 text-xs font-semibold uppercase tracking-wide text-muted">
+          Ferramentas
+        </p>
+        {NAV_FERRAMENTAS.map((i) => (
           <NavLink key={i.href} item={i} variante="side" />
         ))}
       </div>

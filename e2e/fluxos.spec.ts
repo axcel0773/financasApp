@@ -99,6 +99,40 @@ test.describe('autenticado', () => {
       expect(csp).toEqual([]);
     });
   }
+  test('calculadoras: todas acessíveis, sem rolagem horizontal e com resultado', async ({ page }) => {
+    test.setTimeout(180_000);
+    const csp = observarCsp(page);
+    await entrar(page);
+    for (const rota of [
+      '/calculadoras',
+      '/calculadoras/pacote',
+      '/calculadoras/horas',
+      '/calculadoras/e-se',
+      '/calculadoras/clt-pj-mei',
+      '/calculadoras/proposta',
+      '/calculadoras/fgts',
+      '/calculadoras/comprar-alugar-assinar',
+      '/calculadoras/ferias',
+    ]) {
+      await page.goto(rota);
+      await expect(page.locator('[aria-busy="true"]')).toHaveCount(0);
+      await expect(page.locator('h1').first()).toBeVisible();
+      expect(await semRolagemHorizontal(page), rota).toBe(true);
+      const violacoes = (await new AxeBuilder({ page }).analyze()).violations;
+      expect(violacoes.map((v) => `${v.id}: ${v.nodes.map((n) => n.target.join(' ')).slice(0, 3).join(' | ')}`), rota).toEqual([]);
+    }
+    // preço em horas: R$ 440,00 com R$ 8.800,00 líquidos e 40 h por semana = 10 h
+    await page.goto('/calculadoras/horas');
+    await page.getByLabel('Salário líquido por mês').fill('880000');
+    await page.getByLabel('Horas de trabalho por semana').fill('40');
+    await page.getByLabel('Preço da compra').fill('44000');
+    await expect(page.getByText('10 h', { exact: true }).first()).toBeVisible();
+    // férias: sempre há sugestão de datas
+    await page.goto('/calculadoras/ferias');
+    await expect(page.getByText(/dias de folga/).first()).toBeVisible();
+    expect(csp).toEqual([]);
+  });
+
   test('viagem sem volta e sem orçamento é aceita; erro de formulário não apaga o que foi digitado', async ({ page }, info) => {
     await entrar(page);
     await page.goto('/mais/viagens/nova');
