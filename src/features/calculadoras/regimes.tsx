@@ -10,7 +10,8 @@ import { Card, SectionTitle } from '@/ui/primitives/card';
 import { Field, Input, MoneyInput } from '@/ui/primitives/fields';
 import { Destaque, LayoutCalculadora, LinhaValor } from './blocos';
 import { br1, campo, cents, num } from './campos';
-import { CamposPacote, paraEntrada, type ValoresPacote } from './pacote';
+import { CamposPacote } from './pacote';
+import { paraEntrada, type ValoresPacote } from './valores-pacote';
 
 const NOME = { clt: 'CLT', pj: 'PJ (Simples)', mei: 'MEI' } as const;
 

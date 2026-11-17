@@ -2,7 +2,8 @@ import { carregarDadosCalculadoras } from '@/features/calculadoras/dados';
 import { tituloDe } from '@/features/calculadoras/lista';
 import { PageHeader } from '@/ui/primitives/card';
 import { SemTabelas } from '@/features/calculadoras/blocos';
-import { CalculadoraPacote, valoresIniciais } from '@/features/calculadoras/pacote';
+import { CalculadoraPacote } from '@/features/calculadoras/pacote';
+import { valoresIniciais } from '@/features/calculadoras/valores-pacote';
 
 export const metadata = { title: tituloDe('pacote') };
 

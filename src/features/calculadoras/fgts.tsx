@@ -60,7 +60,7 @@ export function CalculadoraFgts({ brutoCents }: { brutoCents: number }) {
             rodape="No saque-rescisão você recebe o saldo inteiro mais a multa de 40%. No aniversário, só a multa; o saldo continua preso."
           />
           <SectionTitle>Ano a ano</SectionTitle>
-          <Card className="overflow-x-auto py-1">
+          <Card className="overflow-x-auto py-1" tabIndex={0} role="region" aria-label="Tabela ano a ano">
             <table className="w-full min-w-[420px] text-sm">
               <caption className="sr-only">Saque-aniversário e saque-rescisão por ano</caption>
               <thead>

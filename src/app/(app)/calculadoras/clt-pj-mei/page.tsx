@@ -3,7 +3,7 @@ import { tituloDe } from '@/features/calculadoras/lista';
 import { PageHeader } from '@/ui/primitives/card';
 import { parametrosDoAno } from '@/core/calculadoras/parametros';
 import { SemTabelas } from '@/features/calculadoras/blocos';
-import { valoresIniciais } from '@/features/calculadoras/pacote';
+import { valoresIniciais } from '@/features/calculadoras/valores-pacote';
 import { CalculadoraRegimes } from '@/features/calculadoras/regimes';
 
 export const metadata = { title: tituloDe('clt-pj-mei') };
