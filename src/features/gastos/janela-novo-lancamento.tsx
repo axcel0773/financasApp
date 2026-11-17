@@ -113,7 +113,7 @@ export function JanelaNovoLancamento({
         </Link>
       </div>
 
-      <div className="grid min-h-0 flex-1 grid-cols-[340px_minmax(0,1fr)] overflow-y-auto">
+      <div className="grid min-h-0 flex-1 grid-cols-[380px_minmax(0,1fr)] overflow-y-auto">
         <div className="flex flex-col gap-5 border-r border-soft px-7 py-6">
           <div>
             <label htmlFor="novo-valor" className={ROTULO}>
@@ -129,7 +129,7 @@ export function JanelaNovoLancamento({
                   const r = parseBRL(e.target.value || '0');
                   if (r.ok) f.setCents(Math.max(0, r.value));
                 }}
-                className="amount min-h-0 border-0 bg-transparent px-0 text-[40px] font-bold leading-tight tracking-tight shadow-none outline-none focus:ring-0 focus-visible:outline-none"
+                className="amount min-h-0 border-0 bg-transparent px-0 text-[40px] font-bold leading-tight tracking-tight !shadow-none !outline-none !ring-0"
               />
             </div>
             <p className="mt-2 text-xs text-muted">Os centavos se ajustam enquanto você digita.</p>
@@ -148,7 +148,7 @@ export function JanelaNovoLancamento({
                   aria-pressed={f.data === d.valor}
                   onClick={() => f.setData(d.valor)}
                   className={cx(
-                    'min-h-10 rounded-full border px-4 text-sm font-semibold',
+                    'min-h-10 rounded-full border px-3.5 text-sm font-semibold',
                     f.data === d.valor ? 'border-primary bg-primary text-primary-fg' : 'border-border',
                   )}
                 >
