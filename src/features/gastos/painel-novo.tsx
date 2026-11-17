@@ -1,6 +1,5 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useRouter } from 'next/navigation';
@@ -27,7 +26,12 @@ export function PainelNovo({ fecharHref, children }: { fecharHref: string; child
   return createPortal(
     <div className="fixed inset-0 z-30 hidden items-center justify-center p-6 lg:flex">
       {/* Preto translúcido nos dois temas: escurece a tela por trás (a cor do texto clarearia no tema escuro). */}
-      <Link href={fecharHref} scroll={false} aria-label="Fechar" tabIndex={-1} className="absolute inset-0 bg-black/65" />
+      {/* clique fora fecha; para leitor de tela e teclado há o botão Fechar e o Esc */}
+      <div
+        aria-hidden
+        onClick={() => navegarComGarantia(router, fecharHref, { scroll: false })}
+        className="absolute inset-0 bg-black/65"
+      />
       <section
         ref={ref}
         tabIndex={-1}

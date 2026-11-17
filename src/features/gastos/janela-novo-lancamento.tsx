@@ -82,7 +82,7 @@ export function JanelaNovoLancamento({
         }
       }}
     >
-      <header className="flex items-center gap-5 border-b border-soft px-7 pb-5 pt-6">
+      <div className="flex items-center gap-5 border-b border-soft px-7 pb-5 pt-6">
         <h2 id="titulo-novo" className="flex-1 font-display text-xl font-semibold">
           Novo lançamento
         </h2>
@@ -111,7 +111,7 @@ export function JanelaNovoLancamento({
         >
           <Icon name="close" size={18} />
         </Link>
-      </header>
+      </div>
 
       <div className="grid min-h-0 flex-1 grid-cols-[340px_minmax(0,1fr)] overflow-y-auto">
         <div className="flex flex-col gap-5 border-r border-soft px-7 py-6">
@@ -245,7 +245,7 @@ export function JanelaNovoLancamento({
           {f.erro}
         </p>
       )}
-      <footer className="flex items-center gap-3 border-t border-soft px-7 py-4">
+      <div className="flex items-center gap-3 border-t border-soft px-7 py-4">
         <p className="flex flex-1 flex-wrap items-center gap-x-2.5 gap-y-1 text-[13px] text-muted">
           <span>
             <kbd className={KBD}>Enter</kbd> salva
@@ -273,7 +273,7 @@ export function JanelaNovoLancamento({
             ? 'Salvando…'
             : `Salvar ${gasto ? 'gasto' : 'entrada'}${f.cents > 0 ? ` de ${formatBRL(f.cents)}` : ''}`}
         </button>
-      </footer>
+      </div>
     </form>
   );
 }
