@@ -7,6 +7,7 @@ import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { TransactionRow } from '@/ui/patterns/transaction-row';
 import { Card, SectionTitle } from '@/ui/primitives/card';
 import { EmptyState } from '@/ui/patterns/empty-state';
+import { carregarSeloTempo } from '@/features/shared/tempo-trabalho';
 import { linkVer } from './link-ver';
 
 export async function BlocoRecebimentos() {
@@ -87,6 +88,7 @@ export async function BlocoRecentes() {
     c.wallets.list(),
     c.categories.list(),
   ]);
+  const selo = await carregarSeloTempo(c, wallets);
   return (
     <>
       <SectionTitle action={linkVer('/gastos')}>Últimos lançamentos</SectionTitle>
@@ -109,6 +111,7 @@ export async function BlocoRecentes() {
                   data: dataCurta(t.occurredOn),
                   cents: t.amountCents,
                   kind: t.kind,
+                  tempo: selo({ cents: t.amountCents, kind: t.kind, walletId: t.walletId }),
                 }}
               />
             );

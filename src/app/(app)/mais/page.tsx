@@ -114,6 +114,16 @@ export default async function MaisPage() {
               >
                 <MoneyInput name="minBalance" defaultValue={centavosParaCampo(a.minBalanceCents)} />
               </Field>
+              <Field
+                label="Jornada semanal (horas)"
+                hint="Usada para mostrar quanto tempo de trabalho custou cada gasto. Use 0 para esconder."
+              >
+                <Input
+                  name="jornada"
+                  inputMode="decimal"
+                  defaultValue={String(a.workHoursWeek).replace('.', ',')}
+                />
+              </Field>
               <Switch
                 name="hideValues"
                 defaultChecked={a.hideValues}

@@ -3,6 +3,7 @@ import { salvarCartaoAction } from '@/app/_actions/planejamento';
 import { agruparFaturas, competenciaDaFatura, maiorCompra, usoDoLimite } from '@/core/card-invoices/domain';
 import { addMeses } from '@/core/shared/competencia';
 import { carregarBase } from '@/features/base';
+import { carregarSeloTempo } from '@/features/shared/tempo-trabalho';
 import { centavosParaCampo, competenciaDoParam, dataCurta, rotuloCompetencia } from '@/ui/format';
 import { ActionForm } from '@/features/shared/action-form';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
@@ -29,6 +30,7 @@ export default async function CartaoPage({
   const sp = await searchParams;
   const { c, wallets, categories, hoje, mesAtual } = await carregarBase();
   const cartao = wallets.find((w) => w.kind === 'credit_card');
+  const selo = await carregarSeloTempo(c, wallets);
   if (!cartao)
     return (
       <>
@@ -155,6 +157,7 @@ export default async function CartaoPage({
                       data: dataCurta(t.occurredOn),
                       cents: t.amountCents,
                       kind: 'expense',
+                      tempo: selo({ cents: t.amountCents, kind: 'expense', walletId: cartao.id }),
                     }}
                   />
                 );

@@ -20,6 +20,8 @@ export interface LinhaTransacao {
   /** Nome da viagem, quando o gasto pertence a uma. */
   viagem?: string;
   pendente?: boolean;
+  /** Selo "custou X de trabalho" (ex.: "1,3 dia"); só em gastos pagos com o salário. */
+  tempo?: string;
 }
 
 /** Linha de lista no mobile; vira linha de tabela (data, descrição, categoria, carteira, valor) a partir de 1024px. */
@@ -76,6 +78,12 @@ export function TransactionRow({
           tom={t.kind === 'expense' ? 'expense' : 'income'}
           size="sm"
         />
+        {t.tempo && (
+          <span className="block whitespace-nowrap text-[11px] text-muted" title={`Custou ${t.tempo} de trabalho`}>
+            <span aria-hidden>≈ {t.tempo}</span>
+            <span className="sr-only">custou {t.tempo} de trabalho</span>
+          </span>
+        )}
       </span>
     </div>
   );

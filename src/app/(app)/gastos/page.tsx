@@ -4,6 +4,7 @@ import { totaisPorCategoria } from '@/core/reports/domain';
 import { ROTULO_CARTEIRA } from '@/core/wallets/domain';
 import { viagensParaLancar } from '@/core/trips/domain';
 import { carregarBase, opcoesLancamento } from '@/features/base';
+import { carregarSeloTempo } from '@/features/shared/tempo-trabalho';
 import { ExcluirButton } from '@/features/gastos/acoes-gasto';
 import { JanelaNovoLancamento } from '@/features/gastos/janela-novo-lancamento';
 import { PainelNovo } from '@/features/gastos/painel-novo';
@@ -45,7 +46,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
     typeof sp.cursor === 'string' && /^\d{4}-\d{2}-\d{2}_[0-9a-f-]{36}$/i.test(sp.cursor) ? sp.cursor : undefined;
   const cursor = cursorStr ? { occurredOn: cursorStr.slice(0, 10), id: cursorStr.slice(11) } : undefined;
 
-  const [lista, mensal, viagensTodas, selecionado] = await Promise.all([
+  const [lista, mensal, viagensTodas, selecionado, selo] = await Promise.all([
     c.transactions.list({
       de: inicio,
       ate: fim,
@@ -59,8 +60,10 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
     buscaGlobal ? Promise.resolve([]) : c.queries.detalhado(inicio, fim),
     c.trips.list(),
     selId ? c.transactions.get(selId) : Promise.resolve(null),
+    carregarSeloTempo(c, wallets),
   ]);
   const sel = selecionado && !selecionado.deletedAt ? selecionado : null;
+  const tempoSel = sel ? selo({ cents: sel.amountCents, kind: sel.kind, walletId: sel.walletId }) : undefined;
   const nomeViagem = new Map(viagensTodas.map((v) => [v.id, v.name]));
   const paraLancar = viagensParaLancar(viagensTodas, hoje);
   const temMais = lista.length > PAGINA;
@@ -238,6 +241,7 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
                 data: dataCurta(t.occurredOn),
                 cents: t.amountCents,
                 kind: t.kind,
+                tempo: selo({ cents: t.amountCents, kind: t.kind, walletId: t.walletId }),
                 viagem: t.tripId ? (nomeViagem.get(t.tripId) ?? 'Viagem') : undefined,
                 origem:
                   t.origin === 'recurring'
@@ -283,6 +287,12 @@ export default async function GastosPage({ searchParams }: { searchParams: SP })
               <dd>{sel.categoryId ? (cats[sel.categoryId]?.nome ?? '—') : 'Sem categoria'}</dd>
               <dt className="text-muted">Carteira</dt>
               <dd>{carteiras[sel.walletId] ?? '—'}</dd>
+              {tempoSel && (
+                <>
+                  <dt className="text-muted">Custou</dt>
+                  <dd>{tempoSel} de trabalho</dd>
+                </>
+              )}
               {sel.tripId && (
                 <>
                   <dt className="text-muted">Viagem</dt>

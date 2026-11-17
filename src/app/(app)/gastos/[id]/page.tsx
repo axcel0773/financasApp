@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import { editarLancamentoAction } from '@/app/_actions/gastos';
 import { carregarBase } from '@/features/base';
+import { carregarSeloTempo } from '@/features/shared/tempo-trabalho';
 import { ExcluirButton } from '@/features/gastos/acoes-gasto';
 import { formatBRL } from '@/core/shared/money';
 import { ActionForm } from '@/features/shared/action-form';
@@ -24,7 +25,12 @@ export default async function EditarPage({ params }: { params: Promise<{ id: str
   const { c, wallets, categories } = await carregarBase();
   const t = await c.transactions.get(id);
   if (!t || t.deletedAt) notFound();
-  const [historico, viagens] = await Promise.all([c.transactions.history(id), c.trips.list()]);
+  const [historico, viagens, selo] = await Promise.all([
+    c.transactions.history(id),
+    c.trips.list(),
+    carregarSeloTempo(c, wallets),
+  ]);
+  const tempo = selo({ cents: t.amountCents, kind: t.kind, walletId: t.walletId });
   const viagemAtual = viagens.find((v) => v.id === t.tripId);
   const categoria = categories.find((x) => x.id === t.categoryId);
   const carteira = wallets.find((w) => w.id === t.walletId);
@@ -54,6 +60,7 @@ export default async function EditarPage({ params }: { params: Promise<{ id: str
           tom={t.kind === 'expense' ? 'expense' : 'income'}
         />
       </Card>
+      {tempo && <p className="-mt-2 mb-4 text-sm text-muted">Custou {tempo} de trabalho.</p>}
       {viagemAtual && (
         <p className="mb-3">
           <Link href={`/mais/viagens/${viagemAtual.id}`}>

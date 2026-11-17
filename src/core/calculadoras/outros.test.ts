@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { compararAquisicao } from './aquisicao';
 import { simularCenario } from './cenario';
-import { descreverTempo, precoEmTempo, valorDaHora } from './horas';
+import { descreverTempo, precoEmTempo, seloTempoDeTrabalho, valorDaHora } from './horas';
 
 describe('preço em horas de trabalho', () => {
   it('44 h por semana = 220 h por mês', () => expect(valorDaHora(880_000, 44)).toBe(4_000));
@@ -59,4 +59,15 @@ describe('comprar × alugar × assinar', () => {
     expect(a.opcoes[0]!.totalPagoCents).toBe(10_000 * 12 + 11_000);
   });
   it('sem opções preenchidas não há vencedora', () => expect(compararAquisicao({ horizonteMeses: 12, rendimentoAnualPct: 10 }).melhor).toBeNull());
+});
+
+describe('selo de tempo nos gastos', () => {
+  const base = { cents: 44_000, kind: 'expense' as const, beneficio: false, liquidoMensalCents: 880_000, horasSemanais: 40 };
+  it('gasto comum mostra o tempo', () => expect(seloTempoDeTrabalho(base)).toBe('1,3 dia'));
+  it('VR/VA, entradas, jornada 0 e sem renda ficam sem selo', () => {
+    expect(seloTempoDeTrabalho({ ...base, beneficio: true })).toBeNull();
+    expect(seloTempoDeTrabalho({ ...base, kind: 'income' })).toBeNull();
+    expect(seloTempoDeTrabalho({ ...base, horasSemanais: 0 })).toBeNull();
+    expect(seloTempoDeTrabalho({ ...base, liquidoMensalCents: 0 })).toBeNull();
+  });
 });

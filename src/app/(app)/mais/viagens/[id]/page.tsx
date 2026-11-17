@@ -4,6 +4,7 @@ import { criarGastoViagemAction, excluirViagemAction } from '@/app/_actions/viag
 import { ehBeneficio } from '@/core/wallets/domain';
 import { estadoViagem, resumirViagem } from '@/core/trips/domain';
 import { carregarBase } from '@/features/base';
+import { carregarSeloTempo } from '@/features/shared/tempo-trabalho';
 import { ExcluirConfirmado } from '@/features/shared/excluir-confirmado';
 import { FormViagem } from '@/features/viagens/form-viagem';
 import { centavosParaCampo, dataCurta } from '@/ui/format';
@@ -26,7 +27,11 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
   const { id } = await params;
   if (!/^[0-9a-f-]{36}$/i.test(id)) notFound();
   const { c, wallets, categories, hoje } = await carregarBase();
-  const [viagem, todos] = await Promise.all([c.trips.get(id), c.transactions.list({ tripId: id, limite: 500 })]);
+  const [viagem, todos, selo] = await Promise.all([
+    c.trips.get(id),
+    c.transactions.list({ tripId: id, limite: 500 }),
+    carregarSeloTempo(c, wallets),
+  ]);
   if (!viagem) notFound();
   const lancamentos = todos.filter((t) => t.kind === 'expense');
   const r = resumirViagem(viagem, lancamentos.map((t) => ({ categoryId: t.categoryId, cents: t.amountCents })), hoje);
@@ -127,6 +132,7 @@ export default async function ViagemPage({ params }: { params: Promise<{ id: str
                     data: dataCurta(t.occurredOn),
                     cents: t.amountCents,
                     kind: t.kind,
+                    tempo: selo({ cents: t.amountCents, kind: t.kind, walletId: t.walletId }),
                   }}
                 />
               ))}

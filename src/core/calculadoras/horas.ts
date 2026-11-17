@@ -34,3 +34,19 @@ export function descreverTempo(t: PrecoEmTempo): string {
   if (t.meses < 1) return `${br(t.dias)} ${t.dias < 2 ? 'dia' : 'dias'}`;
   return `${br(t.meses)} ${t.meses < 2 ? 'mês' : 'meses'}`;
 }
+
+/**
+ * Selo dos gastos ("1,3 dia"): só para despesa paga com dinheiro do salário (VR/VA não contam).
+ * null quando o selo está desligado (jornada 0), sem renda cadastrada ou para entradas.
+ */
+export function seloTempoDeTrabalho(p: {
+  cents: Cents;
+  kind: 'expense' | 'income';
+  beneficio: boolean;
+  liquidoMensalCents: Cents;
+  horasSemanais: number;
+}): string | null {
+  if (p.kind !== 'expense' || p.beneficio || p.horasSemanais <= 0 || p.cents <= 0) return null;
+  const t = precoEmTempo(p.cents, p.liquidoMensalCents, p.horasSemanais);
+  return t ? descreverTempo(t) : null;
+}

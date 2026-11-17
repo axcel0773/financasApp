@@ -20,6 +20,11 @@ export async function salvarAjustesAction(_: ActionState, fd: FormData): Promise
         cdi: pct,
         minBalance: dinheiro,
         theme: z.enum(['system', 'light', 'dark']),
+        jornada: z
+          .string()
+          .trim()
+          .transform((s) => (s === '' ? 0 : Number(s.replace(',', '.'))))
+          .refine((n) => Number.isFinite(n) && n >= 0 && n <= 80, 'Jornada: informe de 0 a 80 horas por semana.'),
       }),
       fd,
     );
@@ -30,6 +35,7 @@ export async function salvarAjustesAction(_: ActionState, fd: FormData): Promise
       cdiPercent: p.value.cdi,
       minBalanceCents: p.value.minBalance,
       theme: p.value.theme,
+      workHoursWeek: Math.round(p.value.jornada * 10) / 10,
       hideValues: fd.get('hideValues') === 'on',
     });
     return ok(undefined);

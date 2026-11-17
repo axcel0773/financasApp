@@ -17,7 +17,7 @@ export type Enums = {
 type Json = string | number | boolean | null | { [k: string]: Json | undefined } | Json[];
 
 export interface Tables {
-  app_settings: { cdi_expected_percent: number; hide_values: boolean; ipca_expected_percent: number; min_balance_cents: number; theme: string; updated_at: string; user_id: string };
+  app_settings: { cdi_expected_percent: number; hide_values: boolean; ipca_expected_percent: number; min_balance_cents: number; theme: string; updated_at: string; user_id: string; work_hours_week: number };
   benefit_credits: { amount_cents: number; created_at: string; credited_on: string; id: string; user_id: string; wallet_id: string };
   categories: { color: string | null; created_at: string; icon: string | null; id: string; monthly_budget_cents: number | null; name: string; sort_order: number; user_id: string };
   category_rules: { category_id: string; created_at: string; id: string; keyword: string; user_id: string };
