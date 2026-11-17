@@ -49,6 +49,8 @@ jobs:
         run: |
           [ -d capturas ] || exit 0
           cd capturas
+          # O ramo só tem imagens: sem isto a Vercel tenta construir o app nele e manda e-mail de falha
+          echo '{"git":{"deploymentEnabled":false},"ignoreCommand":"exit 0"}' > vercel.json
           git init -q -b ci-capturas
           git add -A
           git -c user.name=ci -c user.email=ci@users.noreply.github.com commit -qm "capturas ${GITHUB_SHA::7}"
