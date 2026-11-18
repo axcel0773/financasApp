@@ -67,7 +67,7 @@ export async function BlocoHero() {
       {!mesInfo.rendaEstimada && mesInfo.r.rendaCents > 0 && (
         <p className="mt-1 text-sm text-white/75">
           No ritmo atual, fecha o mês {mesInfo.r.sobraFimCents >= 0 ? 'com' : 'faltando'}{' '}
-          <span className="amount font-semibold text-white">{formatBRL(Math.abs(mesInfo.r.sobraFimCents))}</span>
+          <span className="amount whitespace-nowrap font-semibold text-white">{formatBRL(Math.abs(mesInfo.r.sobraFimCents))}</span>
         </p>
       )}
       {serie.length > 1 && (

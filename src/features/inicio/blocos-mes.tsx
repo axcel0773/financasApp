@@ -6,12 +6,12 @@ import { ocorrenciasPendentes } from '@/core/recurring/domain';
 import { comoEstaMes, type ComoEstaMes } from '@/core/reports/mes';
 import { competenciaDe, primeiroDia, ultimoDia } from '@/core/shared/competencia';
 import { ehBeneficio } from '@/core/wallets/domain';
-import { centavosParaCampo } from '@/ui/format';
+import { formatBRL } from '@/core/shared/money';
 import { cx } from '@/ui/cx';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { IconeRedondo } from '@/ui/patterns/round-icon';
 
-const brl = (c: number) => `R$ ${centavosParaCampo(Math.abs(c))}`;
+const brl = (c: number) => formatBRL(Math.abs(c));
 const pct = (n: number) => `${Math.round(n)}%`;
 
 /** Dados do mês corrente para "Como está o mês" (renda, gastos sem VR/VA, fixos pendentes e meta). */
@@ -150,7 +150,7 @@ export function ComoEstaMesCard({ r, rendaEstimada }: { r: ComoEstaMes; rendaEst
           <Linha
             icone={<IconeRedondo nome="target" tom="destaque" />}
             titulo="Poupança"
-            explica={`quanto da renda deve sobrar · meta ${pct(r.metaPct)}`}
+            explica={`meta: ${pct(r.metaPct)} da renda`}
             valor={<span className="amount">{poup === null ? '—' : pct(poup)}</span>}
             situacao={
               poup === null ? '' : poup >= r.metaPct ? 'dentro da meta' : poup < 0 ? 'gastando mais que a renda' : 'abaixo da meta'
@@ -166,16 +166,16 @@ export function ComoEstaMesCard({ r, rendaEstimada }: { r: ComoEstaMes; rendaEst
             rodape={
               <>
                 {r.sobraFimCents >= 0 ? 'Deve sobrar ' : 'Deve faltar '}
-                <span className="amount">{brl(r.sobraFimCents)}</span> de{' '}
-                <span className="amount">{brl(r.rendaCents)}</span> · meta{' '}
-                <span className="amount">{brl(r.metaCents)}</span>
+                <span className="amount whitespace-nowrap">{brl(r.sobraFimCents)}</span> de{' '}
+                <span className="amount whitespace-nowrap">{brl(r.rendaCents)}</span> · meta{' '}
+                <span className="amount whitespace-nowrap">{brl(r.metaCents)}</span>
               </>
             }
           />
           <Linha
             icone={<IconeRedondo nome="home" tom="viagem" />}
             titulo="Custo de vida"
-            explica="fixos e parcelas + dia a dia"
+            explica="fixos + dia a dia"
             valor={<AmountDisplay cents={r.custoDeVidaCents} size="md" className="!text-lg !font-bold" />}
             situacao={custoPct === null ? '' : custoPct > 100 ? `${pct(custoPct)} · acima da renda` : `${pct(custoPct)} da renda`}
             bom={custoPct !== null && custoPct > 100 ? false : undefined}
@@ -192,11 +192,11 @@ export function ComoEstaMesCard({ r, rendaEstimada }: { r: ComoEstaMes; rendaEst
               <span className="flex flex-wrap gap-x-4 gap-y-1">
                 <span className="inline-flex items-center gap-1.5">
                   <span aria-hidden className="h-2 w-2 rounded-full bg-trip" />
-                  Fixos <span className="amount">{brl(r.fixosCents)}</span>
+                  Fixos <span className="amount whitespace-nowrap">{brl(r.fixosCents)}</span>
                 </span>
                 <span className="inline-flex items-center gap-1.5">
                   <span aria-hidden className="h-2 w-2 rounded-full bg-chart" />
-                  Dia a dia <span className="amount">{brl(r.diaADiaFimCents)}</span>
+                  Dia a dia <span className="amount whitespace-nowrap">{brl(r.diaADiaFimCents)}</span>
                   {r.projetado && ' (projeção)'}
                 </span>
               </span>
@@ -204,8 +204,8 @@ export function ComoEstaMesCard({ r, rendaEstimada }: { r: ComoEstaMes; rendaEst
           />
           <Linha
             icone={<IconeRedondo nome="calendar" />}
-            titulo="Gasto médio por dia"
-            explica={`dia a dia em ${r.diasDecorridos} de ${r.diasNoMes} dias`}
+            titulo="Gasto por dia"
+            explica={`média em ${r.diasDecorridos} de ${r.diasNoMes} dias`}
             valor={<AmountDisplay cents={media} size="md" className="!text-lg !font-bold" />}
             situacao={limite === null ? '' : `limite ${brl(limite)} por dia`}
             bom={limite === null ? undefined : media <= limite}
@@ -218,7 +218,7 @@ export function ComoEstaMesCard({ r, rendaEstimada }: { r: ComoEstaMes; rendaEst
             rodape={
               r.podePorDiaCents === null ? undefined : r.podePorDiaCents > 0 ? (
                 <>
-                  Dá para gastar até <span className="amount">{brl(r.podePorDiaCents)}</span> por dia nos{' '}
+                  Dá para gastar até <span className="amount whitespace-nowrap">{brl(r.podePorDiaCents)}</span> por dia nos{' '}
                   {r.diasRestantes} {r.diasRestantes === 1 ? 'dia que falta' : 'dias que faltam'}
                 </>
               ) : (
