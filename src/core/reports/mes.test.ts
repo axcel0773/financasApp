@@ -52,3 +52,15 @@ describe('como está o mês', () => {
     expect(sem.limiteDiarioCents).toBe(0);
   });
 });
+
+describe('viagens no mês', () => {
+  it('entram no custo de vida pelo valor lançado, sem projeção, e fora da média diária', () => {
+    const r = comoEstaMes({ ...base, gastos: [...base.gastos, { cents: 27_555, comprometido: false, viagem: true }] });
+    expect(r.viagensCents).toBe(27_555);
+    expect(r.diaADiaFimCents).toBe(288_333);
+    expect(r.custoDeVidaCents).toBe(553_333 + 27_555);
+    expect(r.mediaDiariaCents).toBe(9_611);
+    expect(r.limiteDiarioCents).toBe(Math.round((742_000 - 265_000 - 27_555 - 148_400) / 30));
+  });
+});
+

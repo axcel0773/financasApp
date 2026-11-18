@@ -6,8 +6,8 @@ export interface EntradaComoEstaMes {
   mes: Competencia;
   /** Renda do mês: o que já entrou mais o que ainda está previsto. */
   rendaCents: Cents;
-  /** Gastos do mês sem VR/VA. `comprometido` = veio de fixo ou parcela. */
-  gastos: { cents: Cents; comprometido: boolean }[];
+  /** Gastos do mês sem VR/VA. `comprometido` = veio de fixo ou parcela; `viagem` = gasto de uma viagem. */
+  gastos: { cents: Cents; comprometido: boolean; viagem?: boolean }[];
   /** Fixos do mês que ainda não viraram lançamento. */
   fixosPendentesCents: Cents;
   /** Meta de poupança, em % da renda. */
@@ -27,7 +27,9 @@ export interface ComoEstaMes {
   diaADiaCents: Cents;
   /** Dia a dia no fim do mês, no ritmo atual (igual ao lançado em meses passados). */
   diaADiaFimCents: Cents;
-  /** Fixos + dia a dia no fim do mês. */
+  /** Gastos de viagens no mês: entram pelo valor lançado, sem projeção (são pontuais). */
+  viagensCents: Cents;
+  /** Fixos + dia a dia no fim do mês + viagens. */
   custoDeVidaCents: Cents;
   /** Renda − custo de vida (o que deve sobrar no fim do mês). */
   sobraFimCents: Cents;
@@ -56,15 +58,16 @@ export function comoEstaMes(e: EntradaComoEstaMes): ComoEstaMes {
 
   const lancadosFixos = e.gastos.filter((g) => g.comprometido).reduce((s, g) => s + g.cents, 0);
   const fixosCents = lancadosFixos + Math.max(0, e.fixosPendentesCents);
-  const diaADiaCents = e.gastos.filter((g) => !g.comprometido).reduce((s, g) => s + g.cents, 0);
+  const diaADiaCents = e.gastos.filter((g) => !g.comprometido && !g.viagem).reduce((s, g) => s + g.cents, 0);
+  const viagensCents = e.gastos.filter((g) => !g.comprometido && g.viagem).reduce((s, g) => s + g.cents, 0);
   const diaADiaFimCents =
     corrente && diasDecorridos > 0 ? Math.round((diaADiaCents / diasDecorridos) * diasNoMes) : diaADiaCents;
-  const custoDeVidaCents = fixosCents + diaADiaFimCents;
+  const custoDeVidaCents = fixosCents + diaADiaFimCents + viagensCents;
   const renda = Math.max(0, e.rendaCents);
   const sobraFimCents = renda - custoDeVidaCents;
   const metaPct = Math.min(90, Math.max(0, e.metaPct));
   const metaCents = Math.round((renda * metaPct) / 100);
-  const paraDiaADia = renda - fixosCents - metaCents;
+  const paraDiaADia = renda - fixosCents - viagensCents - metaCents;
 
   return {
     projetado: corrente,
@@ -75,6 +78,7 @@ export function comoEstaMes(e: EntradaComoEstaMes): ComoEstaMes {
     fixosCents,
     diaADiaCents,
     diaADiaFimCents,
+    viagensCents,
     custoDeVidaCents,
     sobraFimCents,
     poupancaPct: renda > 0 ? (sobraFimCents / renda) * 100 : null,

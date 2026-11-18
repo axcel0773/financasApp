@@ -43,7 +43,7 @@ export const carregarComoEstaMes = cache(async () => {
     rendaCents,
     gastos: detalhe
       .filter((d) => d.kind === 'expense' && !ehBeneficio(d.walletKind))
-      .map((d) => ({ cents: d.cents, comprometido: d.comprometido })),
+      .map((d) => ({ cents: d.cents, comprometido: d.comprometido, viagem: d.tripId !== null })),
     fixosPendentesCents: ocorrenciasPendentes(regras, mes, ja).reduce((s, o) => s + o.amountCents, 0),
     metaPct: ajustes.savingsGoalPercent,
   });
@@ -175,7 +175,7 @@ export function ComoEstaMesCard({ r, rendaEstimada }: { r: ComoEstaMes; rendaEst
           <Linha
             icone={<IconeRedondo nome="home" tom="viagem" />}
             titulo="Custo de vida"
-            explica="fixos + dia a dia"
+            explica="fixos + dia a dia + viagens"
             valor={<AmountDisplay cents={r.custoDeVidaCents} size="md" className="!text-lg !font-bold" />}
             situacao={custoPct === null ? '' : custoPct > 100 ? `${pct(custoPct)} · acima da renda` : `${pct(custoPct)} da renda`}
             bom={custoPct !== null && custoPct > 100 ? false : undefined}
@@ -184,8 +184,9 @@ export function ComoEstaMesCard({ r, rendaEstimada }: { r: ComoEstaMes; rendaEst
                 partes={[
                   { pct: (r.fixosCents / Math.max(r.rendaCents, r.custoDeVidaCents)) * 100, classe: 'bg-trip' },
                   { pct: (r.diaADiaFimCents / Math.max(r.rendaCents, r.custoDeVidaCents)) * 100, classe: 'bg-chart' },
+                  { pct: (r.viagensCents / Math.max(r.rendaCents, r.custoDeVidaCents)) * 100, classe: 'bg-muted' },
                 ]}
-                rotulo={`Fixos ${brl(r.fixosCents)} e dia a dia ${brl(r.diaADiaFimCents)} de uma renda de ${brl(r.rendaCents)}`}
+                rotulo={`Fixos ${brl(r.fixosCents)}, dia a dia ${brl(r.diaADiaFimCents)} e viagens ${brl(r.viagensCents)} de uma renda de ${brl(r.rendaCents)}`}
               />
             }
             rodape={
@@ -199,6 +200,12 @@ export function ComoEstaMesCard({ r, rendaEstimada }: { r: ComoEstaMes; rendaEst
                   Dia a dia <span className="amount whitespace-nowrap">{brl(r.diaADiaFimCents)}</span>
                   {r.projetado && ' (projeção)'}
                 </span>
+                {r.viagensCents > 0 && (
+                  <span className="inline-flex items-center gap-1.5">
+                    <span aria-hidden className="h-2 w-2 rounded-full bg-muted" />
+                    Viagens <span className="amount whitespace-nowrap">{brl(r.viagensCents)}</span>
+                  </span>
+                )}
               </span>
             }
           />
@@ -207,7 +214,7 @@ export function ComoEstaMesCard({ r, rendaEstimada }: { r: ComoEstaMes; rendaEst
             titulo="Gasto por dia"
             explica={`média em ${r.diasDecorridos} de ${r.diasNoMes} dias`}
             valor={<AmountDisplay cents={media} size="md" className="!text-lg !font-bold" />}
-            situacao={limite === null ? '' : `limite ${brl(limite)} por dia`}
+            situacao={limite === null ? '' : `limite ${brl(limite)}/dia`}
             bom={limite === null ? undefined : media <= limite}
             barra={
               <Barra

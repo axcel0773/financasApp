@@ -21,7 +21,7 @@ export function Widget({
   const conteudo = (
     <>
       <span className="flex items-start justify-between gap-2">
-        <span className="flex h-11 min-w-0 flex-1 items-center">{visual}</span>
+        <span className="flex h-11 min-w-0 flex-1 items-center overflow-hidden">{visual}</span>
         {href && <Icon name="chevron" size={18} className="shrink-0 text-muted" />}
       </span>
       <span className="mt-4 block min-w-0">
