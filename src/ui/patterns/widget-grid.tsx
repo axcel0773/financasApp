@@ -1,6 +1,10 @@
 import { cx } from '../cx';
 
-/** Grade de cartões-widget: 2 colunas no celular, até 4 no desktop. */
+/**
+ * Grade dos cartões-widget. As colunas dependem da LARGURA DISPONÍVEL (container query), não da tela:
+ * a mesma grade fica com 2 colunas numa coluna estreita do desktop e com 4 quando há espaço.
+ * Cada widget precisa de ~150 px para o valor caber sem cortar.
+ */
 export function GradeWidgets({
   children,
   colunas = 4,
@@ -11,15 +15,8 @@ export function GradeWidgets({
   className?: string;
 }) {
   return (
-    <div
-      className={cx(
-        'grid grid-cols-2 gap-3',
-        colunas === 4 && 'lg:grid-cols-4',
-        colunas === 3 && 'lg:grid-cols-3',
-        className,
-      )}
-    >
-      {children}
+    <div className={cx('grade-widgets', className)}>
+      <div data-colunas={colunas}>{children}</div>
     </div>
   );
 }

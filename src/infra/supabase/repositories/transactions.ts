@@ -203,6 +203,7 @@ export class SupabaseTransactionRepository implements TransactionRepository, Tra
         amount_cents: number | string;
         occurred_on: string;
         trip_id: string | null;
+        origin: string | null;
       }[];
       for (const r of linhas)
         out.push({
@@ -213,6 +214,7 @@ export class SupabaseTransactionRepository implements TransactionRepository, Tra
           occurredOn: r.occurred_on,
           kind: r.kind,
           tripId: r.trip_id,
+          comprometido: r.origin === 'recurring' || r.origin === 'installment',
         });
       if (linhas.length < PAGINA) return out;
     }

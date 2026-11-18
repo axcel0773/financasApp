@@ -25,6 +25,11 @@ export async function salvarAjustesAction(_: ActionState, fd: FormData): Promise
           .trim()
           .transform((s) => (s === '' ? 0 : Number(s.replace(',', '.'))))
           .refine((n) => Number.isFinite(n) && n >= 0 && n <= 80, 'Jornada: informe de 0 a 80 horas por semana.'),
+        metaPoupanca: z
+          .string()
+          .trim()
+          .transform((s) => (s === '' ? 20 : Number(s.replace(',', '.'))))
+          .refine((n) => Number.isFinite(n) && n >= 0 && n <= 90, 'Meta de poupança: informe de 0 a 90%.'),
       }),
       fd,
     );
@@ -36,6 +41,7 @@ export async function salvarAjustesAction(_: ActionState, fd: FormData): Promise
       minBalanceCents: p.value.minBalance,
       theme: p.value.theme,
       workHoursWeek: Math.round(p.value.jornada * 10) / 10,
+      savingsGoalPercent: Math.round(p.value.metaPoupanca * 10) / 10,
       hideValues: fd.get('hideValues') === 'on',
     });
     return ok(undefined);

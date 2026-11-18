@@ -233,3 +233,32 @@ nav a:active {
 .encher-anel {
   animation: encher-anel 800ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
+
+/* Grade de widgets: colunas pela largura disponível (container query), ver ui/patterns/widget-grid.tsx */
+.grade-widgets {
+  container-type: inline-size;
+}
+.grade-widgets > div {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+}
+@container (min-width: 480px) {
+  .grade-widgets > div[data-colunas='3'] {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@container (min-width: 640px) {
+  .grade-widgets > div[data-colunas='4'] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+/* Widget: o valor encolhe com a largura do cartão em vez de ser cortado com reticências */
+.widget {
+  container-type: inline-size;
+}
+.widget .widget-valor,
+.widget .widget-valor > *,
+.widget .widget-valor .amount {
+  font-size: min(1.125rem, 12.5cqi);
+}

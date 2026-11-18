@@ -4,6 +4,7 @@ import {
   BlocoAvisos,
   BlocoBeneficios,
   BlocoCalor,
+  BlocoComoEstaMes,
   BlocoGastosMes,
   BlocoViagens,
   BlocoContas,
@@ -42,6 +43,9 @@ export default async function InicioPage() {
         <div>
           <Suspense fallback={fallback('h-44')}>
             <BlocoHero />
+          </Suspense>
+          <Suspense fallback={fallback('mt-3 h-96')}>
+            <BlocoComoEstaMes />
           </Suspense>
           <Suspense fallback={fallback('mt-3 h-80')}>
             <BlocoWidgets />

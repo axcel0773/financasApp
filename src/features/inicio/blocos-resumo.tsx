@@ -9,19 +9,23 @@ import { totalRecebido } from '@/core/income/domain';
 import { ocorrenciasPendentes } from '@/core/recurring/domain';
 import { addDias, addMeses, competenciaDe, primeiroDia, ultimoDia } from '@/core/shared/competencia';
 import { ehBeneficio } from '@/core/wallets/domain';
+import { formatBRL } from '@/core/shared/money';
 import { centavosParaCampo, rotuloCompetencia } from '@/ui/format';
 import { AmountDisplay } from '@/ui/patterns/amount-display';
 import { Card, Hero, SectionTitle } from '@/ui/primitives/card';
 import { Chip } from '@/ui/primitives/chip';
+import { carregarComoEstaMes } from './blocos-mes';
+import { cx } from '@/ui/cx';
 import { linkVer } from './link-ver';
 
 export async function BlocoHero() {
   const c = await getContainer();
   const hoje = c.clock.hoje(),
     mes = competenciaDe(hoje);
-  const [receb, detalhe] = await Promise.all([
+  const [receb, detalhe, mesInfo] = await Promise.all([
     c.income.recebimentos(mes, mes),
     c.queries.detalhado(primeiroDia(mes), ultimoDia(mes)),
+    carregarComoEstaMes(),
   ]);
   const recebido =
     totalRecebido(receb) +
@@ -49,7 +53,23 @@ export async function BlocoHero() {
   return (
     <Hero>
       <p className="text-sm text-white/75">Sobra de {rotuloCompetencia(mes)}</p>
-      <AmountDisplay cents={sobra} size="xl" tom="onDark" />
+      <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
+        <AmountDisplay cents={sobra} size="xl" tom="onDark" />
+        <span
+          className={cx(
+            'rounded-full px-2.5 py-1 text-xs font-semibold',
+            sobra >= 0 ? 'bg-ok-bg text-income' : 'bg-danger-bg text-expense-text',
+          )}
+        >
+          {sobra >= 0 ? 'sobrando até agora' : 'faltando até agora'}
+        </span>
+      </div>
+      {!mesInfo.rendaEstimada && mesInfo.r.rendaCents > 0 && (
+        <p className="mt-1 text-sm text-white/75">
+          No ritmo atual, fecha o mês {mesInfo.r.sobraFimCents >= 0 ? 'com' : 'faltando'}{' '}
+          <span className="amount font-semibold text-white">{formatBRL(Math.abs(mesInfo.r.sobraFimCents))}</span>
+        </p>
+      )}
       {serie.length > 1 && (
         <svg
           viewBox="0 0 460 80"

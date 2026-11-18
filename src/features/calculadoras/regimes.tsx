@@ -84,14 +84,14 @@ export function CalculadoraRegimes({
           <Card className="py-1">
             {(['clt', 'pj', 'mei'] as const).map((k) => (
               <div key={k} className="flex min-h-14 items-center justify-between gap-3 border-b border-border py-2 last:border-0">
-                <span className="flex items-center gap-2 font-semibold">
+                <span className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 font-semibold">
                   {NOME[k]}
                   {r.melhor === k && <Chip tom="ok">melhor</Chip>}
                 </span>
                 {valores[k] === null ? (
                   <span className="text-sm text-muted">não cabe no MEI</span>
                 ) : (
-                  <span className="amount font-semibold">{formatBRL(valores[k]!)}</span>
+                  <span className="amount whitespace-nowrap font-semibold">{formatBRL(valores[k]!)}</span>
                 )}
               </div>
             ))}

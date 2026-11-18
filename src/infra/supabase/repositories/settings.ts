@@ -9,6 +9,8 @@ export interface Ajustes {
   theme: 'system' | 'light' | 'dark';
   /** Horas de trabalho por semana para o selo de tempo nos gastos; 0 = desligado. */
   workHoursWeek: number;
+  /** Meta de poupança, em % da renda do mês (usada em "Como está o mês"). */
+  savingsGoalPercent: number;
 }
 export const AJUSTES_PADRAO: Ajustes = {
   ipcaPercent: 4.5,
@@ -17,6 +19,7 @@ export const AJUSTES_PADRAO: Ajustes = {
   hideValues: false,
   theme: 'system',
   workHoursWeek: 40,
+  savingsGoalPercent: 20,
 };
 
 export class SupabaseSettingsRepository {
@@ -24,7 +27,7 @@ export class SupabaseSettingsRepository {
   async get(): Promise<Ajustes> {
     const { data, error } = await this.db
       .from('app_settings')
-      .select('ipca_expected_percent,cdi_expected_percent,min_balance_cents,hide_values,theme,work_hours_week')
+      .select('ipca_expected_percent,cdi_expected_percent,min_balance_cents,hide_values,theme,work_hours_week,savings_goal_percent')
       .maybeSingle();
     check(error, 'ler ajustes');
     return data
@@ -35,6 +38,7 @@ export class SupabaseSettingsRepository {
           hideValues: data.hide_values,
           theme: data.theme,
           workHoursWeek: num(data.work_hours_week),
+          savingsGoalPercent: num(data.savings_goal_percent),
         }
       : AJUSTES_PADRAO;
   }
@@ -46,6 +50,7 @@ export class SupabaseSettingsRepository {
     if (a.hideValues !== undefined) row.hide_values = a.hideValues;
     if (a.theme !== undefined) row.theme = a.theme;
     if (a.workHoursWeek !== undefined) row.work_hours_week = a.workHoursWeek;
+    if (a.savingsGoalPercent !== undefined) row.savings_goal_percent = a.savingsGoalPercent;
     const { error } = await this.db.from('app_settings').upsert(row);
     check(error, 'salvar ajustes');
   }

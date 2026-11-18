@@ -17,7 +17,7 @@ export function Widget({
   visual: React.ReactNode;
 }) {
   const classe =
-    'flex min-h-[152px] flex-col justify-between rounded-xl border border-border bg-surface p-4 transition-colors';
+    'widget flex min-h-[152px] flex-col justify-between rounded-xl border border-border bg-surface p-4 transition-colors';
   const conteudo = (
     <>
       <span className="flex items-start justify-between gap-2">
@@ -26,7 +26,7 @@ export function Widget({
       </span>
       <span className="mt-4 block min-w-0">
         <span className="block truncate text-xs text-muted">{rotulo}</span>
-        <span className="block truncate">{valor}</span>
+        <span className="widget-valor block whitespace-nowrap">{valor}</span>
         {contexto && <span className="block truncate text-xs text-muted">{contexto}</span>}
       </span>
     </>

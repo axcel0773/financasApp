@@ -124,6 +124,17 @@ export default async function MaisPage() {
                   defaultValue={String(a.workHoursWeek).replace('.', ',')}
                 />
               </Field>
+              <Field
+                label="Meta de poupança (% da renda)"
+                hint="Usada em “Como está o mês”, no Início: quanto da renda você quer que sobre."
+              >
+                <Input
+                  id="meta-poupanca"
+                  name="metaPoupanca"
+                  inputMode="decimal"
+                  defaultValue={String(a.savingsGoalPercent).replace('.', ',')}
+                />
+              </Field>
               <Switch
                 name="hideValues"
                 defaultChecked={a.hideValues}

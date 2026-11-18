@@ -40,25 +40,29 @@ export function TransactionRow({
     <div
       className={cx(
         'flex min-h-14 items-center gap-3 py-2',
-        tabela && 'lg:grid lg:grid-cols-[88px_1fr_160px_120px_140px] lg:gap-4',
+        tabela && 'lg:grid lg:grid-cols-[64px_minmax(0,1fr)_150px_120px] lg:gap-4 xl:grid-cols-[88px_minmax(0,1fr)_160px_140px_140px]',
         t.pendente && 'opacity-70',
       )}
     >
-      {tabela && <span className="hidden text-sm text-muted lg:block">{t.data}</span>}
+      {tabela && <span className="hidden whitespace-nowrap text-sm text-muted lg:block">{t.data}</span>}
       <CategoryIcon nome={t.categoria?.nome} cor={t.categoria?.cor} className={tabela ? 'lg:hidden' : undefined} />
       <span className={cx('min-w-0 flex-1', tabela && 'lg:flex-none')}>
         <span className="block truncate font-semibold">{t.descricao}</span>
         <span className={cx('block truncate text-xs text-muted', tabela && 'lg:hidden')}>
           {t.categoria?.nome ?? 'Sem categoria'} · {t.carteira} · {t.data}
         </span>
-        <span className="mt-0.5 flex gap-1.5">
+        <span className="mt-0.5 flex min-w-0 flex-wrap gap-1.5">
           {t.pendente && (
             <Chip tom="alert">
               <Icon name="offline" size={12} />
               Pendente de envio
             </Chip>
           )}
-          {t.viagem && <Chip tom="info">Viagem · {t.viagem}</Chip>}
+          {t.viagem && (
+            <Chip tom="info" className="max-w-full">
+              <span className="truncate">Viagem · {t.viagem}</span>
+            </Chip>
+          )}
           {t.origem && <Chip>{t.origem}</Chip>}
         </span>
       </span>
@@ -66,9 +70,13 @@ export function TransactionRow({
         <>
           <span className="hidden min-w-0 items-center gap-2 text-sm lg:flex">
             <CategoryIcon nome={t.categoria?.nome} cor={t.categoria?.cor} className="h-7 w-7 rounded-[9px]" />
-            <span className="truncate">{t.categoria?.nome ?? 'Sem categoria'}</span>
+            <span className="min-w-0">
+              <span className="block truncate">{t.categoria?.nome ?? 'Sem categoria'}</span>
+              {/* sem coluna de carteira entre 1024 e 1279 px: ela vem embaixo da categoria */}
+              <span className="block truncate text-xs text-muted xl:hidden">{t.carteira}</span>
+            </span>
           </span>
-          <span className="hidden truncate text-sm text-muted lg:block">{t.carteira}</span>
+          <span className="hidden truncate text-sm text-muted xl:block">{t.carteira}</span>
         </>
       )}
       <span className="text-right">
@@ -106,11 +114,11 @@ export function TransactionRow({
 
 export function TransactionHeader() {
   return (
-    <div className="hidden border-b border-border pb-2 text-xs font-semibold uppercase tracking-wide text-muted lg:grid lg:grid-cols-[88px_1fr_160px_120px_140px] lg:gap-4">
+    <div className="hidden border-b border-border pb-2 text-xs font-semibold uppercase tracking-wide text-muted lg:grid lg:grid-cols-[64px_minmax(0,1fr)_150px_120px] lg:gap-4 xl:grid-cols-[88px_minmax(0,1fr)_160px_140px_140px]">
       <span>Data</span>
       <span>Descrição</span>
       <span>Categoria</span>
-      <span>Carteira</span>
+      <span className="hidden xl:block">Carteira</span>
       <span className="text-right">Valor</span>
     </div>
   );

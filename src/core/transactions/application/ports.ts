@@ -46,6 +46,8 @@ export interface GastoDetalhado {
   kind: 'expense' | 'income';
   /** Viagem do lançamento (nulo = dia a dia). */
   tripId: string | null;
+  /** Veio de um gasto fixo ou de uma parcela (já estava comprometido antes do mês). */
+  comprometido: boolean;
 }
 /** Consulta de leitura usada por Início, Orçamento, Relatórios e Fluxo (despesas/receitas avulsas ativas). */
 export interface TransactionQueries {

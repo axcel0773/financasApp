@@ -17,9 +17,9 @@ export function SectionTitle({
   action?: React.ReactNode;
 }) {
   return (
-    <div className="mb-2 mt-6 flex items-center justify-between">
-      <h2 className="font-display text-lg font-semibold">{children}</h2>
-      {action}
+    <div className="mb-2 mt-6 flex items-center justify-between gap-3">
+      <h2 className="min-w-0 font-display text-lg font-semibold">{children}</h2>
+      {action && <span className="shrink-0 whitespace-nowrap">{action}</span>}
     </div>
   );
 }
