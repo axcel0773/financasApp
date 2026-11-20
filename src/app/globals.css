@@ -262,3 +262,100 @@ nav a:active {
 .widget .widget-valor .amount {
   font-size: min(1.125rem, 12.5cqi);
 }
+
+/*
+ * Cor de destaque (Mais → Ajustes). No escuro o destaque também é a cor dos gráficos, do foco e dos links;
+ * no claro, gráficos e foco ficam pretos e o link usa um tom escuro da mesma cor (contraste ≥ 4,5:1 no branco).
+ */
+:root[data-accent='ciano'] {
+  --accent: #5ee0d6;
+  --chart: #5ee0d6;
+  --focus: #5ee0d6;
+  --link: #5ee0d6;
+}
+:root[data-theme='light'][data-accent='ciano'] {
+  --accent: #5ee0d6;
+  --chart: #0a0a0b;
+  --focus: #0a0a0b;
+  --link: #0f6b66;
+}
+:root[data-accent='azul'] {
+  --accent: #7cc4ff;
+  --chart: #7cc4ff;
+  --focus: #7cc4ff;
+  --link: #7cc4ff;
+}
+:root[data-theme='light'][data-accent='azul'] {
+  --accent: #7cc4ff;
+  --chart: #0a0a0b;
+  --focus: #0a0a0b;
+  --link: #0b5cad;
+}
+:root[data-accent='violeta'] {
+  --accent: #c4a6ff;
+  --chart: #c4a6ff;
+  --focus: #c4a6ff;
+  --link: #c4a6ff;
+}
+:root[data-theme='light'][data-accent='violeta'] {
+  --accent: #c4a6ff;
+  --chart: #0a0a0b;
+  --focus: #0a0a0b;
+  --link: #6d28d9;
+}
+:root[data-accent='rosa'] {
+  --accent: #ff9ccf;
+  --chart: #ff9ccf;
+  --focus: #ff9ccf;
+  --link: #ff9ccf;
+}
+:root[data-theme='light'][data-accent='rosa'] {
+  --accent: #ff9ccf;
+  --chart: #0a0a0b;
+  --focus: #0a0a0b;
+  --link: #be185d;
+}
+:root[data-accent='laranja'] {
+  --accent: #ffb066;
+  --chart: #ffb066;
+  --focus: #ffb066;
+  --link: #ffb066;
+}
+:root[data-theme='light'][data-accent='laranja'] {
+  --accent: #ffb066;
+  --chart: #0a0a0b;
+  --focus: #0a0a0b;
+  --link: #9a4a06;
+}
+@media (prefers-color-scheme: light) {
+  :root[data-theme='system'][data-accent='ciano'] {
+    --accent: #5ee0d6;
+    --chart: #0a0a0b;
+    --focus: #0a0a0b;
+    --link: #0f6b66;
+  }
+  :root[data-theme='system'][data-accent='azul'] {
+    --accent: #7cc4ff;
+    --chart: #0a0a0b;
+    --focus: #0a0a0b;
+    --link: #0b5cad;
+  }
+  :root[data-theme='system'][data-accent='violeta'] {
+    --accent: #c4a6ff;
+    --chart: #0a0a0b;
+    --focus: #0a0a0b;
+    --link: #6d28d9;
+  }
+  :root[data-theme='system'][data-accent='rosa'] {
+    --accent: #ff9ccf;
+    --chart: #0a0a0b;
+    --focus: #0a0a0b;
+    --link: #be185d;
+  }
+  :root[data-theme='system'][data-accent='laranja'] {
+    --accent: #ffb066;
+    --chart: #0a0a0b;
+    --focus: #0a0a0b;
+    --link: #9a4a06;
+  }
+}

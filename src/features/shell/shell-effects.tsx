@@ -10,12 +10,14 @@ import {
 import { sincronizarFila } from '@/infra/offline/queue';
 import { useToast } from '@/ui/primitives/toast';
 
-/** Aplica tema e "ocultar valores", registra o service worker e sincroniza a fila offline. */
+/** Aplica tema, cor de destaque e "ocultar valores", registra o service worker e sincroniza a fila offline. */
 export function ShellEffects({
   tema,
+  destaque,
   ocultar,
 }: {
   tema: 'system' | 'light' | 'dark';
+  destaque: string;
   ocultar: boolean;
 }) {
   const router = useRouter();
@@ -26,6 +28,8 @@ export function ShellEffects({
     el.setAttribute('data-theme', tema);
     // espelha em cookie para o servidor já renderizar no tema escolhido (sem piscar na próxima visita)
     document.cookie = `tema=${tema}; path=/; max-age=31536000; samesite=lax`;
+    el.setAttribute('data-accent', destaque);
+    document.cookie = `destaque=${encodeURIComponent(destaque)}; path=/; max-age=31536000; samesite=lax`;
     let oculto = ocultar;
     try {
       const salvo = localStorage.getItem('ocultar-valores');
@@ -34,7 +38,7 @@ export function ShellEffects({
       /* sem armazenamento */
     }
     el.setAttribute('data-hide-values', String(oculto));
-  }, [tema, ocultar]);
+  }, [tema, destaque, ocultar]);
 
   useEffect(() => {
     if (!('serviceWorker' in navigator) || process.env.NODE_ENV !== 'production') return;

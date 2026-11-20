@@ -9,7 +9,8 @@ import { centavosParaCampo } from '@/ui/format';
 import { ActionForm } from '@/features/shared/action-form';
 import { Button } from '@/ui/primitives/button';
 import { Card, PageHeader, SectionTitle } from '@/ui/primitives/card';
-import { Field, Input, MoneyInput, RadioChips, Switch } from '@/ui/primitives/fields';
+import { Field, Input, MoneyInput, RadioChips, RadioCores, Switch } from '@/ui/primitives/fields';
+import { DESTAQUES } from '@/ui/theme/destaques';
 import { Icon } from '@/ui/primitives/icon';
 
 export const metadata = { title: 'Mais' };
@@ -86,12 +87,21 @@ export default async function MaisPage() {
               <Field label="Tema">
                 <RadioChips
                   name="theme"
+                  rotulo="Tema"
                   defaultValue={a.theme}
                   options={[
-                    { value: 'dark', label: 'Escuro' },
-                    { value: 'light', label: 'Claro' },
-                    { value: 'system', label: 'Sistema' },
+                    { value: 'dark', label: 'Escuro', icone: 'moon' },
+                    { value: 'light', label: 'Claro', icone: 'sun' },
+                    { value: 'system', label: 'Igual ao aparelho', icone: 'monitor' },
                   ]}
+                />
+              </Field>
+              <Field label="Cor de destaque" hint="Usada em botões, gráficos e links de todo o app.">
+                <RadioCores
+                  name="accent"
+                  rotulo="Cor de destaque"
+                  defaultValue={a.accent}
+                  options={DESTAQUES.map((d) => ({ value: d.id, label: d.nome, cor: d.cor }))}
                 />
               </Field>
               <Field label="IPCA esperado % a.a.">

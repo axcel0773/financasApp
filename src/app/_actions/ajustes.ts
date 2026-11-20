@@ -1,6 +1,7 @@
 'use server';
 
 import { z } from 'zod';
+import { IDS_DESTAQUE } from '@/ui/theme/destaques';
 import { getContainer } from '@/composition/container';
 import { ok } from '@/core/shared/result';
 import { executar } from '../_lib/action';
@@ -20,6 +21,7 @@ export async function salvarAjustesAction(_: ActionState, fd: FormData): Promise
         cdi: pct,
         minBalance: dinheiro,
         theme: z.enum(['system', 'light', 'dark']),
+        accent: z.enum(IDS_DESTAQUE).default('lima'),
         jornada: z
           .string()
           .trim()
@@ -40,6 +42,7 @@ export async function salvarAjustesAction(_: ActionState, fd: FormData): Promise
       cdiPercent: p.value.cdi,
       minBalanceCents: p.value.minBalance,
       theme: p.value.theme,
+      accent: p.value.accent,
       workHoursWeek: Math.round(p.value.jornada * 10) / 10,
       savingsGoalPercent: Math.round(p.value.metaPoupanca * 10) / 10,
       hideValues: fd.get('hideValues') === 'on',

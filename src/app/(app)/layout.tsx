@@ -12,7 +12,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       topbar={<Topbar />}
       sairIcone={<LogoutForm variante="icone" />}
       sairBloco={<LogoutForm />}
-      extras={<ShellEffects tema={ajustes.theme} ocultar={ajustes.hideValues} />}>
+      extras={<ShellEffects tema={ajustes.theme} destaque={ajustes.accent} ocultar={ajustes.hideValues} />}>
       {children}
     </AppShell>
   );

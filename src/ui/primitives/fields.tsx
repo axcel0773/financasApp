@@ -1,5 +1,6 @@
 import type { InputHTMLAttributes, SelectHTMLAttributes, TextareaHTMLAttributes } from 'react';
 import { cx } from '../cx';
+import { Icon, type IconName } from './icon';
 import { MoneyInput } from './money-input';
 
 import { FIELD } from './fields-base';
@@ -65,24 +66,67 @@ export function RadioChips({
   name,
   options,
   defaultValue,
+  rotulo,
 }: {
   name: string;
-  options: { value: string; label: string }[];
+  /** Com `icone`, o chip mostra só o ícone; o nome fica para leitor de tela e na dica ao passar o mouse. */
+  options: { value: string; label: string; icone?: IconName }[];
   defaultValue?: string | null;
+  /** Nome do grupo para leitor de tela. */
+  rotulo?: string;
 }) {
   return (
-    <div className="flex flex-wrap gap-2" role="radiogroup">
+    <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={rotulo}>
       {options.map((o) => (
-        <label key={o.value} className="cursor-pointer">
+        <label key={o.value} className="cursor-pointer" title={o.icone ? o.label : undefined}>
           <input
             type="radio"
             name={name}
             value={o.value}
             defaultChecked={o.value === (defaultValue ?? '')}
             className="peer sr-only"
+            aria-label={o.icone ? o.label : undefined}
           />
-          <span className="inline-flex min-h-11 items-center rounded-full border border-border bg-surface px-4 text-sm font-semibold peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-fg peer-focus-visible:ring-2 peer-focus-visible:ring-primary">
-            {o.label}
+          <span
+            className={cx(
+              'inline-flex min-h-11 items-center justify-center rounded-full border border-border bg-surface text-sm font-semibold peer-checked:border-primary peer-checked:bg-primary peer-checked:text-primary-fg peer-focus-visible:ring-2 peer-focus-visible:ring-primary',
+              o.icone ? 'w-11' : 'px-4',
+            )}
+          >
+            {o.icone ? <Icon name={o.icone} size={20} /> : o.label}
+          </span>
+        </label>
+      ))}
+    </div>
+  );
+}
+
+/** Escolha de cor: bolinhas com a cor; o nome vai para leitor de tela e para a dica ao passar o mouse. */
+export function RadioCores({
+  name,
+  options,
+  defaultValue,
+  rotulo,
+}: {
+  name: string;
+  options: readonly { value: string; label: string; cor: string }[];
+  defaultValue?: string | null;
+  rotulo: string;
+}) {
+  return (
+    <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label={rotulo}>
+      {options.map((o) => (
+        <label key={o.value} className="cursor-pointer" title={o.label}>
+          <input
+            type="radio"
+            name={name}
+            value={o.value}
+            defaultChecked={o.value === (defaultValue ?? '')}
+            className="peer sr-only"
+            aria-label={o.label}
+          />
+          <span className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-transparent peer-checked:border-ink peer-focus-visible:ring-2 peer-focus-visible:ring-primary peer-focus-visible:ring-offset-2 peer-focus-visible:ring-offset-surface">
+            <span aria-hidden className="h-8 w-8 rounded-full" style={{ backgroundColor: o.cor }} />
           </span>
         </label>
       ))}

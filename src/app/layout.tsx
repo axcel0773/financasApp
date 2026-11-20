@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from 'next';
+import { ehDestaque } from '@/ui/theme/destaques';
 import { Onest } from 'next/font/google';
 import { cookies, headers } from 'next/headers';
 import './globals.css';
@@ -37,8 +38,10 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   // Escuro é o padrão. O cookie espelha a escolha salva em Ajustes para o servidor já entregar o tema certo.
   const salvo = (await cookies()).get('tema')?.value;
   const tema = salvo === 'light' || salvo === 'system' ? salvo : 'dark';
+  const cor = (await cookies()).get('destaque')?.value;
+  const destaque = ehDestaque(cor) ? cor : 'lima';
   return (
-    <html lang="pt-BR" className={body.variable} data-theme={tema}>
+    <html lang="pt-BR" className={body.variable} data-theme={tema} data-accent={destaque}>
       <body className="antialiased">{children}</body>
     </html>
   );
