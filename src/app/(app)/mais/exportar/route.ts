@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getContainer } from '@/composition/container';
-import { senhaConfere } from '@/infra/supabase/confirm-password';
+import { confirmarSenha } from '@/infra/supabase/confirm-password';
 import { createSupabaseServer } from '@/infra/supabase/client.server';
 
 /** Exportação CSV dos lançamentos. Exige a senha (POST), nunca vai para cache e neutraliza fórmulas de planilha. */
@@ -18,9 +18,10 @@ export async function POST(req: Request) {
   if (!user?.email) return new NextResponse('Não autorizado', { status: 401 });
   const fd = await req.formData();
   const senha = fd.get('senha');
-  if (typeof senha !== 'string' || !(await senhaConfere(user.email, senha)))
-    return new NextResponse('Senha incorreta', {
-      status: 403,
+  const conf = typeof senha === 'string' ? await confirmarSenha(user.email, senha) : { ok: false as const, mensagem: 'Senha incorreta.' };
+  if (!conf.ok)
+    return new NextResponse(conf.mensagem, {
+      status: conf.mensagem === 'Senha incorreta.' ? 403 : 429,
       headers: { 'Cache-Control': 'no-store' },
     });
   const c = await getContainer();

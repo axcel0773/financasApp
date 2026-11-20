@@ -10,7 +10,7 @@ import {
   editarTransacao,
   excluirTransacao,
 } from '@/core/transactions/application/use-cases';
-import { senhaConfere } from '@/infra/supabase/confirm-password';
+import { confirmarSenha } from '@/infra/supabase/confirm-password';
 import { executar, exigirUsuario } from '../_lib/action';
 import type { ActionState } from '../_lib/action-state';
 import {
@@ -118,8 +118,8 @@ export async function esvaziarLixeiraAction(_: ActionState, fd: FormData): Promi
     const p = lerForm(z.object({ senha: texto(128) }), fd);
     if (!p.ok) return p;
     const u = await exigirUsuario();
-    if (!(await senhaConfere(u.email, p.value.senha)))
-      return { ok: false as const, error: 'Senha incorreta.' };
+    const conf = await confirmarSenha(u.email, p.value.senha);
+    if (!conf.ok) return { ok: false as const, error: conf.mensagem };
     const c = await getContainer();
     const { error } = await c.db.from('transactions').delete().not('deleted_at', 'is', null);
     if (error) throw new Error(error.code);

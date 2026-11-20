@@ -27,10 +27,18 @@ export async function pedirRedefinicao(_prev: EsqueciState, form: FormData): Pro
   if (bloqueado > 0) return { error: mensagemBloqueio(bloqueado), enviado: false };
   await registrarFalha(supabase, k, REGRA_RESET_IP); // cada pedido conta; ao 5º na hora, bloqueia
 
-  const h = await headers();
-  const host = h.get('x-forwarded-host') ?? h.get('host');
-  const proto = h.get('x-forwarded-proto') ?? (host?.startsWith('localhost') || host?.startsWith('127.') ? 'http' : 'https');
-  // O Supabase só aceita endereços da lista de URLs permitidas; fora dela, usa o Site URL.
-  await supabase.auth.resetPasswordForEmail(parsed.data, { redirectTo: `${proto}://${host}/auth/callback` });
+  await supabase.auth.resetPasswordForEmail(parsed.data, { redirectTo: `${await enderecoDoApp()}/auth/callback` });
   return { error: null, enviado: true };
+}
+
+/**
+ * Endereço do app para o link do e-mail. Em produção é fixo (APP_URL, ou o domínio de produção que a
+ * Vercel informa), nunca o Host da requisição, que quem pede pode forjar. Só em desenvolvimento usa o Host.
+ */
+async function enderecoDoApp(): Promise<string> {
+  if (process.env.APP_URL) return process.env.APP_URL.replace(/\/$/, '');
+  if (process.env.VERCEL_PROJECT_PRODUCTION_URL) return `https://${process.env.VERCEL_PROJECT_PRODUCTION_URL}`;
+  const h = await headers();
+  const host = h.get('host') ?? 'localhost:3000';
+  return `${host.startsWith('localhost') || host.startsWith('127.') ? 'http' : 'https'}://${host}`;
 }
