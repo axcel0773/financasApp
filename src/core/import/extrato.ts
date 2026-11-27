@@ -13,7 +13,7 @@ export interface ResultadoExtrato {
   erros: { linha: number; motivo: string }[];
 }
 
-const semAcento = (s: string): string => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+export const semAcento = (s: string): string => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 /** Divide uma linha respeitando aspas ("a;b" fica numa célula só). */
 export function dividirLinha(linha: string, sep: string): string[] {

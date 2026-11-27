@@ -19,10 +19,16 @@ const entrada = z.object({
         cents: z.number().int().positive(),
         kind: z.enum(['expense', 'income']),
         categoryId: z.string().uuid().nullable(),
+        tripId: z.string().uuid().nullable().optional(),
       }),
     )
     .min(1, 'Nada para importar.')
     .max(2000, 'Importe no máximo 2.000 linhas por vez.'),
+  /** Regras de categoria sugeridas que a pessoa aprovou: ficam salvas para as próximas importações. */
+  regras: z
+    .array(z.object({ keyword: z.string().trim().min(2).max(60), categoryId: z.string().uuid() }))
+    .max(40)
+    .optional(),
 });
 
 /** UUID determinístico: importar o mesmo arquivo duas vezes gera os mesmos ids, e o banco ignora os repetidos. */
@@ -53,11 +59,14 @@ export async function importarLancamentosAction(input: unknown): Promise<ActionS
         amountCents: i.cents,
         occurredOn: i.data,
         note: i.descricao || null,
+        tripId: i.kind === 'expense' ? (i.tripId ?? null) : null,
       };
     });
     const c = await getContainer();
+    for (const r of p.value.regras ?? []) await c.categories.adicionarRegra(r.keyword, r.categoryId);
     const res = await importarLancamentos(c.transactions, lote);
-    resumo = `${res.criados} importado(s)` + (res.repetidos ? `, ${res.repetidos} já existia(m)` : '') + (res.invalidos ? `, ${res.invalidos} inválido(s)` : '') + '.';
+    resumo = `${res.criados} importado(s)` + (res.repetidos ? `, ${res.repetidos} já existia(m)` : '') + (res.invalidos ? `, ${res.invalidos} inválido(s)` : '') + '.' +
+      (p.value.regras?.length ? ` ${p.value.regras.length} regra(s) de categoria salva(s).` : '');
   });
   return r.ok ? { ok: true, message: resumo } : r;
 }

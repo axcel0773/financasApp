@@ -95,6 +95,7 @@ export class SupabaseTransactionRepository implements TransactionRepository, Tra
             amount_cents: t.amountCents,
             occurred_on: t.occurredOn,
             note: t.note ?? null,
+            trip_id: t.tripId ?? null,
           })),
           { onConflict: 'user_id,client_id', ignoreDuplicates: true },
         )
